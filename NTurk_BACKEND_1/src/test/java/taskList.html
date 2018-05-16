@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>任务列表</title>
+    <style>
+        ul {
+            display: flex;
+        }
+
+        li {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<button id="new-tasks-button" onclick="loadNewTasks()">任务大厅</button>
+<button id="my-tasks-button" onclick="loadMyTasks()">我的任务</button>
+<div id="mlist">
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    let taskList;
+    let isNewTasksList = undefined;
+
+    function loadList() {
+        if (Array.isArray(taskList)) { // TODO 感觉这样不是很好…
+            let content = '';
+            for (const i in taskList) {
+                console.log(i);
+                content += '<ul>';
+                content += '<li>' + taskList[i].taskName + '</li>';
+                content += '<li>' + taskList[i].taskCategory + '</li>';
+                content += '<li>' + taskList[i].taskDescription + '</li>';
+//                    content += '<li> reward: ' + taskList[i].reward + '</li>';
+                content += '<li>' + "参加人数: " + taskList[i].attendance + '</li>';
+                content += '<li><button onclick="enterTask(' + i + ')">进入</button></li>';
+                content += '</ul>';
+            }
+
+            document.getElementById('mlist').innerHTML = content;
+        }
+    }
+
+    function loadNewTasks() {
+        document.getElementById('mlist').innerHTML = "";
+        taskList = [];
+        isNewTasksList = true;
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:8086/newTasks', true);
+
+        // 加这么一句
+        xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+
+        xhr.onload = function () {
+            if (this.responseText) {
+                taskList = JSON.parse(this.responseText);
+                console.log("in taskList.html" + "\n" + taskList);
+
+                loadList(taskList);
+            }
+        };
+        xhr.send();
+    }
+
+    function loadMyTasks() {
+        document.getElementById('mlist').innerHTML = "";
+        taskList = [];
+        isNewTasksList = false;
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:8086/workerTasks', true);
+        // 就这个url和上面不一样
+
+        xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+
+        xhr.onload = function () {
+            if (this.responseText) {
+                taskList = JSON.parse(this.responseText);
+                console.log("in taskList.html" + "\n" + taskList);
+
+                loadList(taskList);
+            }
+        };
+        xhr.send();
+    }
+
+    function enterTask(index) {
+        const task = taskList[index];
+
+        if (isNewTasksList) {
+            let xhr = new XMLHttpRequest();
+
+            let contract = {
+                taskId: task.taskId,
+                workerId: localStorage.getItem("userId")
+            };
+
+            xhr.open('POST', 'http://localhost:8086/contract', true);
+            xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onload = function () {
+                enterAnnotationPage(task);
+            };
+            xhr.send(JSON.stringify(contract));
+        }
+        enterAnnotationPage(task);
+    }
+
+    function enterAnnotationPage(task) {
+        // 用localStorage感觉不好，但是这里就不管了，下面url上的变量就没用了
+        localStorage.setItem("thisTask", JSON.stringify(task));
+        console.log(task);
+
+        if (task.taskCategory === 'GENERAL') {
+            window.location.href = 'generalAnnotation.html' // ?taskId=' + task.taskId;
+        } else if (task.taskCategory === 'FRAME') {
+            window.location.href = 'frameAnnotation.html' // ?taskId=' + task.taskId;
+        }
+    }
+</script>
+</body>
+</html>

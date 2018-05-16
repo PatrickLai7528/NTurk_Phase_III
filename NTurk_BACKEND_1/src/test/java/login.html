@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+    <!--<script src="./js/jquery.js"></script>-->
+    <script src="./js/jquery.min.js"></script>
+</head>
+<body>
+<div id="login-div">
+    <form id="login-form">
+        <input type="text" placeholder="email address" name="username"><br>
+        <input type="password" placeholder="password" name="password"><br>
+        <button type="submit">login</button>
+    </form>
+</div>
+<button id="logout-button">logout</button>
+<div id="sign-up-div">
+    <form id="sign-up-form">
+        <input type="text" placeholder="email address" name="username"><br>
+        <input type="password" placeholder="password" name="password"><br>
+        <button type="submit">sign up</button>
+    </form>
+</div>
+
+<form id="upload-form">
+    <input id="file-chooser" type="file">
+    <input id="send-btn" type="button" value="Качи файла">
+</form>
+
+</body>
+<script>
+    function doLogin(loginData) {
+        $.ajax({
+            url: "http://localhost:8086/auth",
+            type: "POST",
+            data: JSON.stringify(loginData),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data/*, textStatus, jqXHR*/) {
+                localStorage.setItem("jwtToken", data.token);
+                localStorage.setItem("userId", data.userId);
+
+//                console.log(data);
+//                alert(data);
+
+                window.location.href = "taskList.html";
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                if (jqXHR.status === 401 || jqXHR.status === 403) {
+                    alert(jqXHR.responseText);
+                } else {
+                    throw new Error("an unexpected error occurred: " + errorThrown);
+                }
+            }
+        });
+    }
+
+    function doSignup(signupData) {
+        // console.log(signupData)
+        $.ajax({
+            url: "http://localhost:8086/auth/requester",
+            type: "POST",
+            data: JSON.stringify(signupData),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            complete: function (data) {
+                alert("success");
+            },
+//                error: function() {
+//                    alert("error");
+//                }
+        });
+    }
+
+    document.getElementById("login-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        console.log("到底是怎么了");
+    });
+
+    $("#login-form").submit(function (event) {
+        console.log("怎么就是不听话");
+        event.preventDefault();
+
+        const $form = $(this);
+        const formData = {
+            emailAddress: $form.find('input[name="username"]').val(),
+            password: $form.find('input[name="password"]').val()
+        };
+
+        console.log(formData);
+        doLogin(formData);
+    });
+
+    $("#sign-up-form").submit(function (event) {
+        console.log("起起落落落落落落");
+        event.preventDefault();
+
+        const $form = $(this);
+        const formData = {
+            emailAddress: $form.find('input[name="username"]').val(),
+            password: $form.find('input[name="password"]').val()
+        };
+
+        console.log("before signing up");
+        console.log(formData);
+
+        doSignup(formData);
+    });
+
+    $("#logout-button").click(function (e) {
+        // console.log("点了一下logout");
+        localStorage.removeItem("jwtToken");
+    });
+
+    /**
+     * foursomeSE image uploading
+     */
+
+    $('#send-btn').on("click", function () {
+        let blobFile = $("#file-chooser").prop('files')[0];
+        let formData = new FormData();
+        formData.append("file", blobFile);
+
+        $.ajax({
+            url: "http://localhost:8086/image",
+            headers: {"Authorization": localStorage.getItem("jwtToken")},
+            type: 'POST',
+            xhr: function () {
+                let myXhr = $.ajaxSettings.xhr();
+                return myXhr;
+            },
+            data: formData,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                console.log("ok");
+            }
+        });
+    });
+
+</script>
+</html>

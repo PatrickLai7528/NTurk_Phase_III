@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tryFrame</title>
+
+    <style>
+        /* 这个canvasDiv一加，鼠标的位置就不对了*/
+        /*#canvasDiv {*/
+        /*position: relative;*/
+        /*}*/
+
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+<button id="nextButton">下一个</button>
+<button type="button" class="btn btn-lg btn-danger" data-toggle="popover" title="标签"
+        data-html="true">
+    这是一开始随便试试瞎放的
+</button>
+<button id="save">保存是全都一起保存</button>
+<div id="canvasDiv">
+    <canvas id="canvas" style="position:absolute"></canvas>
+</div>
+<script>
+    // 如果onclick写在html上。而不是后来用getElementById.addEventListener加上去，
+    // 那么onclick的东西必须写到最外面来（而不是一股脑放到onload里）。
+    // generalAnnotation就是listener因为都是后来js加的，所以可以放到onload里。
+
+    let task;
+    let imgNames;
+    // 这上面两个应该是const，但是在这里没法初始化
+
+    let annotation;
+    let frames; // 这个好像可有可不有
+    let imgIndex = 0;
+    let pic; // 为了下面draw方便，就把变量提到上面了。
+    let color = '#df4b26';
+    let isNew = false;
+
+    const canvas = $('#canvas')[0];
+    const ctx = canvas.getContext('2d');
+
+
+    let isMouseDown;
+    let startX, endX;
+    let startY, endY;
+
+    $(function () {
+        document.getElementById('nextButton').addEventListener('click', function () {
+            imgIndex = (imgIndex + 1) % imgNames.length;
+            isNew = false;
+            loadImageAndAnnotation()
+        });
+        document.getElementById('save').addEventListener('click', putOrPost);
+
+
+//        const taskId = new URL(window.location.href).searchParams.get("taskId");
+//        const xhr = new XMLHttpRequest();
+//        xhr.open('GET', 'http://localhost:8086/tasks/' + taskId);
+//        xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+//        xhr.onload = function () {
+//            task = JSON.parse(this.responseText);
+        task = JSON.parse(localStorage.getItem('thisTask'));
+        imgNames = task.imgNames;
+
+        loadImageAndAnnotation();
+//        };
+//        xhr.send();
+
+        /**
+         * mouse events
+         * */
+
+        canvas.onmousedown = function (e) {
+
+            startX = e.pageX - this.offsetLeft;
+            startY = e.pageY - this.offsetTop;
+            isMouseDown = true;
+        };
+
+        canvas.onmousemove = function (e) {
+            if (isMouseDown) {
+                endX = e.pageX - this.offsetLeft;
+                endY = e.pageY - this.offsetTop;
+                drawRec();
+            }
+        };
+
+        canvas.onmouseup = function (e) {
+            endX = e.pageX - this.offsetLeft;
+            endY = e.pageY - this.offsetTop;
+            isMouseDown = false;
+
+            if (startX === endX && startY === endY) {
+                // TODO 这个应该设置成一个范围内
+                return;
+            }
+
+            drawRec();
+
+            const frame = new Frame(new Point(startX, startY), new Point(endX, endY), color);
+            frames.push(frame);
+
+            addTag(frame, frames.length - 1);
+        };
+
+    });
+
+    /**
+     * loading-related methods. (mouse-event listeners are down below)
+     * */
+    function loadImageAndAnnotation() {
+        pic = new Image();
+        pic.src = 'http://localhost:8086/image/' + imgNames[imgIndex];
+        pic.addEventListener('load', function () {
+            canvas.width = pic.width;
+            canvas.height = pic.height;
+            ctx.lineWidth = 5;
+            // 这句放这里是有点怪…但是好像改了width的height，lineWidth会变……
+
+            ctx.drawImage(pic, 0, 0);
+
+            // 必须先img，然后再annotation，不然img就覆盖annotation了…
+            loadAnnotation();
+        });
+    }
+
+    function loadAnnotation() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:8086/generalAnnotation/taskId/' + task.taskId + '/imgName/' + imgNames[imgIndex], true);
+        xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+        xhr.onload = function () {
+            if (this.status === 200) {
+                annotation = JSON.parse(xhr.responseText);
+                frames = annotation.frames;
+                initialDraw();
+            }
+        };
+        xhr.onloadend = function () {
+            if (this.status === 404) {
+                frames = [];
+                annotation = {
+                    'imgName': imgNames[imgIndex],
+                    // annotationId 无所谓，这里就不写了吧…
+                    'frames': frames
+                };
+                isNew = true;
+                initialDraw();
+            }
+        };
+        xhr.send();
+    }
+
+    /**
+     * draw methods. (and tag)
+     * */
+
+    function initialDraw() {
+        // 因为tag可以只draw一次，但是frame必须每次重来
+        // 所以，第一次每个frame都要addTag。之后就只有新建的才需要了。
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const canvasDiv = document.getElementById('canvasDiv');
+        const childNodes = canvasDiv.childNodes;
+        for (let i = 0; i < childNodes.length; i++) {
+            // 又是这个循环变长的坑……childNodes中间如果改了就会不可控…
+            const cn = childNodes[i];
+            if (cn.tagName === 'DIV') {
+                canvasDiv.removeChild(cn);
+                i--;
+            }
+        }
+
+        // popover和tag的button就是要分别来remove…
+        const popovers = document.getElementsByClassName('popover');
+        for (const pv of popovers) {
+            document.body.removeChild(pv);
+        }
+
+        // draw
+        ctx.drawImage(pic, 0, 0);
+        for (let i = 0; i < frames.length; i++) {
+            const f = frames[i];
+            ctx.strokeStyle = f.color;
+            ctx.lineWidth = 5;
+            ctx.strokeRect(f.p1.x, f.p1.y,
+                f.p2.x - f.p1.x, f.p2.y - f.p1.y);
+            addTag(f, i);
+        }
+
+        ctx.strokeStyle = color;
+    }
+
+    function drawRec() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 目前只能想到把所有的重画一遍
+
+        ctx.drawImage(pic, 0, 0);
+        for (const f of frames) {
+            ctx.strokeStyle = f.color;
+            console.log(f.p1 + '/n' + f.p2);
+            ctx.strokeRect(f.p1.x, f.p1.y,
+                f.p2.x - f.p1.x, f.p2.y - f.p1.y);
+        }
+
+        ctx.strokeStyle = color;
+        ctx.strokeRect(startX, startY, endX - startX, endY - startY);
+    }
+
+    function addTag(frame, index) { // the interface may be simplified. (no “frame” parameter)
+//            const p = frames[frames.length - 1].getRightTopPoint();
+        const p = getRightTopPoint(frame);
+
+//        console.log(canvas.getBoundingClientRect().top);
+//        console.log(canvas.offsetTop);
+        const cssString = 'position:absolute;' + 'top:' + (p.y + canvas.offsetTop) + 'px;' + 'left:' + p.x + "px;";
+
+        const htmlString = '<button userId="b' + index
+            //                        + '" style="' + cssString2
+            + '" type="button" class="btn btn-lg btn-danger" data-toggle="popover" title="标签" data-html="true"></button>';
+
+        let div = document.createElement('div');
+        div.userId = 'div' + index;
+        div.innerHTML = htmlString;
+        div.setAttribute('style', cssString);
+        // end
+
+        const canvasDiv = document.getElementById("canvasDiv");
+        canvasDiv.appendChild(div);
+
+
+        $('#b' + index).popover({
+            content: function () {
+                // TODO listen to text change.
+                const contentStr = "<textarea userId='tag" + index + "' " +
+                    "oninput='onInputListener(" + index + ")'>"
+                    + frame.tag + "</textarea>" + "<br/>"
+                    + "<button onclick='deleteTag(" + index + ")'>删是一个一个删</button>";
+                return contentStr;
+            }
+        });
+    }
+
+    function onInputListener(index) {
+        let textArea = document.getElementById('tag' + index);
+        frames[index].tag = textArea.value;
+    }
+
+    let deleteTag = function (i) {
+        frames.splice(i, 1);
+        initialDraw();
+    };
+
+    /**
+     * two classes. In due time, please rewrite them according to ECMAScript6 standard.
+     * */
+
+    function Point(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    function Frame(p1, p2, color) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.color = color;
+        this.tag = '';
+    }
+
+    // 这个不能写成成员函数，因为从后端拿过来不知道这是什么类型
+    function getRightTopPoint(frame) {
+        p1 = new Point(frame.p1.x, frame.p2.y);
+        p2 = new Point(frame.p2.x, frame.p1.y);
+        return [p1, p2, frame.p1, frame.p2].reduce(function (p1, p2) {
+            function compareP(p1, p2) {
+                if (p1.x >= p2.x && p1.y <= p2.y) { // 这里的 “=” 可能处理来比较草率，但应付这个应该还行…
+                    return 1;
+                } else if (p1.x <= p2.x && p1.y >= p2.y) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+
+            return compareP(p1, p2) > 0 ? p1 : p2;
+        });
+    }
+
+    /**
+     * -related methods
+     * */
+    function putOrPost() {
+        let method = isNew ? 'POST' : 'PUT';
+        let xhr = new XMLHttpRequest();
+        xhr.open(method, 'http://localhost:8086/frameAnnotation', true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Authorization", localStorage.getItem("jwtToken"));
+        xhr.send(JSON.stringify(annotation));
+    }
+</script>
+</body>
+</html>
