@@ -6,39 +6,9 @@
                 <div class="user-name">
                     <span>{{userName}}</span>
                 </div>
-                <div class="detail-info">
-                    <i class="el-icon-document">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">类别：{{type}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-location">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">地址：{{province}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-message">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">邮箱：{{emailAddress}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-date">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">注册日期：{{createTime}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-goods">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">积分：{{credit}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-star-on">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">经验：{{experiencePoint}}</span>
-                    </i>
-                </div>
-                <div class="detail-info">
-                    <i class="el-icon-view">
-                        <span style="font-family: Microsoft YaHei; padding-left: 9px">排名：{{rank}}</span>
+                <div class="detail-info" v-for="info in infoList">
+                    <i v-bind:class="info.iconType">
+                        <span class="user-brief-info-label">{{info.showName}}：{{info.value}}</span>
                     </i>
                 </div>
             </div>
@@ -47,52 +17,82 @@
 </template>
 
 <script>
-    export default {
-        data() {
-            return {
-                iconName: '',
-                userName: '',
-                type: '',
-                province: '',
-                emailAddress: '',
-                createTime: '',
-                credit: 0,
-                experiencePoint: 0,
-                rank: 0
-            }
-        },
-        created() {
-            this.$bus.$on("refreshInfo", ()=> {
-                this.loadInfo();
-            });
-        },
-        mounted: function () {
-            this.loadInfo();
-        },
-        methods: {
-            dateFormat(date) {
-                // date has the format: "yyyy-MM-dd hh:mm:ss"
-                return date === null ? 'null' : date.substring(0,10) ;
-            },
-            loadInfo() {
-                let route = 'http://localhost:8086/myInfo';
-                this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = response.data;
-                    this.iconName = 'http://localhost:8086/image/' + data.iconName;
-                    this.type = this.$store.getters.getUserType === 'WORKER'?'工人':'发起者';
-                    this.userName = data.nickname;
-                    this.province = data.province;
-                    this.emailAddress = data.emailAddress;
-                    this.createTime = this.dateFormat(data.createTime);
-                    this.credit = data.credit;
-                    this.experiencePoint = data.experiencePoint;
-                    this.rank = data.rank;
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            }
-        }
-    }
+	export default {
+		data () {
+			return {
+				iconName: "",
+				userName: "",
+				infoList: {
+					type: {
+						iconType: "el-icon-document",
+						showName: "類別",
+						value: ""
+					},
+					province: {
+						iconType: "el-icon-location",
+						showName: "地址",
+						value: ""
+					},
+					emailAddress: {
+						iconType: "el-icon-message",
+						showName: "郵箱",
+						value: ""
+					},
+					createTime: {
+						iconType: "el-icon-date",
+						showName: "注冊日期",
+						value: ""
+					},
+					credit: {
+						iconType: "el-icon-goods",
+						showName: "积分",
+						value: ""
+					},
+					experiencePoint: {
+						iconType: "el-icon-star-on",
+						showName: "經驗",
+						value: ""
+					},
+					rank: {
+						iconType: "el-icon-view",
+						showName: "排名",
+						value: ""
+					}
+				}
+			};
+		},
+		created () {
+			this.$bus.$on("refreshInfo", () => {
+				this.loadInfo();
+			});
+		},
+		mounted: function () {
+			this.loadInfo();
+		},
+		methods: {
+			dateFormat (date) {
+				// date has the format: "yyyy-MM-dd hh:mm:ss"
+				return date === null ? "null" : date.substring(0, 10);
+			},
+			loadInfo () {
+				let route = "http://localhost:8086/myInfo";
+				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
+					let data = response.data;
+					this.iconName = "http://localhost:8086/image/" + data.iconName;
+					this.infoList.type.value = this.$store.getters.getUserType === "WORKER" ? "工人" : "发起者";
+					this.userName = data.nickname;
+					this.infoList.province.value = data.province;
+					this.infoList.emailAddress.value = data.emailAddress;
+					this.infoList.createTime.value = this.dateFormat(data.createTime);
+					this.infoList.credit.value = data.credit;
+					this.infoList.experiencePoint.value = data.experiencePoint;
+					this.infoList.rank.value = data.rank;
+				}).catch(function (error) {
+					console.log(error);
+				});
+			}
+		}
+	};
 </script>
 
 <style scoped>
@@ -135,5 +135,10 @@
         font-size: 15px;
         padding-bottom: 10px;
         font-family: Microsoft YaHei;
+    }
+
+    .user-brief-info-label {
+        font-family: Microsoft YaHei;
+        padding-left: 9px;
     }
 </style>
