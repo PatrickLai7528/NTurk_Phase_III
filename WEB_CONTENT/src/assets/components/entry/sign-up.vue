@@ -54,243 +54,178 @@
 </template>
 
 <script scoped>
-    import PasswordValidator from '../../js/PasswordValidator.js'
-    import AccountValidator from '../../js/AccountValidator.js'
-    import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
-    import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
+	import PasswordValidator from '../../js/PasswordValidator.js'
+	import AccountValidator from '../../js/AccountValidator.js'
+	import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
+	import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
+	import ProvinceDataUtils from '../../js/utils/ProvinceDataUtils.js'
 
-    export default {
-        data() {
-            var validatePassword = (rule, value, callback) => {
-                let passwordValidator = new PasswordValidator(value);
-                // make sure that passwordValidator has a method called validate
-                VirtualInterface.ensureImplements(passwordValidator, ValidatorInterface);
-                let result = passwordValidator.validate();
-                return result.isValid ? callback() : callback(result.errMsg)
-            };
-            var validateAccount = (rule, value, callback) => {
-                let accountValidator = new AccountValidator(value);
-                // make sure that accountValidator has a method called validate
-                VirtualInterface.ensureImplements(accountValidator, ValidatorInterface);
-                let result = accountValidator.validate();
-                return result.isValid ? callback() : callback(result.errMsg)
-            };
-            var validateEmpty = (rule, value, callback) => {
-                return value === '' ? callback("該欄不能為空") : callback();
-            };
-            var validateConfirmPassword = (rule, value, callback) => {
-                return value !== this.ruleForm.password ? callback("請確定密碼") : callback();
-            };
-            return {
-                provinces: [{
-                    value: '北京'
-                }, {
-                    value: '天津'
-                }, {
-                    value: '上海'
-                }, {
-                    value: '重庆'
-                }, {
-                    value: '河北'
-                }, {
-                    value: '辽宁'
-                }, {
-                    value: '吉林'
-                }, {
-                    value: '黑龙江'
-                }, {
-                    value: '江苏'
-                }, {
-                    value: '浙江'
-                }, {
-                    value: '安徽'
-                }, {
-                    value: '福建'
-                }, {
-                    value: '江西'
-                }, {
-                    value: '山东'
-                }, {
-                    value: '河南'
-                }, {
-                    value: '湖北'
-                }, {
-                    value: '湖南'
-                }, {
-                    value: '广东'
-                }, {
-                    value: '海南'
-                }, {
-                    value: '四川'
-                }, {
-                    value: '贵州'
-                }, {
-                    value: '云南'
-                }, {
-                    value: '山西'
-                }, {
-                    value: '甘肃'
-                }, {
-                    value: '青海'
-                }, {
-                    value: '台湾'
-                }, {
-                    value: '内蒙古'
-                }, {
-                    value: '广西'
-                }, {
-                    value: '西藏'
-                }, {
-                    value: '宁夏'
-                }, {
-                    value: '新疆'
-                }, {
-                    value: '香港'
-                }, {
-                    value: '澳门'
-                },],
-                userType: [{
-                    value: 'WORKER',
-                    label: '眾包工人'
-                }, {
-                    value: 'REQUESTER',
-                    label: '眾包發起者'
-                },],
-                filename: {
-                    filename: "",
-                },
-                ruleForm: {
-                    account: '',
-                    userName: '',
-                    password: '',
-                    confirmPassword: '',
-                    province: '',
-                    userType: '',
-                    userIcon: '',
-                },
-                userIconUploadURL: "http://localhost:8086/image",
-                rules: {
-                    password: [
-                        {validator: validatePassword, trigger: 'blur'}
-                    ],
-                    account: [
-                        {validator: validateAccount, trigger: 'blur'}
-                    ],
-                    userName: [
-                        {validator: validateEmpty, trigger: 'blur'},
-                    ],
-                    confirmPassword: [
-                        {validator: validateConfirmPassword, trigger: 'blur'}
-                    ],
-                    province: [
-                        {validator: validateEmpty, trigger: 'blur'}
-                    ],
-                    userType: [
-                        {validator: validateEmpty, trigger: 'blur'}
-                    ],
-                },
-                isUploadIcon: false,
-            };
-        },
-        mounted: function () {
-            let _this = this;
-            this.$nextTick(function () {
-                    // 隨機生成一個名字
-                    var d = new Date();
-                    var random = Math.floor(Math.random() * (10000 - 1) + 1);
-                    _this.ruleForm.userIcon = "usericon_" + d.getMilliseconds().toString().substring(0, 10) + random + '.jpg';
-                    _this.userIconUploadURL += "/" + _this.ruleForm.userIcon;
-                    console.log(_this.ruleForm);
-                    console.log(_this.userIconUploadURL);
-                }
-            )
-        },
-        methods: {
-            beforeUpload: function (file) {
-                if (file === undefined)
-                    return false;
-                // console.log(file);
-                const isLt2M = file.size / 1024 / 1024 < 2;
-                if (!isLt2M) {
-                    this.show('上传头像图片大小不能超过 2MB!', 'error');
-                }
-                this.isUploadIcon = true;
-                return isLt2M;
-            }
-            ,
-            submitForm(formName) {
-                let _this = this;
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        _this.doTheSignUp();
-                    } else {
-                        console.log('error submit!!');
-                        return false;
-                    }
-                });
-            }
-            ,
-            decidePostUrl() {
-                if (this.ruleForm.userType === 'WORKER') {
-                    return 'http://localhost:8086/auth/worker';
-                } else if (this.ruleForm.userType === "REQUESTER") {
-                    return 'http://localhost:8086/auth/requester'
-                } else {
-                    throw new Error("Unexpected User Type error!");
-                }
-            }
-            ,
-            decidePostData() {
-                return {
-                    emailAddress: this.ruleForm.account,
-                    password: this.ruleForm.password,
-                    nickname: this.ruleForm.userName,
-                    iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
-                    province: this.ruleForm.province,
-                }
-            }
-            ,
-            doWhileSignUpSuccess(response) {
-                this.showMsg("注冊成功!", 'success');
-                this.$router.push({path: '/entry/login'})
-            }
-            ,
-            doWhileSignUpError(error) {
-                if (error.response.status === 400) {
-                    this.showMsg("賬號已重名", "error");
-                } else {
-                    this.showMsg("注冊失敗", 'error');
-                }
-            }
-            ,
-            doTheSignUp: function () {
-                let _this = this;
-                //上傳圖片
-                this.$refs.upload.submit();
-                this.$http({
-                        url: _this.decidePostUrl(),
-                        method: "POST",
-                        data: _this.decidePostData()
-                    }
-                ).then(_this.doWhileSignUpSuccess).catch(_this.doWhileSignUpError)
-            }
-            ,
-            showMsg: function (msg, type) {
-                this.$notify({
-                    type: type,
-                    title: '通知',
-                    message: msg,
-                });
-            }
-            ,
-        }
-        ,
-        computed: {
-            headers() {   //将获得headers放在computed计算属性中试试,将token变成store.state.token
-                return {Authorization: this.$store.getters.getToken};
-            }
-        }
-    }
+	export default {
+		data() {
+			var validatePassword = (rule, value, callback) => {
+				let passwordValidator = new PasswordValidator(value);
+				// make sure that passwordValidator has a method called validate
+				VirtualInterface.ensureImplements(passwordValidator, ValidatorInterface);
+				let result = passwordValidator.validate();
+				return result.isValid ? callback() : callback(result.errMsg)
+			};
+			var validateAccount = (rule, value, callback) => {
+				let accountValidator = new AccountValidator(value);
+				// make sure that accountValidator has a method called validate
+				VirtualInterface.ensureImplements(accountValidator, ValidatorInterface);
+				let result = accountValidator.validate();
+				return result.isValid ? callback() : callback(result.errMsg)
+			};
+			var validateEmpty = (rule, value, callback) => {
+				return value === '' ? callback("該欄不能為空") : callback();
+			};
+			var validateConfirmPassword = (rule, value, callback) => {
+				return value !== this.ruleForm.password ? callback("請確定密碼") : callback();
+			};
+			return {
+				provinces: ProvinceDataUtils.getProvinceData(),
+				userType: [{
+					value: 'WORKER',
+					label: '眾包工人'
+				}, {
+					value: 'REQUESTER',
+					label: '眾包發起者'
+				},],
+				filename: {
+					filename: "",
+				},
+				ruleForm: {
+					account: '',
+					userName: '',
+					password: '',
+					confirmPassword: '',
+					province: '',
+					userType: '',
+					userIcon: '',
+				},
+				userIconUploadURL: "http://localhost:8086/image",
+				rules: {
+					password: [
+						{validator: validatePassword, trigger: 'blur'}
+					],
+					account: [
+						{validator: validateAccount, trigger: 'blur'}
+					],
+					userName: [
+						{validator: validateEmpty, trigger: 'blur'},
+					],
+					confirmPassword: [
+						{validator: validateConfirmPassword, trigger: 'blur'}
+					],
+					province: [
+						{validator: validateEmpty, trigger: 'blur'}
+					],
+					userType: [
+						{validator: validateEmpty, trigger: 'blur'}
+					],
+				},
+				isUploadIcon: false,
+			};
+		},
+		mounted: function () {
+			let _this = this;
+			this.$nextTick(function () {
+					// 隨機生成一個名字
+					var d = new Date();
+					var random = Math.floor(Math.random() * (10000 - 1) + 1);
+					_this.ruleForm.userIcon = "usericon_" + d.getMilliseconds().toString().substring(0, 10) + random + '.jpg';
+					_this.userIconUploadURL += "/" + _this.ruleForm.userIcon;
+					console.log(_this.ruleForm);
+					console.log(_this.userIconUploadURL);
+				}
+			)
+		},
+		methods: {
+			beforeUpload: function (file) {
+				if (file === undefined)
+					return false;
+				// console.log(file);
+				const isLt2M = file.size / 1024 / 1024 < 2;
+				if (!isLt2M) {
+					this.show('上传头像图片大小不能超过 2MB!', 'error');
+				}
+				this.isUploadIcon = true;
+				return isLt2M;
+			}
+			,
+			submitForm(formName) {
+				let _this = this;
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						_this.doTheSignUp();
+					} else {
+						console.log('error submit!!');
+						return false;
+					}
+				});
+			}
+			,
+			decidePostUrl() {
+				if (this.ruleForm.userType === 'WORKER') {
+					return 'http://localhost:8086/auth/worker';
+				} else if (this.ruleForm.userType === "REQUESTER") {
+					return 'http://localhost:8086/auth/requester'
+				} else {
+					throw new Error("Unexpected User Type error!");
+				}
+			}
+			,
+			decidePostData() {
+				return {
+					emailAddress: this.ruleForm.account,
+					password: this.ruleForm.password,
+					nickname: this.ruleForm.userName,
+					iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
+					province: this.ruleForm.province,
+				}
+			}
+			,
+			doWhileSignUpSuccess(response) {
+				this.showMsg("注冊成功!", 'success');
+				this.$router.push({path: '/entry/login'})
+			}
+			,
+			doWhileSignUpError(error) {
+				if (error.response.status === 400) {
+					this.showMsg("賬號已重名", "error");
+				} else {
+					this.showMsg("注冊失敗", 'error');
+				}
+			}
+			,
+			doTheSignUp: function () {
+				let _this = this;
+				//上傳圖片
+				this.$refs.upload.submit();
+				this.$http({
+						url: _this.decidePostUrl(),
+						method: "POST",
+						data: _this.decidePostData()
+					}
+				).then(_this.doWhileSignUpSuccess).catch(_this.doWhileSignUpError)
+			}
+			,
+			showMsg: function (msg, type) {
+				this.$notify({
+					type: type,
+					title: '通知',
+					message: msg,
+				});
+			}
+			,
+		}
+		,
+		computed: {
+			headers() {   //将获得headers放在computed计算属性中试试,将token变成store.state.token
+				return {Authorization: this.$store.getters.getToken};
+			}
+		}
+	}
 </script>
 
 <style scoped>

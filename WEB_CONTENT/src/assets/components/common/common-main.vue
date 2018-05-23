@@ -106,7 +106,7 @@
 				}
 				this.translate();
 			},
-			decideGetUrl() {
+			decideGetTableDataUrl() {
 				if (this.message === "user")
 					return "http://localhost:8086/workerTasks"; //用户中心得到的是以前存在的任务
 				else
@@ -114,15 +114,14 @@
 			},
 			getTableData() {
 				let header = {Authorization: this.$store.getters.getToken};
-				let getUrl = this.decideGetUrl();
+				let getUrl = this.decideGetTableDataUrl();
 				this.$http.get(
 					getUrl,
 					{headers: header}
 				).then(this.doWhileGetTableDataSuccess).catch(function (error) {
 					console.log(error);
 				});
-			}
-			,
+			},
 			translate: function () {
 				for (let i = 0; i < this.tableData.length; i++) {
 					if (this.tableData[i].taskCategory === "GENERAL") {
@@ -133,8 +132,7 @@
 						this.tableData[i].taskCategoryChi = "區域劃分";
 					}
 				}
-			}
-			,
+			},
 			handleClick(row, Id, taskCategory) {
 				let _this = this;
 				const h = this.$createElement;
