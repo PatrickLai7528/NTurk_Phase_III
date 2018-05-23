@@ -31,7 +31,7 @@
     import AccountValidator from '../../js/AccountValidator.js'
     import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
     import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
-    import UserUtils from '../../js/UserUtils.js'
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data() {
             var validatePassword = (rule, value, callback) => {

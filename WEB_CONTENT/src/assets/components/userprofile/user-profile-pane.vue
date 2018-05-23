@@ -153,7 +153,7 @@
 <script>
     import taskLobby from '../common/common-main.vue'
     import requesterLobby from '../common/common-requester-lobby.vue'
-    import UserUtils from '../../js/UserUtils.js'
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         name: "",
         components: {

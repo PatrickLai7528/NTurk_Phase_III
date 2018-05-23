@@ -35,7 +35,7 @@
 
 <script>
 	import logIn from './log-in.vue'
-	import UserUtils from '../../js/UserUtils.js'
+	import UserUtils from '../../js/utils/UserUtils.js'
 
 	export default {
 		components: {

@@ -17,7 +17,7 @@
 </template>
 
 <script>
-    import UserUtils from '../../js/UserUtils.js'
+    import UserUtils from '../../js/utils/UserUtils.js'
 	export default {
 		data () {
 			return {

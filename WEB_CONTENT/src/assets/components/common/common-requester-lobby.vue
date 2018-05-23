@@ -37,6 +37,7 @@
 </template>
 
 <script>
+    import DateUtils from '../../js/utils/DateUtils.js'
     export default {
         props: ['message'],
         data() {
@@ -96,37 +97,11 @@
                             return new Date() > e.endTime;
                         }
                         else {
-                            return this.dateFormat(new Date()) <= e.endTime;
+                            return DateUtils.dateFormat(new Date()) <= e.endTime;
                         }
 
                     }
                 }
-            },
-            dateFormat(oldDate) {
-                Date.prototype.format = function (fmt) {
-                    let o = {
-                        "M+": this.getMonth() + 1,                 //月份
-                        "d+": this.getDate(),                    //日
-                        "h+": this.getHours(),                   //小时
-                        "m+": this.getMinutes(),                 //分
-                        "s+": this.getSeconds(),                 //秒
-                        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                        "S": this.getMilliseconds()             //毫秒
-                    };
-                    if (/(y+)/.test(fmt)) {
-                        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-                    }
-                    for (let k in o) {
-                        if (new RegExp("(" + k + ")").test(fmt)) {
-                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                        }
-                    }
-                    return fmt;
-                };
-
-                let tem = new Date(oldDate).getTime();
-                let ans = new Date(tem).format("yyyy-MM-dd hh:mm:ss");
-                return ans;
             },
             translateContractStatus: function (status) {        //翻译状态
                 if (status === "IN_PROGRESS") {
@@ -161,7 +136,7 @@
 
                             for (let con of temp) {
                                 console.log(response.data);
-                                let theContract = new Contract(con.contractId, con.contractStatus, con.workerId, that.dateFormat(con.lastEditTime));
+                                let theContract = new Contract(con.contractId, con.contractStatus, con.workerId, DateUtils.dateFormat(con.lastEditTime));
                                 theContract.taskId = e.taskId;
                                 theContract.taskName = e.taskName;
                                 theContract.endTime = e.endTime;    //加入时间来共筛选
