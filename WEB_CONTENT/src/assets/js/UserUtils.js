@@ -4,15 +4,15 @@
 
 class UserUtils {
 	static isWorker(context) {
-		return context.$store.getters.getUserType != 'WORKER';
+		return context.$store.getters.getUserType === 'WORKER';
 	}
 
 	static isRequester(context) {
-		return context.$store.getters.getUserType != "REQUESTER";
+		return context.$store.getters.getUserType === "REQUESTER";
 	}
 
 	static isAdmin(context) {
-		return context.$store.getters.getUserType != 'ADMIN';
+		return context.$store.getters.getUserType === 'ADMIN';
 	}
 
 	constructor() {
