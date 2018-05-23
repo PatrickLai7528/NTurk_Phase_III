@@ -17,6 +17,7 @@
 </template>
 
 <script>
+    import UserUtils from '../../js/UserUtils.js'
 	export default {
 		data () {
 			return {
@@ -79,7 +80,7 @@
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
 					let data = response.data;
 					this.iconName = "http://localhost:8086/image/" + data.iconName;
-					this.infoList.type.value = this.$store.getters.getUserType === "WORKER" ? "工人" : "发起者";
+					this.infoList.type.value = UserUtils.isWorker(this) ? "工人" : "发起者";
 					this.userName = data.nickname;
 					this.infoList.province.value = data.province;
 					this.infoList.emailAddress.value = data.emailAddress;

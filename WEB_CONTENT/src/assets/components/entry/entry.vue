@@ -34,43 +34,43 @@
 </template>
 
 <script>
-    import logIn from './log-in.vue'
+	import logIn from './log-in.vue'
+	import UserUtils from '../../js/UserUtils.js'
 
-    export default {
-        components: {
-            logIn
-        },
-        name: "",
-        methods: {
-            mounted: function () {
-                this.$nextTick(function () {
-                })
-            },
-            toQuickStart: function () {
-                this.$router.push({path: '/entry'});
-                this.$router.forward();
-            },
-            toLogIn: function () {
-                this.$router.push({path: '/entry/login'});
-                this.$router.forward();
-            },
-            notLogIn: function () {
-                console.log("here is entry.vue");
-                console.log(this.$store);
-                console.log(sessionStorage);
-                return !(this.$store.getters.getUserType === 'WORKER'
-                    || this.$store.getters.getUserType === 'REQUESTER'
-                    || this.$store.getters.getUserType === 'ADMIN');
-            }
+	export default {
+		components: {
+			logIn
+		},
+		name: "",
+		methods: {
+			mounted: function () {
+				this.$nextTick(function () {
+				})
+			},
+			toQuickStart: function () {
+				this.$router.push({path: '/entry'});
+				this.$router.forward();
+			},
+			toLogIn: function () {
+				this.$router.push({path: '/entry/login'});
+				this.$router.forward();
+			},
+			notLogIn: function () {
+				console.log("here is entry.vue");
+				console.log(this.$store);
+				console.log(sessionStorage);
+				return !(UserUtils.isWorker(this)
+					|| UserUtils.isRequester(this)
+					|| UserUtils.isAdmin(this));
+			}
 
-        }
-    }
+		}
+	}
 </script>
 
 <style scoped>
     .logo {
         padding-top: 3.3em;
-        /*background: #99CED4;*/
         background-image: url(../../images/bg.jpg);
         background-size: auto 100%;
         height: 700px;

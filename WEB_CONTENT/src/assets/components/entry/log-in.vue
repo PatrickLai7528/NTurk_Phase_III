@@ -31,7 +31,7 @@
     import AccountValidator from '../../js/AccountValidator.js'
     import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
     import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
-
+    import UserUtils from '../../js/UserUtils.js'
     export default {
         data() {
             var validatePassword = (rule, value, callback) => {
@@ -100,7 +100,7 @@
                         token: response.data.token,
                         userType: response.data.userType
                     });
-                    if(this.$store.getters.getUserType === 'ADMIN'){
+                    if(UserUtils.isAdmin(this)){
                         this.$router.push({path: '/admin'});
                     }
                     else{
