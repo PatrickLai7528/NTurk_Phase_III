@@ -1,16 +1,5 @@
 <template>
     <div class="about">
-        <!--<h1 style="position: absolute; top: 6em;">here is about</h1>-->
-        <!--以下為六角星實現-->
-        <!--<div class="container">-->
-        <!--<div class="wrapper">-->
-        <!--<div class="cont">-->
-        <!--<div class="inner">-->
-        <!--<div class="vertical-font"></div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
-        <!--</div>-->
         <div id="hexagon">
         </div>
         <el-row class="container">
@@ -113,12 +102,6 @@
     .about-left {
         text-align: right;
         padding-right: 20px;
-        /*border-color: #A9A9A9;*/
-        /*border-left-width: 0;*/
-        /*border-right-width: 2.5px;*/
-        /*border-top-width: 0;*/
-        /*border-bottom-width: 0;*/
-        /*border-style: solid;*/
         height: 120%;
     }
 
@@ -127,11 +110,7 @@
         margin-top: 3em;
         margin-left: 8em;
         margin-right: 8em;
-        /*margin-right: 4em;*/
         border-color: #A9A9A9;
-        /*border-right-width: 1em;*/
-        /*border-left-width: 1em;*/
-        /*border-top-width: 1em;*/
         border-width: 1em;
         border-style: solid;
     }

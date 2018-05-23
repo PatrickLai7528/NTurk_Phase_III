@@ -59,257 +59,222 @@
 </template>
 
 <script>
-    export default {
-        props: ['message'],
-        data() {
-            return {
-                tableData: [{
-                    taskId: '',
-                    taskName: '',
-                    requesterId: '',
-                    requesterName:'',
-                    taskCategory: '',
-                    taskCategoryChi: '',
-                    requester: '',
-                    reward: '',
-                    endTime: '',
-                    taskState: '',
-                    totalReward: '',    //任务的总积分奖励
-                    formatEndTime: '',   //将读出来的时间进行格式化再显示
-                    attendance: 0,      //表示有多少人参加了这个标注任务
-                    capacity: 0,          //表示这个标注任务共限制多少人参加
-                }],
-                contractData:'',
-            }
-        }
-        ,
-        mounted: function () {
-            let _this = this;
-            this.$nextTick(function () {
-                console.log(_this.message);
-                _this.getAll();
-            })
-        }
-        ,
+	import DateUtils from '../../js/utils/DateUtils.js'
 
-        methods: {
-            filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
-                return row.taskCategory === value;
-            }
-            ,
-            dateFormat(oldDate) {
-                Date.prototype.format = function (fmt) {
-                    let o = {
-                        "M+": this.getMonth() + 1,                 //月份
-                        "d+": this.getDate(),                    //日
-                        "h+": this.getHours(),                   //小时
-                        "m+": this.getMinutes(),                 //分
-                        "s+": this.getSeconds(),                 //秒
-                        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                        "S": this.getMilliseconds()             //毫秒
-                    };
-                    if (/(y+)/.test(fmt)) {
-                        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-                    }
-                    for (let k in o) {
-                        if (new RegExp("(" + k + ")").test(fmt)) {
-                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                        }
-                    }
-                    return fmt;
-                };
+	export default {
+		props: ['message'],
+		data() {
+			return {
+				tableData: [{
+					taskId: '',
+					taskName: '',
+					requesterId: '',
+					requesterName: '',
+					taskCategory: '',
+					taskCategoryChi: '',
+					requester: '',
+					reward: '',
+					endTime: '',
+					taskState: '',
+					totalReward: '',    //任务的总积分奖励
+					formatEndTime: '',   //将读出来的时间进行格式化再显示
+					attendance: 0,      //表示有多少人参加了这个标注任务
+					capacity: 0,          //表示这个标注任务共限制多少人参加
+				}],
+				contractData: '',
+			}
+		}
+		,
+		mounted: function () {
+			let _this = this;
+			this.$nextTick(function () {
+				console.log(_this.message);
+				_this.getAll();
+			})
+		},
+		methods: {
+			filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
+				return row.taskCategory === value;
+			},
+			doWhileGetTableDataSuccess(response) {
+				this.tableData = response.data;
+				for (let e of this.tableData) {
+					e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
+					if (e.capacity === 2147483647) {
+						e.capacity = "无限制";
+					}
+				}
+				this.translate();
+			},
+			decideGetTableDataUrl() {
+				if (this.message === "user")
+					return "http://localhost:8086/workerTasks"; //用户中心得到的是以前存在的任务
+				else
+					return "http://localhost:8086/newTasks"
+			},
+			getTableData() {
+				let header = {Authorization: this.$store.getters.getToken};
+				let getUrl = this.decideGetTableDataUrl();
+				this.$http.get(
+					getUrl,
+					{headers: header}
+				).then(this.doWhileGetTableDataSuccess).catch(function (error) {
+					console.log(error);
+				});
+			},
+			translate: function () {
+				for (let i = 0; i < this.tableData.length; i++) {
+					if (this.tableData[i].taskCategory === "GENERAL") {
+						this.tableData[i].taskCategoryChi = "整體標註";
+					} else if (this.tableData[i].taskCategory === "FRAME") {
+						this.tableData[i].taskCategoryChi = "區域標註";
+					} else if (this.tableData[i].taskCategory === "SEGMENT") {
+						this.tableData[i].taskCategoryChi = "區域劃分";
+					}
+				}
+			},
+			handleClick(row, Id, taskCategory) {
+				let _this = this;
+				const h = this.$createElement;
+				this.$message({
+					message: h('p', null, [
+						h('i', {style: 'color: teal'}, '參加成功:' + taskCategory)
+					])
+				});
 
-                let tem = new Date(oldDate).getTime();
-                let ans = new Date(tem).format("yyyy-MM-dd hh:mm:ss");
-                return ans;
-            },
-            getTableData() {
-                let _this = this;
-                if (_this.message === 'user') {    //用户中心得到的是以前存在的任务
-                    _this.$http.get("http://localhost:8086/workerTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                            _this.tableData = response.data;
-                            for (let e of _this.tableData) {
-                                e.formatEndTime = _this.dateFormat(e.endTime); //将日期进行格式化
-                                if(e.capacity === 2147483647){
-                                    e.capacity = "无限制";
-                                }
-                            }
-                            _this.translate();
-                        }
-                    )
-                } else {           //任务大厅得到的是新任务
-                    this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                        //get方法设置headers成功
-                        _this.tableData = response.data;
-                        console.log(response.data);
-                        for (let e of _this.tableData) {
-                            console.log(e.endTime);
-                            e.formatEndTime = _this.dateFormat(e.endTime); //将日期进行格式化
-                            if(e.capacity === 2147483647){
-                                e.capacity = "无限制";
-                            }
-                        }
-                        _this.translate();
-                    }).catch(function (error) {
-                        console.log(error);
-                    });
-                }
-            }
-            ,
-            translate: function () {
-                for (let i = 0; i < this.tableData.length; i++) {
-                    if (this.tableData[i].taskCategory === "GENERAL") {
-                        this.tableData[i].taskCategoryChi = "整體標註";
-                    } else if (this.tableData[i].taskCategory === "FRAME") {
-                        this.tableData[i].taskCategoryChi = "區域標註";
-                    } else if (this.tableData[i].taskCategory === "SEGMENT") {
-                        this.tableData[i].taskCategoryChi = "區域劃分";
-                    }
-                }
-            }
-            ,
-            handleClick(row, Id, taskCategory) {
-                let _this = this;
-                const h = this.$createElement;
-                this.$message({
-                    message: h('p', null, [
-                        h('i', {style: 'color: teal'}, '參加成功:' + taskCategory)
-                    ])
-                });
+				function Contract(taskId, workerId) {
+					this.taskId = taskId;
+					this.workerId = workerId;
+				}
 
-                function Contract(taskId, workerId) {
-                    this.taskId = taskId;
-                    this.workerId = workerId;
-                }
+				if (taskCategory === "GENERAL") {    //不仅要跳转还要判断是否要压入一个新的contract
+					if (_this.message !== 'user') {
+						let contract = new Contract(Id, _this.$store.getters.getUserId);
+						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
+							headers: {
+								Authorization: _this.$store.getters.getToken,
+								'Content-Type': 'application/json'
+							}
+						}).then(function (response) {
+							_this.$router.push({name: 'general', params: {taskId: Id}});
+						}).catch(function (error) {
+							console.log(error);
+						})
 
-                if (taskCategory === "GENERAL") {    //不仅要跳转还要判断是否要压入一个新的contract
-                    if (_this.message !== 'user') {
-                        let contract = new Contract(Id, _this.$store.getters.getUserId);
-                        _this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-                            headers: {
-                                Authorization: _this.$store.getters.getToken,
-                                'Content-Type': 'application/json'
-                            }
-                        }).then(function (response) {
-                            _this.$router.push({name: 'general', params: {taskId: Id}});
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
+					} else {
+						//在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
+						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+							_this.contractData = response.data;
+							if (_this.contractData.contractStatus === 'COMPLETED') {
+								_this.messageHandler();
+							}
+							else if (_this.contractData.contractStatus === 'ABORT') {
+								_this.badMessage();
+							}
+							else {
+								_this.$router.push({name: 'general', params: {taskId: Id}});
+							}
+						}).catch(
+							function (error) {
+								console.log(error)
+							}
+						);
+					}
+				} else if (taskCategory === "SEGMENT") {
+					if (_this.message !== 'user') {
+						let contract = new Contract(Id, _this.$store.getters.getUserId);
+						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
+							headers: {
+								Authorization: _this.$store.getters.getToken,
+								'Content-Type': 'application/json'
+							}
+						}).then(function (response) {
+							_this.$router.push({name: 'segment', params: {taskId: Id}});
+						}).catch(function (error) {
+							console.log(error);
+						})
 
-                    } else {
-                        //在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
-                        _this.$http.get('http://localhost:8086/contract/taskId/' + Id,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                            _this.contractData = response.data;
-                            if(_this.contractData.contractStatus === 'COMPLETED'){
-                                _this.messageHandler();
-                            }
-                            else if(_this.contractData.contractStatus === 'ABORT'){
-                                _this.badMessage();
-                            }
-                            else{
-                                _this.$router.push({name: 'general', params: {taskId: Id}});
-                            }
-                        }).catch(
-                            function (error) {
-                                console.log(error)
-                            }
-                        );
-                    }
-                } else if (taskCategory === "SEGMENT") {
-                    if (_this.message !== 'user') {
-                        let contract = new Contract(Id, _this.$store.getters.getUserId);
-                        _this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-                            headers: {
-                                Authorization: _this.$store.getters.getToken,
-                                'Content-Type': 'application/json'
-                            }
-                        }).then(function (response) {
-                            _this.$router.push({name: 'segment', params: {taskId: Id}});
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
+					}
+					else {
+						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+							_this.contractData = response.data;
+							if (_this.contractData.contractStatus === 'COMPLETED') {
+								_this.messageHandler();
+							}
+							else if (_this.contractData.contractStatus === 'ABORT') {
+								_this.badMessage();
+							}
+							else {
+								_this.$router.push({name: 'segment', params: {taskId: Id}});
+							}
+						}).catch(
+							function (error) {
+								console.log(error)
+							}
+						);
+					}
+				} else if (taskCategory === "FRAME") {
+					if (_this.message !== 'user') {
+						let contract = new Contract(Id, _this.$store.getters.getUserId);
+						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
+							headers: {
+								Authorization: _this.$store.getters.getToken,
+								'Content-Type': 'application/json'
+							}
+						}).then(function (response) {
+							_this.$router.push({name: 'frame', params: {taskId: Id}});
+						}).catch(function (error) {
+							console.log(error);
+						})
 
-                    }
-                    else {
-                        _this.$http.get('http://localhost:8086/contract/taskId/' + Id,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                            _this.contractData = response.data;
-                            if(_this.contractData.contractStatus === 'COMPLETED'){
-                                _this.messageHandler();
-                            }
-                            else if(_this.contractData.contractStatus === 'ABORT'){
-                                _this.badMessage();
-                            }
-                            else{
-                                _this.$router.push({name: 'segment', params: {taskId: Id}});
-                            }
-                        }).catch(
-                            function (error) {
-                                console.log(error)
-                            }
-                        );
-                    }
-                } else if (taskCategory === "FRAME") {
-                    if (_this.message !== 'user') {
-                        let contract = new Contract(Id, _this.$store.getters.getUserId);
-                        _this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-                            headers: {
-                                Authorization: _this.$store.getters.getToken,
-                                'Content-Type': 'application/json'
-                            }
-                        }).then(function (response) {
-                            _this.$router.push({name: 'frame', params: {taskId: Id}});
-                        }).catch(function (error) {
-                            console.log(error);
-                        })
-
-                    }
-                    else {
-                        _this.$http.get('http://localhost:8086/contract/taskId/' + Id,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                            _this.contractData = response.data;
-                            if(_this.contractData.contractStatus === 'COMPLETED'){
-                                _this.messageHandler();
-                            }
-                            else if(_this.contractData.contractStatus === 'ABORT'){
-                                _this.badMessage();
-                            }
-                            else{
-                                _this.$router.push({name: 'frame', params: {taskId: Id}});
-                            }
-                        }).catch(
-                            function (error) {
-                                console.log(error)
-                            }
-                        );
-                    }
-                }
-            }
-            ,
-            messageHandler(){
-                this.$message({
-                    message:'您已经提交了该任务，不能对结果进行修改，请安心等待结果和奖励^_^',
-                    type:'success'
-                })
-            },
-            badMessage(){
-                this.$alert('这个任务已经过期了，不能对结果进行修改', '系统警告', {
-                    confirmButtonText: '确定'
-                });
-            },
-            getAll() {
-                this.getTableData();
-            }
-            ,
-            tableRowClassName({row, rowIndex}) {
-                console.log("here" + rowIndex);
-                if (rowIndex % 2 === 1) {
-                    return 'odd-row';
-                } else {
-                    return 'even-row';
-                }
-            }
-            ,
-        }
-    }
+					}
+					else {
+						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+							_this.contractData = response.data;
+							if (_this.contractData.contractStatus === 'COMPLETED') {
+								_this.messageHandler();
+							}
+							else if (_this.contractData.contractStatus === 'ABORT') {
+								_this.badMessage();
+							}
+							else {
+								_this.$router.push({name: 'frame', params: {taskId: Id}});
+							}
+						}).catch(
+							function (error) {
+								console.log(error)
+							}
+						);
+					}
+				}
+			}
+			,
+			messageHandler() {
+				this.$message({
+					message: '您已经提交了该任务，不能对结果进行修改，请安心等待结果和奖励^_^',
+					type: 'success'
+				})
+			},
+			badMessage() {
+				this.$alert('这个任务已经过期了，不能对结果进行修改', '系统警告', {
+					confirmButtonText: '确定'
+				});
+			},
+			getAll() {
+				this.getTableData();
+			}
+			,
+			tableRowClassName({row, rowIndex}) {
+				console.log("here" + rowIndex);
+				if (rowIndex % 2 === 1) {
+					return 'odd-row';
+				} else {
+					return 'even-row';
+				}
+			}
+			,
+		}
+	}
 </script>
 
 <style>

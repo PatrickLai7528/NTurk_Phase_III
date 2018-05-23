@@ -32,7 +32,6 @@
             <el-form-item v-if="form.workerRequirement=='EXPERIENCE'" prop="requiredExperience" label="要求經驗">
                 <el-input class="input" v-model.number="form.requiredExperience"></el-input>
             </el-form-item>
-
             <div>
                 <el-form-item id="select" v-if="form.workerRequirement=='APPOINT'" prop="nominees" label="选择工人">
                     <el-select id="select" class="setSize" v-if="form.workerRequirement=='APPOINT'"
@@ -159,84 +158,79 @@
 
         },
         methods: {
-            /*
-            this.$http({
-                        url: "http://localhost:8086/auth/worker",
-                        method: "POST",
-                        data: {
-                            emailAddress: _this.ruleForm.account,
-                            password: _this.ruleForm.password
-                        },
-             */
+        	getImageNamesFromBus(){
+        		let _this = this;
+				this.$bus.$emit("getImageNames", function (value) {
+					console.log("here is callback function " + value);
+					_this.form.imgNames = value;
+				});
+            },
+            setUpFormData(){
+				this.form.createTime = new Date();
+				this.form.createTime.setTime(new Date().getTime() + 8 * 60 * 60 * 1000);
+				this.form.requesterId = this.$store.getters.getUserId;    //设置新建任务的用户名
+
+				if (this.form.rewardStrategy === "INDIVIDUAL") {
+					this.form.rewardPerPerson = this.form.totalReward / this.form.capacity;
+				}
+
+				if (this.form.workerRequirement === "APPOINT") {
+					this.form.requiredExperience = 2147483647;
+				}
+
+				if (this.form.rewardStrategy === "TOTAL") {
+					this.form.capacity = 2147483647;
+				}
+
+				if (this.form.taskCategory !== 'GENERAL') {
+					this.form.questions = [];
+				}
+				else {
+					this.form.questions = this.form.dynamicTags;    //将所填问题添加到question里面
+				}
+
+				// console.log(that.form.dynamicTags);
+				this.form.endTime.setTime(this.form.endTime.getTime() + 8 * 60 * 60 * 1000);
+            },
+            decidePostData(){
+				return {
+					/*
+                    现在还存在两个问题，一个是当没有人数限制的时候rewardPerPerson怎么表示
+                    另一个是当要求指定工人的时候，requiredExperience怎么搞
+                    */
+					taskName: this.form.taskName,
+                    taskCategory: this.form.taskCategory,
+					taskDescription: this.form.taskDescription,
+					endTime: this.form.endTime,
+					workerRequirement: this.form.workerRequirement,
+					rewardStrategy: this.form.rewardStrategy,
+					imgNames: this.form.imgNames,
+					totalReward: this.form.totalReward,
+					capacity: this.form.capacity,
+					requiredExperience: this.form.requiredExperience,
+					createTime: this.form.createTime,
+					requesterId: this.form.requesterId,
+					questions: this.form.questions,
+					nominees: this.form.nominees,
+					rewardPerPerson: this.form.rewardPerPerson,
+				}
+            },
             onSubmit(formName) {      //处理提交并且post到后台
                 let _this = this;
                 // 取得所有的圖片名稱, 異步的
-                this.$bus.$emit("getImageNames", function (value) {
-                    console.log("here is callback function " + value);
-                    _this.form.imgNames = value;
-                });
+                _this.getImageNamesFromBus();
                 console.log("after getImageNames" + _this.form.imgNames);
                 this.$refs[formName].validate((valid) => {
                     console.log(valid);
                     if (valid) {
                         let that = _this;
-                        // _this.$bus.$emit("getImageNames", function (value) {
-                        //     that.form.imgNames = value;
-                        // });
-                        // console.log(that.theImg);
-                        // that.form.imgNames = that.theImg;
-                        //console.log(this.theImg); //将另一个组件的内容放到这个地方成功
-                        that.form.createTime = new Date();
-                        that.form.createTime.setTime(new Date().getTime() + 8 * 60 * 60 * 1000);
-                        that.form.requesterId = _this.$store.getters.getUserId;    //设置新建任务的用户名
-
-                        if (that.form.rewardStrategy === "INDIVIDUAL") {
-                            that.form.rewardPerPerson = that.form.totalReward / this.form.capacity;
-                        }
-
-                        if (that.form.workerRequirement === "APPOINT") {
-                            that.form.requiredExperience = 2147483647;
-                        }
-
-                        if (that.form.rewardStrategy === "TOTAL") {
-                            that.form.capacity = 2147483647;
-                        }
-
-                        if (that.form.taskCategory !== 'GENERAL') {
-                            that.form.questions = [];
-                        }
-                        else {
-                            that.form.questions = that.form.dynamicTags;    //将所填问题添加到question里面
-                        }
-
-                        console.log(that.form.dynamicTags);
-                        that.form.endTime.setTime(that.form.endTime.getTime() + 8 * 60 * 60 * 1000);
+                        that.setUpFormData();
                         console.log(that.form);              //所有属性全部确定
                         that.$http({
                             url: "http://localhost:8086/task",
                             method: "POST",
                             headers: {Authorization: that.$store.getters.getToken},
-                            data: {
-                                /*
-                                现在还存在两个问题，一个是当没有人数限制的时候rewardPerPerson怎么表示
-                                另一个是当要求指定工人的时候，requiredExperience怎么搞
-                                */
-                                taskName: that.form.taskName,
-                                taskCategory: that.form.taskCategory,
-                                taskDescription: that.form.taskDescription,
-                                endTime: that.form.endTime,
-                                workerRequirement: that.form.workerRequirement,
-                                rewardStrategy: that.form.rewardStrategy,
-                                imgNames: that.form.imgNames,
-                                totalReward: that.form.totalReward,
-                                capacity: that.form.capacity,
-                                requiredExperience: that.form.requiredExperience,
-                                createTime: that.form.createTime,
-                                requesterId: that.form.requesterId,
-                                questions: that.form.questions,
-                                nominees: that.form.nominees,
-                                rewardPerPerson: that.form.rewardPerPerson,
-                            }
+                            data: that.decidePostData()
                         }).then(that.doWhileSuccess).catch(function (error) {
                             that.badMessage();
                             that.$router.push({path: '/profile'});
