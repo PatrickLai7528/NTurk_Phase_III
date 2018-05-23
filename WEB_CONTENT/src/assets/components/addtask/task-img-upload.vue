@@ -9,7 +9,6 @@
                 :headers="headers"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
-                :file-list="fileList2"
                 :on-change="onChange"
                 list-type="picture-card">
             <i class="el-icon-upload" style="alignment: left"></i>
@@ -21,8 +20,8 @@
     export default {
         data() {
             return {
-                fileList2: [   //需要用fileList2的name属性来向info的图片列表里面添加图片
-                ],
+                // fileList2: [   //需要用fileList2的name属性来向info的图片列表里面添加图片
+                // ],
                 imageNames: []
             };
         },
