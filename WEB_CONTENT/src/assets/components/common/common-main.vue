@@ -96,7 +96,7 @@
 			filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
 				return row.taskCategory === value;
 			},
-			doWhileSuccess(response) {
+			doWhileGetTableDataSuccess(response) {
 				this.tableData = response.data;
 				for (let e of this.tableData) {
 					e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
@@ -106,27 +106,21 @@
 				}
 				this.translate();
 			},
+			decideGetUrl() {
+				if (this.message === "user")
+					return "http://localhost:8086/workerTasks"; //用户中心得到的是以前存在的任务
+				else
+					return "http://localhost:8086/newTasks"
+			},
 			getTableData() {
-				let _this = this;
-				if (this.message === 'user') {    //用户中心得到的是以前存在的任务
-					this.$http.get("http://localhost:8086/workerTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then()
-				} else {           //任务大厅得到的是新任务
-					this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-						//get方法设置headers成功
-						_this.tableData = response.data;
-						console.log(response.data);
-						for (let e of _this.tableData) {
-							console.log(e.endTime);
-							e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
-							if (e.capacity === 2147483647) {
-								e.capacity = "无限制";
-							}
-						}
-						_this.translate();
-					}).catch(function (error) {
-						console.log(error);
-					});
-				}
+				let header = {Authorization: this.$store.getters.getToken};
+				let getUrl = this.decideGetUrl();
+				this.$http.get(
+					getUrl,
+					{headers: header}
+				).then(this.doWhileGetTableDataSuccess).catch(function (error) {
+					console.log(error);
+				});
 			}
 			,
 			translate: function () {
