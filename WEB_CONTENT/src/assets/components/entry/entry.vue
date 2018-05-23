@@ -74,7 +74,6 @@
         background-image: url(../../images/bg.jpg);
         background-size: auto 100%;
         height: 700px;
-        /*background: #F19F4D;*/
         width: 100%;
     }
 
