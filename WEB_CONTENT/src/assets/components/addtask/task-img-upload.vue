@@ -13,10 +13,7 @@
                 :on-change="onChange"
                 list-type="picture-card">
             <i class="el-icon-upload" style="alignment: left"></i>
-            <!--<div class="el-upload__text">將文件拖到此處，或<em>點擊上傳</em></div>-->
-            <!--<div slot="tip" class="el-upload__tip">只能上傳jpg/png文件，且不超過500kb</div>-->
         </el-upload>
-        <!--<el-button @click="uploadImageSet">upload this damn shit images</el-button>-->
     </div>
 </template>
 
@@ -35,18 +32,20 @@
         },
         mounted() {
             let _this = this;
-            this.$nextTick(function () {
-                _this.$bus.$on("uploadImageSet", () => {
-                        _this.uploadImageSet();
-                    }
-                );
-                _this.$bus.$on("getImageNames", (callback) => {
-                        _this.getImageNames(callback);
-                    }
-                );
-            })
+            this.$nextTick(_this.setUpBusEvent)
         },
         methods: {
+        	/* 往vue-bus注冊事件 */
+        	setUpBusEvent(){
+				this.$bus.$on("uploadImageSet", () => {
+						this.uploadImageSet();
+					}
+				);
+				this.$bus.$on("getImageNames", (callback) => {
+						this.getImageNames(callback);
+					}
+				);
+            },
             handleRemove(file, fileList) {
                 this.handleSuccess("remove", file, fileList);   //在删除后也调用emit
                 console.log(file, fileList);
@@ -61,12 +60,12 @@
             },
             // 提交任務數據一同提交
             uploadImageSet() {
-                console.log("in upload image set");
+                // console.log("in upload image set");
                 this.$refs.upload.submit();
             },
             // 異步取得圖片的名稱
             getImageNames(callback) {
-                console.log("here is getImageNames " + this.imageNames);
+                // console.log("here is getImageNames " + this.imageNames);
                 callback(this.imageNames);
             }
         },
