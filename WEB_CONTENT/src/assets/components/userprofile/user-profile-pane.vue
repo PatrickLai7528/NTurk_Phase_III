@@ -59,8 +59,10 @@
                     </el-row>
                     <el-row class="functionPane">
                         <el-col>
-                            <task-lobby class="task-lobby" message="user" style="font-size: 16px" v-if="isWorker === true"></task-lobby>
-                            <requester-lobby class="task-lobby" message="user" style="font-size: 16px" v-if="isWorker === false"></requester-lobby>
+                            <task-lobby class="task-lobby" message="user" style="font-size: 16px"
+                                        v-if="isWorker === true"></task-lobby>
+                            <requester-lobby class="task-lobby" message="user" style="font-size: 16px"
+                                             v-if="isWorker === false"></requester-lobby>
                         </el-col>
                     </el-row>
                 </el-tab-pane>
@@ -82,15 +84,17 @@
                                             <span>{{workerBasicExchange.description}}</span>
                                         </div>
                                         <div class="exchange-counter">
-                                            <el-input-number size="mini"　:min="1"
+                                            <el-input-number size="mini" 　:min="1"
                                                              v-model="workerBasicExchange.counter"></el-input-number>
-                                            <el-button type="text" class="join-exchange-event-button" @click="exchange(0)">兌換</el-button>
+                                            <el-button type="text" class="join-exchange-event-button"
+                                                       @click="exchange(0)">兌換
+                                            </el-button>
                                         </div>
                                     </el-card>
                                 </el-col>
                             </el-row>
                         </el-col>
-                        <el-col :span="12"v-if="isWorker === true">
+                        <el-col :span="12" v-if="isWorker === true">
                             <el-row>
                                 <el-col :span="24">
                                     <el-card class="tasks-brief">
@@ -101,9 +105,11 @@
                                             <span>{{workerQuotaExchange.description}}</span>
                                         </div>
                                         <div class="exchange-counter">
-                                            <el-input-number size="mini"　:min="1"
+                                            <el-input-number size="mini" 　:min="1"
                                                              v-model="workerQuotaExchange.counter"></el-input-number>
-                                            <el-button type="text" class="join-exchange-event-button" @click="exchange(1)">兌換</el-button>
+                                            <el-button type="text" class="join-exchange-event-button"
+                                                       @click="exchange(1)">兌換
+                                            </el-button>
                                         </div>
                                     </el-card>
                                 </el-col>
@@ -120,9 +126,11 @@
                                             <span>{{requesterExchange.description}}</span>
                                         </div>
                                         <div class="exchange-counter">
-                                            <el-input-number size="mini"　:min="1"
+                                            <el-input-number size="mini" 　:min="1"
                                                              v-model="requesterExchange.counter"></el-input-number>
-                                            <el-button type="text" class="join-exchange-event-button" @click="exchange(2)">兌換</el-button>
+                                            <el-button type="text" class="join-exchange-event-button"
+                                                       @click="exchange(2)">兌換
+                                            </el-button>
                                         </div>
                                     </el-card>
                                 </el-col>
@@ -134,12 +142,12 @@
                     <el-row class="functionPane">
                         <el-col>
                             <el-alert
-                                v-for="(notification,index) in notificationList"
-                                :title="notification.title"
-                                 type="info"
-                                :description="notification.content"
-                                :closable="false"
-                                style="text-align: left; margin-bottom: 20px"
+                                    v-for="(notification,index) in notificationList"
+                                    :title="notification.title"
+                                    type="info"
+                                    :description="notification.content"
+                                    :closable="false"
+                                    style="text-align: left; margin-bottom: 20px"
                             >
                             </el-alert>
                         </el-col>
@@ -151,208 +159,170 @@
 </template>
 
 <script>
-    import taskLobby from '../common/common-main.vue'
-    import requesterLobby from '../common/common-requester-lobby.vue'
-    import UserUtils from '../../js/utils/UserUtils.js'
-    export default {
-        name: "",
-        components: {
-            taskLobby,
-            requesterLobby,
-        },
-        data() {
-            return {
-                isWorker: null,
-                notificationList: [{
-                    title: '假裝有消息',
-                    content: '假裝有描述',
-                }],
-                tasks: [{
-                    taskName: '',
-                    taskCategory: '',
-                    contractStatus: '',
-                    createTime: ''
-                }],
-                workerBasicExchange: {
-                    name: '基本兌換',
-                    description: '1積分能兑换1元',
-                    money: '1',
-                    requiredCredit: '1',
-                    counter: 0
-                },
-                workerQuotaExchange: {
-                    name: '定額兌換',
-                    description: '1000積分能兌換1500元',
-                    money: '1500',
-                    requiredCredit: '1000',
-                    counter: 0
-                },
-                requesterExchange: {
-                    name: '基本兌換',
-                    endTime: '',
-                    description: '1元能兑换1積分',
-                    money: '1',
-                    requiredCredit: '1',
-                    counter: 0
-                }
-            }
-        },
-        created() {
-        	let _this = this;
-            this.$bus.$on("refreshPane", ()=> {
-                this.isWorker = UserUtils.isWorker(_this);
-                this.loadTask();
-                this.loadMessage();
-            });
-        },
-        mounted: function () {
-            this.isWorker = UserUtils.isWorker(this);
-            this.loadTask();
-            this.loadMessage();
-        },
-        methods: {
-            loadTask() {
-                let route = '';
-                if(this.isWorker){
-                    route = "http://localhost:8086/workerTasks";
-                }
-                else{
-                    route = "http://localhost:8086/requesterTasks";
-                }
+	import taskLobby from '../common/common-main.vue'
+	import requesterLobby from '../common/common-requester-lobby.vue'
+	import UserUtils from '../../js/utils/UserUtils.js'
+	import DateUtils from '../../js/utils/DateUtils.js'
+	import TranslateUtils from '../../js/utils/TranslateUtils.js'
 
-                this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    this.tasks = [];
-                    for(let i=response.data.length-1;i>=0;i--){
-                        let data = response.data[i];
-                        let createTime = data.createTime;
-                        data.createTime = this.dateFormat(createTime);
-                        this.tasks.push(data);
-                    }
-                    this.translate();
-                }).catch((error)=> {
-                    console.log(error);
-                })
-            },
-            translate: function () {
-                for (let i = 0; i < this.tasks.length; i++) {
-                    if (this.tasks[i].taskCategory === "GENERAL") {
-                        this.tasks[i].taskCategory = "整体标注";
-                    } else if (this.tasks[i].taskCategory === "FRAME") {
-                        this.tasks[i].taskCategory = "画框标注";
-                    } else if (this.tasks[i].taskCategory === "SEGMENT") {
-                        this.tasks[i].taskCategory = "区域标注";
-                    }
-                }
-                for (let j = 0; j < this.tasks.length; j++) {
-                    if (this.tasks[j].contractStatus === "IN_PROGRESS") {
-                        this.tasks[j].contractStatus = "进行中";
-                    } else if (this.tasks[j].contractStatus === "VIRGIN") {
-                        this.tasks[j].contractStatus = "无人参与";
-                    } else if (this.tasks[j].contractStatus === "COMPLETED") {
-                        this.tasks[j].contractStatus = "已完成";
-                    } else if (this.tasks[j].contractStatus === "ABORT") {
-                        this.tasks[j].contractStatus = "已废弃";
-                    }
-                }
-            },
-            loadMessage() {
-                this.$http.get("http://localhost:8086/message",
-                    {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    this.notificationList = [];
-                    for(let i=response.data.length-1;i>=0;i--){
-                        response.data[i].title="系统消息："+response.data[i].title;
-                        this.notificationList.push(response.data[i]);
-                    }
-                }).catch(function (error) {
-                    console.log(error);
-                })
-            },
-            exchange(index) {
-                let point, money, route;
-                if(this.isWorker){
-                    if(index === 0){
-                        point = this.workerBasicExchange.counter;
-                        money = point;
-                    }
-                    else{
-                        point = this.workerQuotaExchange.counter;
-                        money = point/1000 * 1500 + point%1000;
-                    }
-                    route = "http://localhost:8086/userProfile/worker/exchange/";
-                }
-                else{
-                    money = this.requesterExchange.counter;
-                    point = money;
-                    route = "http://localhost:8086/userProfile/requester/exchange/";
-                }
+	export default {
+		name: "",
+		components: {
+			taskLobby,
+			requesterLobby,
+		},
+		data() {
+			return {
+				isWorker: null,
+				notificationList: [{
+					title: '假裝有消息',
+					content: '假裝有描述',
+				}],
+				tasks: [{
+					taskName: '',
+					taskCategory: '',
+					contractStatus: '',
+					createTime: ''
+				}],
+				workerBasicExchange: {
+					name: '基本兌換',
+					description: '1積分能兑换1元',
+					money: '1',
+					requiredCredit: '1',
+					counter: 0
+				},
+				workerQuotaExchange: {
+					name: '定額兌換',
+					description: '1000積分能兌換1500元',
+					money: '1500',
+					requiredCredit: '1000',
+					counter: 0
+				},
+				requesterExchange: {
+					name: '基本兌換',
+					endTime: '',
+					description: '1元能兑换1積分',
+					money: '1',
+					requiredCredit: '1',
+					counter: 0
+				}
+			}
+		},
+		created() {
+			let _this = this;
+			this.$bus.$on("refreshPane", () => {
+				this.isWorker = UserUtils.isWorker(_this);
+				this.loadTask();
+				this.loadMessage();
+			});
+		},
+		mounted: function () {
+			this.isWorker = UserUtils.isWorker(this);
+			this.loadTask();
+			this.loadMessage();
+		},
+		methods: {
+			loadTask() {
+				let route = '';
+				if (this.isWorker) {
+					route = "http://localhost:8086/workerTasks";
+				}
+				else {
+					route = "http://localhost:8086/requesterTasks";
+				}
 
-                let data = {
-                    point: point,
-                    money: money,
-                };
+				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
+					this.tasks = [];
+					for (let i = response.data.length - 1; i >= 0; i--) {
+						let data = response.data[i];
+						let createTime = data.createTime;
+						data.createTime = DateUtils.dateFormat(createTime);
+						this.tasks.push(data);
+					}
+					this.translate();
+				}).catch((error) => {
+					console.log(error);
+				})
+			},
+			translate: function () {
+				// console.log(this.tasks instanceof Array);
+				this.tasks.forEach((value, index, array) => {
+					value.taskCategory = TranslateUtils.translateTaskCategory(value.taskCategory);
+					value.contractStatus = TranslateUtils.translateContractStatus(value.contractStatus)
+				});
+			},
+			loadMessage() {
+				this.$http.get("http://localhost:8086/message",
+					{headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
+					this.notificationList = [];
+					for (let i = response.data.length - 1; i >= 0; i--) {
+						response.data[i].title = "系统消息：" + response.data[i].title;
+						this.notificationList.push(response.data[i]);
+					}
+				}).catch(function (error) {
+					console.log(error);
+				})
+			},
+			exchange(index) {
+				let point, money, route;
+				if (this.isWorker) {
+					if (index === 0) {
+						point = this.workerBasicExchange.counter;
+						money = point;
+					}
+					else {
+						point = this.workerQuotaExchange.counter;
+						money = point / 1000 * 1500 + point % 1000;
+					}
+					route = "http://localhost:8086/userProfile/worker/exchange/";
+				}
+				else {
+					money = this.requesterExchange.counter;
+					point = money;
+					route = "http://localhost:8086/userProfile/requester/exchange/";
+				}
 
-                this.$http.post(route, data, {headers:{Authorization:this.$store.getters.getToken}}
-                ).then((response)=> {
-                    this.messageHandler();
-                    this.refreshInfo();
-                    this.loadMessage();
-                    this.workerBasicExchange.counter = 1;
-                    this.workerQuotaExchange.counter = 1;
-                    this.requesterExchange.counter = 1;
-                }).catch((error)=> {
-                    if(error.response.status === 400){
-                        this.badMessage();
-                    }
-                    else{
-                        console.log(error);
-                    }
-                    this.workerBasicExchange.counter = 1;
-                    this.workerQuotaExchange.counter = 1;
-                    this.requesterExchange.counter = 1;
-                })
-            },
-            messageHandler(){
-                this.$message({
-                    message:'兑换成功^_^',
-                    type:'success'
-                })
-            },
-            badMessage(){
-                this.$alert('您的积分不足，多做点任务再来兑换吧^_^', '系统警告', {
-                    confirmButtonText: '确定'
-                });
-            },
-            dateFormat(date) {
-                Date.prototype.format = function (fmt) {
-                    let o = {
-                        "M+": this.getMonth() + 1,                 //月份
-                        "d+": this.getDate(),                    //日
-                        "h+": this.getHours(),                   //小时
-                        "m+": this.getMinutes(),                 //分
-                        "s+": this.getSeconds(),                 //秒
-                        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                        "S": this.getMilliseconds()             //毫秒
-                    };
-                    if (/(y+)/.test(fmt)) {
-                        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-                    }
-                    for (let k in o) {
-                        if (new RegExp("(" + k + ")").test(fmt)) {
-                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                        }
-                    }
-                    return fmt;
-                };
+				let data = {
+					point: point,
+					money: money,
+				};
 
-                let tem = new Date(date).getTime();
-                let ans = new Date(tem).format("yyyy-MM-dd hh:mm");
-                return ans;
-            },
-            refreshInfo () {
-                this.$bus.$emit("refreshInfo");
-            }
-        }
-    }
+				this.$http.post(route, data, {headers: {Authorization: this.$store.getters.getToken}}
+				).then((response) => {
+					this.messageHandler();
+					this.refreshInfo();
+					this.loadMessage();
+					this.workerBasicExchange.counter = 1;
+					this.workerQuotaExchange.counter = 1;
+					this.requesterExchange.counter = 1;
+				}).catch((error) => {
+					if (error.response.status === 400) {
+						this.badMessage();
+					}
+					else {
+						console.log(error);
+					}
+					this.workerBasicExchange.counter = 1;
+					this.workerQuotaExchange.counter = 1;
+					this.requesterExchange.counter = 1;
+				})
+			},
+			messageHandler() {
+				this.$message({
+					message: '兑换成功^_^',
+					type: 'success'
+				})
+			},
+			badMessage() {
+				this.$alert('您的积分不足，多做点任务再来兑换吧^_^', '系统警告', {
+					confirmButtonText: '确定'
+				});
+			},
+			refreshInfo() {
+				this.$bus.$emit("refreshInfo");
+			}
+		}
+	}
 </script>
 
 <style scoped>
