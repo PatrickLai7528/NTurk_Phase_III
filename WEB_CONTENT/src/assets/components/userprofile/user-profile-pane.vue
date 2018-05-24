@@ -222,52 +222,52 @@
 			this.loadMessage();
 		},
 		methods: {
+			decideGetTaskUrl() {
+				if (this.isWorker)
+					return "http://localhost:8086/workerTasks";
+				else
+					return "http://localhost:8086/requesterTasks";
+			},
+			doWhileGetTaskSuccess(response) {
+				this.tasks = [];
+				for (let i = response.data.length - 1; i >= 0; i--) {
+					let data = response.data[i];
+					let createTime = data.createTime;
+					data.createTime = DateUtils.simpleDateFormate(createTime);
+					this.tasks.push(data);
+				}
+				this.translate();
+			},
 			loadTask() {
-				let route = '';
-				if (this.isWorker) {
-					route = "http://localhost:8086/workerTasks";
-				}
-				else {
-					route = "http://localhost:8086/requesterTasks";
-				}
-
-				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					this.tasks = [];
-					for (let i = response.data.length - 1; i >= 0; i--) {
-						let data = response.data[i];
-						let createTime = data.createTime;
-						data.createTime = DateUtils.dateFormat(createTime);
-						this.tasks.push(data);
-					}
-					this.translate();
-				}).catch((error) => {
-					console.log(error);
-				})
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
+				this.$http.get(this.decideGetTaskUrl(), header)
+					.then(this.doWhileGetTaskSuccess)
+					.catch((error) => {
+						console.log(error);
+					})
 			},
 			translate: function () {
-				// console.log("****************user profile pane translate function****************");
 				this.tasks.forEach((value, index, array) => {
-					// console.log(value);
-					// console.log(index);
-					// console.log(array);
 					value.taskCategory = TranslateUtils.translateTaskCategory(value.taskCategory);
-					/* 眾包發起者不顯示合同狀態 */
-					if (this.isWorker)
+					if (this.isWorker) /* 眾包發起者不顯示合同狀態 */
 						value.contractStatus = TranslateUtils.translateContractStatus(value.contractStatus)
 				});
-				// console.log("****************user profile pane translate function****************");
 			},
 			loadMessage() {
-				this.$http.get("http://localhost:8086/message",
-					{headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					this.notificationList = [];
-					for (let i = response.data.length - 1; i >= 0; i--) {
-						response.data[i].title = "系统消息：" + response.data[i].title;
-						this.notificationList.push(response.data[i]);
-					}
-				}).catch(function (error) {
-					console.log(error);
-				})
+				let getMessageUrl = "http://localhost:8086/message";
+				let getMessageHeader = {headers: {Authorization: this.$store.getters.getToken}};
+				this.$http.get(getMessageUrl, getMessageHeader)
+					.then(this.doWhileGetMessageSuccess)
+					.catch(function (error) {
+						console.log(error);
+					})
+			},
+			doWhileGetMessageSuccess(response) {
+				this.notificationList = [];
+				for (let i = response.data.length - 1; i >= 0; i--) {
+					response.data[i].title = "系统消息：" + response.data[i].title;
+					this.notificationList.push(response.data[i]);
+				}
 			},
 			exchange(index) {
 				let point, money, route;
