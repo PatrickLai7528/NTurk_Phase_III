@@ -26,101 +26,106 @@
 </template>
 
 <script scoped>
-    // import store from '../../store/store.js'
-    import PasswordValidator from '../../js/PasswordValidator.js'
-    import AccountValidator from '../../js/AccountValidator.js'
-    import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
-    import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
-    import UserUtils from '../../js/utils/UserUtils.js'
-    export default {
-        data() {
-            var validatePassword = (rule, value, callback) => {
-                let passwordValidator = new PasswordValidator(value);
-                // make sure that passwordValidator has a method called validate
-                VirtualInterface.ensureImplements(passwordValidator, ValidatorInterface);
-                let result = passwordValidator.validate();
-                return result.isValid ? callback() : callback(result.errMsg)
-            };
-            var validateAccount = (rule, value, callback) => {
-                let accountValidator = new AccountValidator(value);
-                // make sure that accountValidator has a method called validate
-                VirtualInterface.ensureImplements(accountValidator, ValidatorInterface);
-                let result = accountValidator.validate();
-                return result.isValid ? callback() : callback(result.errMsg)
-            };
-            return {
-                ruleForm: {
-                    password: '',
-                    account: '',
-                },
-                rules: {
-                    password: [
-                        {validator: validatePassword, trigger: 'blur'},
-                    ],
-                    account: [
-                        {validator: validateAccount, trigger: 'blur'}
-                    ],
-                },
-            };
-        },
-        mounted: function () {
-            /*
+	// import store from '../../store/store.js'
+	import PasswordValidator from '../../js/PasswordValidator.js'
+	import AccountValidator from '../../js/AccountValidator.js'
+	import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
+	import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
+	import UserUtils from '../../js/utils/UserUtils.js'
+
+	export default {
+		data() {
+			var validatePassword = (rule, value, callback) => {
+				let passwordValidator = new PasswordValidator(value);
+				// make sure that passwordValidator has a method called validate
+				VirtualInterface.ensureImplements(passwordValidator, ValidatorInterface);
+				let result = passwordValidator.validate();
+				return result.isValid ? callback() : callback(result.errMsg)
+			};
+			var validateAccount = (rule, value, callback) => {
+				let accountValidator = new AccountValidator(value);
+				// make sure that accountValidator has a method called validate
+				VirtualInterface.ensureImplements(accountValidator, ValidatorInterface);
+				let result = accountValidator.validate();
+				return result.isValid ? callback() : callback(result.errMsg)
+			};
+			return {
+				ruleForm: {
+					password: '',
+					account: '',
+				},
+				rules: {
+					password: [
+						{validator: validatePassword, trigger: 'blur'},
+					],
+					account: [
+						{validator: validateAccount, trigger: 'blur'}
+					],
+				},
+			};
+		},
+		mounted: function () {
+			/*
                 test if store.js work or not, after refreshing the pages
              */
-            // console.log(sessionStorage);
-            // console.log(this.$store.getters.getUserId);
-            // console.log(this.$store.getters.getUserType);
-            // console.log(this.$store.getters.getToken);
-        },
-        methods: {
-            toSignUpPage: function () {
-                this.$router.push({path: '/entry/signup'});
-                this.$router.forward();
-            },
-            submitForm(formName) {
-                this.$refs[formName].validate((valid) => {
-                    if (valid) {
-                        this.doTheLogIn();
-                    } else {
-                        return false;
-                    }
-                });
-            },
-            doTheLogIn: function () {
-                this.$http({
-                    url: "http://localhost:8086/auth/",
-                    method: "POST",
-                    data: {
-                        emailAddress: this.ruleForm.account,
-                        password: this.ruleForm.password
-                    },
-                }).then((response)=> {
-                    this.$store.dispatch('logIn', {
-                        userId: response.data.userId,
-                        token: response.data.token,
-                        userType: response.data.userType
-                    });
-                    if(UserUtils.isAdmin(this)){
-                        this.$router.push({path: '/admin'});
-                    }
-                    else{
-                        this.$router.push({path: '/profile'});
-                    }
-                    this.showMsg("登入成功");
-                    this.$router.forward();
-                }).catch((error)=> {
-                    this.showMsg("賬戶或密碼錯誤");
-                    //console.log(error);
-                })
-            },
-            showMsg: function (msg) {
-                this.$message({
-                    title: '通知',
-                    message: msg
-                });
-            },
-        }
-    }
+			// console.log(sessionStorage);
+			// console.log(this.$store.getters.getUserId);
+			// console.log(this.$store.getters.getUserType);
+			// console.log(this.$store.getters.getToken);
+		},
+		methods: {
+			toSignUpPage: function () {
+				this.$router.push({path: '/entry/signup'});
+				this.$router.forward();
+			},
+			submitForm(formName) {
+				this.$refs[formName].validate((valid) => {
+					if (valid) {
+						this.doTheLogIn();
+					} else {
+						return false;
+					}
+				});
+			},
+			doWhileLogInSuccess(response) {
+				this.$store.dispatch('logIn', {
+					userId: response.data.userId,
+					token: response.data.token,
+					userType: response.data.userType
+				});
+				if (UserUtils.isAdmin(this)) {
+					this.$router.push({path: '/admin'});
+				}
+				else {
+					this.$router.push({path: '/profile'});
+				}
+				this.showMsg("登入成功");
+				this.$router.forward();
+			},
+			doTheLogIn: function () {
+				let argu = {
+					url: "http://localhost:8086/auth/",
+					method: "POST",
+					data: {
+						emailAddress: this.ruleForm.account,
+						password: this.ruleForm.password
+					},
+				};
+				this.$http(argu)
+					.then(this.doWhileLogInSuccess)
+					.catch((error) => {
+						this.showMsg("賬戶或密碼錯誤");
+						//console.log(error);
+					})
+			},
+			showMsg: function (msg) {
+				this.$message({
+					title: '通知',
+					message: msg
+				});
+			},
+		}
+	}
 </script>
 
 <style scoped>
