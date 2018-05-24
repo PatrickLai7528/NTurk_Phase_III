@@ -60,6 +60,7 @@
 
 <script>
 	import DateUtils from '../../js/utils/DateUtils.js'
+	import TranslateUtils from '../../js/utils/TranslateUtils.js'
 
 	export default {
 		props: ['message'],
@@ -113,25 +114,27 @@
 					return "http://localhost:8086/newTasks"
 			},
 			getTableData() {
-				let header = {Authorization: this.$store.getters.getToken};
+				let header = {headers : {Authorization: this.$store.getters.getToken}};
 				let getUrl = this.decideGetTableDataUrl();
-				this.$http.get(
-					getUrl,
-					{headers: header}
-				).then(this.doWhileGetTableDataSuccess).catch(function (error) {
+				this.$http.get(getUrl, header)
+                    .then(this.doWhileGetTableDataSuccess)
+                    .catch(function (error) {
 					console.log(error);
 				});
 			},
 			translate: function () {
-				for (let i = 0; i < this.tableData.length; i++) {
-					if (this.tableData[i].taskCategory === "GENERAL") {
-						this.tableData[i].taskCategoryChi = "整體標註";
-					} else if (this.tableData[i].taskCategory === "FRAME") {
-						this.tableData[i].taskCategoryChi = "區域標註";
-					} else if (this.tableData[i].taskCategory === "SEGMENT") {
-						this.tableData[i].taskCategoryChi = "區域劃分";
-					}
-				}
+				this.tableData.forEach((value, index, array)=>{
+					value.taskCategoryChi = TranslateUtils.translateTaskCategory(value.taskCategory);
+                });
+				// for (let i = 0; i < this.tableData.length; i++) {
+				// 	if (this.tableData[i].taskCategory === "GENERAL") {
+				// 		this.tableData[i].taskCategoryChi = "整體標註";
+				// 	} else if (this.tableData[i].taskCategory === "FRAME") {
+				// 		this.tableData[i].taskCategoryChi = "區域標註";
+				// 	} else if (this.tableData[i].taskCategory === "SEGMENT") {
+				// 		this.tableData[i].taskCategoryChi = "區域劃分";
+				// 	}
+				// }
 			},
 			handleClick(row, Id, taskCategory) {
 				let _this = this;

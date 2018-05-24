@@ -245,11 +245,17 @@
 				})
 			},
 			translate: function () {
-				// console.log(this.tasks instanceof Array);
+				// console.log("****************user profile pane translate function****************");
 				this.tasks.forEach((value, index, array) => {
+					// console.log(value);
+					// console.log(index);
+					// console.log(array);
 					value.taskCategory = TranslateUtils.translateTaskCategory(value.taskCategory);
-					value.contractStatus = TranslateUtils.translateContractStatus(value.contractStatus)
+					/* 眾包發起者不顯示合同狀態 */
+					if (this.isWorker)
+						value.contractStatus = TranslateUtils.translateContractStatus(value.contractStatus)
 				});
+				// console.log("****************user profile pane translate function****************");
 			},
 			loadMessage() {
 				this.$http.get("http://localhost:8086/message",

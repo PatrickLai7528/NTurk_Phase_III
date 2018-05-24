@@ -93,6 +93,8 @@
 
 				let route = 'http://localhost:8086/admin/task/taskState';
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
+					console.log("i am in setTaskState");
+					console.log(response.data);
 					let data = this.translate(response.data);
 					let taskCategoryList = data.map((item) => {
 						return item.taskCategory;
@@ -182,7 +184,7 @@
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
 					console.log("i am in setTaskGrowth");
 					console.log(response.data);
-					let data = this.translate(response.data);
+					// let data = this.translate(response.data);
 					let dateList = data.map((item) => {
 						return item.date;
 					});
@@ -276,33 +278,33 @@
 				});
 			},
 			translate: function (data) {
-				console.log(data);
-				data.forEach((value, index, array) => {
-					// console.log("in translate function");
-					// console.log(value);
-					// console.log(index);
-					// console.log(array);
-					// value.name = TranslateUtils.translateTaskCategory(value.name);
-					// value.taskCategory = TranslateUtils.translateTaskCategory(value.taskCategory);
-				});
-				// for (let i = 0; i < data.length; i++) {
-				// 	if (data[i].name === "GENERAL") {
-				// 		data[i].name = "整体标注";
-				// 	} else if (data[i].name === "FRAME") {
-				// 		data[i].name = "画框标注";
-				// 	} else if (data[i].name === "SEGMENT") {
-				// 		data[i].name = "区域标注";
-				// 	}
-				// }
-				// for (let j = 0; j < data.length; j++) {
-				// 	if (data[j].taskCategory === "GENERAL") {
-				// 		data[j].taskCategory = "整体标注";
-				// 	} else if (data[j].taskCategory === "FRAME") {
-				// 		data[j].taskCategory = "画框标注";
-				// 	} else if (data[j].taskCategory === "SEGMENT") {
-				// 		data[j].taskCategory = "区域标注";
-				// 	}
-				// }
+				// console.log(data);
+				// data.forEach((value, index, array) => {
+				// 	// console.log("in translate function");
+				// 	// console.log(value);
+				// 	// console.log(index);
+				// 	// console.log(array);
+				// 	// value.name = TranslateUtils.translateTaskCategory(value.name);
+				// 	// value.taskCategory = TranslateUtils.translateTaskCategory(value.taskCategory);
+				// });
+				for (let i = 0; i < data.length; i++) {
+					if (data[i].name === "GENERAL") {
+						data[i].name = "整体标注";
+					} else if (data[i].name === "FRAME") {
+						data[i].name = "画框标注";
+					} else if (data[i].name === "SEGMENT") {
+						data[i].name = "区域标注";
+					}
+				}
+				for (let j = 0; j < data.length; j++) {
+					if (data[j].taskCategory === "GENERAL") {
+						data[j].taskCategory = "整体标注";
+					} else if (data[j].taskCategory === "FRAME") {
+						data[j].taskCategory = "画框标注";
+					} else if (data[j].taskCategory === "SEGMENT") {
+						data[j].taskCategory = "区域标注";
+					}
+				}
 				return data;
 			}
 		}
