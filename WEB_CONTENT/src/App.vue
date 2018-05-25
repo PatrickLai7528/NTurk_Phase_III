@@ -101,7 +101,7 @@
         z-index: 1;
         margin: 0;
         padding: 0;
-        height: 800px;
+        height: 100%;
         overflow: visible;
     }
 
@@ -110,9 +110,11 @@
         left: 0;
         right: 0;
         margin-top: 54px;
+        height: 100%;
+        overflow: hidden;
     }
 
     .el-container {
-        margin-top: 30px;
+        //margin-top: 30px;
     }
 </style>

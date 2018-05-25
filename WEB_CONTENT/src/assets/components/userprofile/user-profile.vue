@@ -24,6 +24,7 @@
 <style>
     #user-profile {
         margin-top: 5em;
+        width: 100%;
     }
 
     #user-profile-el-aside {

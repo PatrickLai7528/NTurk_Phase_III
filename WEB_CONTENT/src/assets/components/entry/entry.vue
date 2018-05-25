@@ -1,8 +1,8 @@
 <template>
     <el-row style="height: 100%">
-        <el-col :span="12">
+        <el-col :span="12" style="height: 100%">
             <div class="logo">
-                <el-container>
+                <el-container style="height: 80%">
                     <el-main>
                         <h1 class="NTurk">nTurk</h1>
                     </el-main>
@@ -14,7 +14,7 @@
                             <h3 class="slogon">快速上手</h3>
                         </el-button>
                     </el-footer>
-                    <el-footer v-if="notLogIn()">
+                    <el-footer v-if="notLogIn()" class="sx">
                         <el-button type="text" @click="toLogIn()">
                             <h3 class="slogon">登錄</h3>
                         </el-button>
@@ -23,7 +23,7 @@
             </div>
         </el-col>
         <!--<transition name="el-fade-in">-->
-        <el-col :span="12">
+        <el-col :span="12" style="height: 100%">
             <div class="logInOrSignUp">
                 <router-view></router-view>
             </div>
@@ -73,7 +73,7 @@
         padding-top: 3.3em;
         background-image: url(../../images/bg.jpg);
         background-size: auto 100%;
-        height: 700px;
+        height: 100%;
         width: 100%;
     }
 
@@ -85,7 +85,7 @@
         padding-top: 3.3em;
         background: #FFFFFF;
         width: 100%;
-        height: 700px;
+        height: 80%;
     }
 
     .NTurk {
@@ -115,5 +115,9 @@
         padding-right: 0;
         padding-bottom: 0;
         padding-left: 0;
+    }
+
+    .sx {
+        height: 70px;
     }
 </style>
