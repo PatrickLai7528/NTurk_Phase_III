@@ -2,17 +2,17 @@
     <div class="main">
         <el-table :data="tableData"
                   class="table" :row-class-name="tableRowClassName" align="center">
-            <el-table-column label="任务ID" prop="taskId" sortable width="120"
+            <el-table-column label="任务ID" prop="taskId" sortable
                              :filters="[{text:'已截止',value:'已截止'},{text:'正在进行',value:'正在进行'}]"
                              :filter-method="filterTaskStatus">
             </el-table-column>
-            <el-table-column label="任务名称" prop="taskName" width="150">
+            <el-table-column label="任务名称" prop="taskName">
             </el-table-column>
-            <el-table-column label="工人ID" prop="workerId" sortable width="100">
+            <el-table-column label="工人ID" prop="workerId" sortable>
             </el-table-column>
-            <el-table-column label="合同ID" prop="contractId" sortable width="100">
+            <el-table-column label="合同ID" prop="contractId" sortable>
             </el-table-column>
-            <el-table-column label="合同状态" prop="contractStatus" width="100"
+            <el-table-column label="合同状态" prop="contractStatus"
                              :filters="[{text:'正在进行',value:'正在进行'},{text:'已完成',value:'已完成'},{text:'逾期',value:'逾期'}]"
                              :filter-method="filterStatus">
                 <template slot-scope="scope">
@@ -22,12 +22,9 @@
                     </el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="最后修改时间" prop="lastEditTime" sortable width="180">
+            <el-table-column label="最后修改时间" prop="lastEditTime" sortable width="250">
             </el-table-column>
-            <el-table-column
-                    fixed="right"
-                    label="操作"
-                    width="100">
+            <el-table-column label="操作">
                 <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="small" align="left">查看标注</el-button>
                 </template>
@@ -171,6 +168,7 @@
         /*background-image: url(../../images/mainbg.jpg);*/
         /*background-size: auto 100%;*/
         height: 650px;
+        width: 100%;
     }
 
     .table {

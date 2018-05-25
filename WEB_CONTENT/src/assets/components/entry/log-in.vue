@@ -126,20 +126,25 @@
 <style scoped>
     .logIn {
         font-family: Microsoft YaHei;
+        width: 50%;
     }
 
     .input {
-        width: 18em;
+        width: 90%;
     }
 
     .label {
         font-size: 24px;
     }
 
+    .el-form-item__label {
+        font-size: 16px;
+    }
+
     .logInButton {
         font-family: Microsoft YaHei;
         color: #FFFFFF;
-        width: 18em;
+        width: 90%;
         background: #A9A9A9;
         border-color: #A9A9A9;
     }
