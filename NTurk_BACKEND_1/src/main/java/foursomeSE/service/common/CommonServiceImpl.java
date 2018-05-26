@@ -99,7 +99,7 @@ public abstract class CommonServiceImpl<D, S> implements CommonService<D, S> {
                 .ifPresent(t -> result.t = t);
 
         if (result.t == null) {
-            throw new MyObjectNotFoundException();
+            throw new MyObjectNotFoundException("this is legacy code of iteration 2. How come that you come here?");
         }
         return result.t;
     }

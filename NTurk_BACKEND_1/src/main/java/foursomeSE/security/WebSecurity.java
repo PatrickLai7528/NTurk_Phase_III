@@ -56,7 +56,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .and().httpBasic().disable()
         ;
         httpSecurity.addFilter(new AuthorizationTokenFilter(authenticationManager()
-                , new HybridUserDetailsServiceImpl(new LowerWorkerServiceImpl(), new LowerRequesterServiceImpl())));
+                , hybridUserDetailsServiceImpl)); // 这里改了一点，本来怎么会自己new的呃
     }
 
     // 这个和下面的？重吗？什么关系？不管了…

@@ -10,10 +10,11 @@ import foursomeSE.entity.user.CWorker;
 import foursomeSE.entity.user.UserType;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
-import foursomeSE.service.contract.LowerContractService;
-import foursomeSE.service.message.LowerMessageService;
-import foursomeSE.service.task.LowerTaskService;
-import foursomeSE.service.user.lower.LowerUserService;
+import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.UserJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.util.ConvenientFunctions;
 import org.springframework.stereotype.Service;
 
@@ -22,29 +23,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static foursomeSE.service.task.TaskUtils.taskById;
+import static foursomeSE.service.user.UserUtils.userById;
+import static foursomeSE.service.user.UserUtils.userByUsername;
+import static foursomeSE.util.ConvenientFunctions.iterableToList;
+import static foursomeSE.util.ConvenientFunctions.iterableToStream;
 import static foursomeSE.util.ConvenientFunctions.listConvert;
 
 @Service
 public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker, CWorker> implements UpperWorkerService {
-    private LowerContractService contractService;
-    private LowerTaskService lowerTaskService;
-    private LowerMessageService lowerMessageService;
+//    private LowerContractService contractService;
+    private ContractJPA contractJPA;
+    //private LowerTaskService lowerTaskService;
+    private TaskJPA taskJPA;
 
-    public UpperWorkerServiceImpl(LowerUserService<Worker> service,
-                                  LowerMessageService lowerMessageService,
-                                  LowerContractService contractService,
-                                  LowerTaskService lowerTaskService,
-                                  LowerMessageService lowerMessageService1) {
-        super(service, lowerMessageService);
-        this.contractService = contractService;
-        this.lowerTaskService = lowerTaskService;
-        this.lowerMessageService = lowerMessageService1;
+    public UpperWorkerServiceImpl(UserJPA<Worker> userJPA,
+                                  MessageJPA messageJPA,
+                                  ContractJPA contractJPA,
+                                  TaskJPA taskJPA) {
+        super(userJPA, messageJPA);
+        this.contractJPA = contractJPA;
+        this.taskJPA = taskJPA;
     }
 
     @Override
     public CWorker getById(long id) {
-        Worker worker = service.getById(id);
-        ArrayList<Worker> sortedWorkers = service.getLotBy(p -> true).stream()
+        Worker worker = userById(userJPA, id);
+        ArrayList<Worker> sortedWorkers = iterableToStream(userJPA.findAll())
                 .sorted(ConvenientFunctions::ExperiementPointDescend)
                 .collect(Collectors.toCollection(ArrayList::new));
 
@@ -58,7 +63,7 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
 
     @Override
     public List<SimpleCWorker> getAllSimple() {
-        return listConvert(service.getLotBy(x -> true), SimpleCWorker::new);
+        return listConvert(iterableToList(userJPA.findAll()), SimpleCWorker::new);
     }
 
     @Override
@@ -75,9 +80,11 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
         );
 
         // 这个参与目前只要参与了就行，也不管有没有完成
-        service.getLotBy(p -> true).forEach(w -> {
-            int name = contractService.getLotBy(c -> c.getWorkerId() == w.getWorkerId()).stream()
-                    .map(c -> lowerTaskService.getById(c.getTaskId()))
+        iterableToStream(userJPA.findAll()).forEach(w -> {
+
+//            int name = contractService.getLotBy(c -> c.getWorkerId() == w.getId()).stream()
+            int name = contractJPA.findByWorkerId(w.getId()).stream()
+                    .map(c -> taskById(taskJPA, c.getTaskId()))
                     .collect(Collectors.groupingBy(Task::getTaskCategory, Collectors.counting())).size();
             result.stream()
                     .filter(u -> u.getName() == name)
@@ -89,19 +96,19 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
     @Override
     public void add(Worker user) {
         super.add(user);
-        lowerMessageService.add(Message.createMessage(user.getEmailAddress(), MessageType.CREAT_WORKER));
+        messageJPA.save(Message.createMessage(user.getEmailAddress(), MessageType.CREAT_WORKER));
     }
 
     @Override
     public void exchange(ExchangeRequest exchangeRequest, String username) {
-        Worker worker = service.getOneBy(w -> w.getEmailAddress().equals(username));
+        Worker worker = userByUsername(userJPA, username);
         if (worker.getCredit() < exchangeRequest.getPoint()) {
             throw new MyNotValidException();
         }
         worker.setCredit(worker.getCredit() - exchangeRequest.getPoint());
-        service.update(worker);
+        userJPA.save(worker);
 
-        lowerMessageService.add(Message.createMessage(username, MessageType.WORKER_EXCHANGE, new String[]{
+        messageJPA.save(Message.createMessage(username, MessageType.WORKER_EXCHANGE, new String[]{
                 String.format("%.2f", exchangeRequest.getPoint()),
                 String.format("%.2f", exchangeRequest.getMoney())
         }));

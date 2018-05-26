@@ -1,8 +1,11 @@
 package foursomeSE.entity;
 
+import javax.persistence.Embeddable;
+import java.io.Serializable;
 import java.util.List;
 
-public class Segment {
+@Embeddable
+public class Segment implements Serializable {
     private List<Point> polygon;
     private String tag;
 

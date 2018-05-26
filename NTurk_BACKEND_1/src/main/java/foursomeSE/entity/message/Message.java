@@ -1,12 +1,29 @@
 package foursomeSE.entity.message;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "messages")
 public class Message {
+    @Id
+    @GeneratedValue
     private long id;
+
+    @NotNull
     private String username;
+
+    @NotNull
     private String title;
+
+    @NotNull
     private String content;
+
+    @NotNull
     private LocalDateTime createTime;
 
     public Message() {

@@ -1,6 +1,10 @@
 package foursomeSE.entity;
 
-public class AnswerPair {
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+public class AnswerPair implements Serializable {
     private String question;
     private String answer;
 
