@@ -2,17 +2,17 @@
     <div class="main">
         <el-table :data="tableData"
                   class="table" :row-class-name="tableRowClassName" align="center">
-            <el-table-column label="任务ID" prop="taskId" sortable width="120"
+            <el-table-column label="任务ID" prop="taskId" sortable
                              :filters="[{text:'已截止',value:'已截止'},{text:'正在进行',value:'正在进行'}]"
                              :filter-method="filterTaskStatus">
             </el-table-column>
-            <el-table-column label="任务名称" prop="taskName" width="150">
+            <el-table-column label="任务名称" prop="taskName">
             </el-table-column>
-            <el-table-column label="工人ID" prop="workerId" sortable width="100">
+            <el-table-column label="工人ID" prop="workerId" sortable>
             </el-table-column>
-            <el-table-column label="合同ID" prop="contractId" sortable width="100">
+            <el-table-column label="合同ID" prop="contractId" sortable>
             </el-table-column>
-            <el-table-column label="合同状态" prop="contractStatus" width="100"
+            <el-table-column label="合同状态" prop="contractStatus"
                              :filters="[{text:'正在进行',value:'正在进行'},{text:'已完成',value:'已完成'},{text:'逾期',value:'逾期'}]"
                              :filter-method="filterStatus">
                 <template slot-scope="scope">
@@ -22,12 +22,9 @@
                     </el-tag>
                 </template>
             </el-table-column>
-            <el-table-column label="最后修改时间" prop="lastEditTime" sortable width="180">
+            <el-table-column label="最后修改时间" prop="lastEditTime" sortable width="250">
             </el-table-column>
-            <el-table-column
-                    fixed="right"
-                    label="操作"
-                    width="100">
+            <el-table-column label="操作">
                 <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="small" align="left">查看标注</el-button>
                 </template>
@@ -37,6 +34,7 @@
 </template>
 
 <script>
+    import DateUtils from '../../js/utils/DateUtils.js'
     export default {
         props: ['message'],
         data() {
@@ -96,37 +94,11 @@
                             return new Date() > e.endTime;
                         }
                         else {
-                            return this.dateFormat(new Date()) <= e.endTime;
+                            return DateUtils.dateFormat(new Date()) <= e.endTime;
                         }
 
                     }
                 }
-            },
-            dateFormat(oldDate) {
-                Date.prototype.format = function (fmt) {
-                    let o = {
-                        "M+": this.getMonth() + 1,                 //月份
-                        "d+": this.getDate(),                    //日
-                        "h+": this.getHours(),                   //小时
-                        "m+": this.getMinutes(),                 //分
-                        "s+": this.getSeconds(),                 //秒
-                        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-                        "S": this.getMilliseconds()             //毫秒
-                    };
-                    if (/(y+)/.test(fmt)) {
-                        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-                    }
-                    for (let k in o) {
-                        if (new RegExp("(" + k + ")").test(fmt)) {
-                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-                        }
-                    }
-                    return fmt;
-                };
-
-                let tem = new Date(oldDate).getTime();
-                let ans = new Date(tem).format("yyyy-MM-dd hh:mm:ss");
-                return ans;
             },
             translateContractStatus: function (status) {        //翻译状态
                 if (status === "IN_PROGRESS") {
@@ -161,7 +133,7 @@
 
                             for (let con of temp) {
                                 console.log(response.data);
-                                let theContract = new Contract(con.contractId, con.contractStatus, con.workerId, that.dateFormat(con.lastEditTime));
+                                let theContract = new Contract(con.contractId, con.contractStatus, con.workerId, DateUtils.dateFormat(con.lastEditTime));
                                 theContract.taskId = e.taskId;
                                 theContract.taskName = e.taskName;
                                 theContract.endTime = e.endTime;    //加入时间来共筛选
@@ -196,6 +168,7 @@
         /*background-image: url(../../images/mainbg.jpg);*/
         /*background-size: auto 100%;*/
         height: 650px;
+        width: 100%;
     }
 
     .table {

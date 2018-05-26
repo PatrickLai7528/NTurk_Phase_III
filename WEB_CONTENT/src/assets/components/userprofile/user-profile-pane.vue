@@ -153,7 +153,7 @@
 <script>
     import taskLobby from '../common/common-main.vue'
     import requesterLobby from '../common/common-requester-lobby.vue'
-
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         name: "",
         components: {
@@ -198,14 +198,15 @@
             }
         },
         created() {
+        	let _this = this;
             this.$bus.$on("refreshPane", ()=> {
-                this.isWorker = (this.$store.getters.getUserType === 'WORKER');
+                this.isWorker = UserUtils.isWorker(_this);
                 this.loadTask();
                 this.loadMessage();
             });
         },
         mounted: function () {
-            this.isWorker = (this.$store.getters.getUserType === 'WORKER');
+            this.isWorker = UserUtils.isWorker(this);
             this.loadTask();
             this.loadMessage();
         },

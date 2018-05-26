@@ -33,16 +33,11 @@
             }
         },
         methods: {
-            mounted: function () {
-                this.$nextTick(function () {
-                })
-            },
             handleAddImg(payload){
                 this.imgNames = [];
                 for(let e of payload.fileList2){
                     this.imgNames.push(e.name);
                 }
-
                 console.log(this.imgNames);   //测试成功，已经将子组件emit的内容传到父组件了
             }
         }

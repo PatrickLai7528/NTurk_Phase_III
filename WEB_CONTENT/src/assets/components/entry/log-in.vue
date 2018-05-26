@@ -31,7 +31,7 @@
     import AccountValidator from '../../js/AccountValidator.js'
     import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
     import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
-
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data() {
             var validatePassword = (rule, value, callback) => {
@@ -100,7 +100,7 @@
                         token: response.data.token,
                         userType: response.data.userType
                     });
-                    if(this.$store.getters.getUserType === 'ADMIN'){
+                    if(UserUtils.isAdmin(this)){
                         this.$router.push({path: '/admin'});
                     }
                     else{
@@ -126,20 +126,25 @@
 <style scoped>
     .logIn {
         font-family: Microsoft YaHei;
+        width: 50%;
     }
 
     .input {
-        width: 18em;
+        width: 90%;
     }
 
     .label {
         font-size: 24px;
     }
 
+    .el-form-item__label {
+        font-size: 16px;
+    }
+
     .logInButton {
         font-family: Microsoft YaHei;
         color: #FFFFFF;
-        width: 18em;
+        width: 90%;
         background: #A9A9A9;
         border-color: #A9A9A9;
     }
