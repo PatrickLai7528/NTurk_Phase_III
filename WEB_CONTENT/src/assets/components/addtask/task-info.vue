@@ -11,6 +11,28 @@
                 <el-input type="textarea" class="input" v-model="form.taskDescription">
                 </el-input>
             </el-form-item>
+
+            <el-form-item label="标签" prop="dynamicTags">
+                <el-tag
+                        :key="tag"
+                        v-for="tag in form.dynamicTags"
+                        closable
+                        :disable-transitions="false"
+                        class="tag"
+                        @close="tagClose(tag)">
+                    {{tag}}
+                </el-tag>
+                <el-input v-if="tagVisible"
+                          v-model="tagValue"
+                          ref="saveTagInput"
+                          size="small"
+                          @keyup.enter.native="tagInputConfirm"
+                          @blur="tagInputConfirm"
+                >
+                </el-input>
+                <el-button v-else size="small" @click="tagInput" style="font-size: 16px">+</el-button>
+            </el-form-item>
+
             <el-form-item label="任務類型" prop="taskCategory">
                 <el-select class="input" v-model="form.taskCategory" placeholder="請選擇任務類型">
                     <el-option class="option" label="區域劃分" value="SEGMENT"></el-option>
@@ -57,22 +79,22 @@
             </el-form-item>
 
             <el-form-item label="問題" v-if="form.taskCategory == 'GENERAL'" prop="dynamicTags">
-                <el-input v-if="inputVisible"
-                          v-model="tempQuestion"
-                          ref="saveTagInput"
-                          size="small"
-                          @keyup.enter.native="handleInputConfirm"
-                          @blur="handleInputConfirm"
+                <el-input v-if="questionVisible"
+                          v-model="questionValue"
+                          ref="saveQuestionInput"
+                          @keyup.enter.native="questionInputConfirm"
+                          @blur="questionInputConfirm"
                 >
                 </el-input>
-                <el-button v-else size="small" @click="showInput">+ Question</el-button>
-                <el-row v-for="tag in form.dynamicTags">
+                <el-button v-else size="small" @click="questionInput" style="font-size: 16px">+</el-button>
+                <el-row v-for="question in form.questions">
                     <el-tag
-                            type="info"
-                            :key="tag"
+                            type="warning"
+                            :key="question"
                             closable
-                            @close="handleClose(tag)">
-                        {{tag}}
+                            class="question"
+                            @close="questionClose(question)">
+                        {{question}}
                     </el-tag>
                 </el-row>
             </el-form-item>
@@ -127,8 +149,10 @@
                 },
                 tempQuestion: '',
                 allWorkers: [],  //在初始化的时候去后端拿所有工人列表   多选框的key是workerId  value是workerName
-                inputValue: "",
-                inputVisible: false,
+                tagValue: "",
+                tagVisible: false,
+                questionValue: "",
+                questionVisible: false,
                 handlePicker: {
                     disabledDate(nowDate) {
                         let date = new Date();
@@ -143,7 +167,7 @@
                     endTime: [{type: 'date', required: true, message: '请选择截止日期', trigger: 'change'}],
                     rewardStrategy: [{required: true, message: '请选择奖励方式', trigger: 'change'}],
                     nominees: [{type: 'array', required: true, message: '请至少选择一个工人', trigger: 'change'}],
-                    dynamicTags: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
+                    questions: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
                     capacity: [{validator: bePositive, trigger: "blur"}],
                     totalReward: [{validator: bePositive, trigger: "blur"}],
                     requiredExperience: [{validator: bePositive, trigger: "blur"}]
@@ -184,9 +208,6 @@
 
 				if (this.form.taskCategory !== 'GENERAL') {
 					this.form.questions = [];
-				}
-				else {
-					this.form.questions = this.form.dynamicTags;    //将所填问题添加到question里面
 				}
 
 				// console.log(that.form.dynamicTags);
@@ -271,24 +292,42 @@
                     confirmButtonText: '确定'
                 });
             },
-            handleClose(tag) {
+            tagClose(tag) {
                 this.form.dynamicTags.splice(this.form.dynamicTags.indexOf(tag), 1);
             },
-            showInput() {
-                this.inputVisible = true;
+            tagInput() {
+                this.tagVisible = true;
                 this.$nextTick(_ => {
                     this.$refs.saveTagInput.$refs.input.focus();
                 });
             },
-
-            handleInputConfirm() {
-                let inputValue = this.tempQuestion;
-                if (inputValue) {
-                    this.form.dynamicTags.push(inputValue);
+            tagInputConfirm() {
+                let tagValue = this.tagValue;
+                if (tagValue) {
+                    this.form.dynamicTags.push(tagValue);
                 }
-                this.inputVisible = false;
-                this.tempQuestion = '';
+                this.tagVisible = false;
+                this.tagValue = '';
             },
+
+            questionClose(question) {
+                this.form.questions.splice(this.form.questions.indexOf(question), 1);
+            },
+            questionInput() {
+                this.questionVisible = true;
+                this.$nextTick(_ => {
+                    this.$refs.saveQuestionInput.$refs.input.focus();
+                });
+            },
+            questionInputConfirm() {
+                let questionValue = this.questionValue;
+                if (questionValue) {
+                    this.form.questions.push(questionValue);
+                }
+                this.questionVisible = false;
+                this.questionValue = '';
+            },
+
             getAllWorkers() {
                 let _this = this;
                 //console.log(store);
@@ -306,7 +345,8 @@
 <style scoped>
     .taskInfo {
         text-align: left;
-        margin-left: 3em;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .title {
@@ -338,7 +378,24 @@
         max-width: 336px;
     }
 
+    .el-form-item__label {
+        font-size: 16px;
+    }
+
     #d {
         clear: both;
     }
+
+    .tag {
+        margin-right: 20px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .question {
+        margin-right: 20px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
 </style>

@@ -1,13 +1,15 @@
 <template>
     <div class="add-task">
         <el-row style="height: 100%">
-            <el-col :span="12">
-                <div class="taskinfo">
-                    <task-info v-bind:the-img="imgNames"></task-info>
+            <el-col :span="12" style="height: 100%">
+                <div class="my-task-info">
+                    <task-info v-bind:the-img="imgNames" style="display: inline-block"></task-info>
                 </div>
             </el-col>
             <!--<transition name="el-fade-in">-->
-            <el-col :span="12">
+            <!--<el-col :span="12" id="border-line">-->
+            <!--</el-col>-->
+            <el-col :span="12" id="border">
                 <div class="taskimg">
                     <task-img-upload v-on:fileList2="handleAddImg"></task-img-upload>
                 </div>
@@ -45,20 +47,20 @@
 </script>
 
 <style scoped>
-    .taskinfo {
+    .my-task-info {
         display: flex;
-        align-items: left;
+        text-align: center;
         justify-content: left;
-        display: -webkit-flex; /* Safari */
         margin-top: 5em;
         min-height: 550px;
-        border-color: #A9A9A9;
-        border-right-width: 0.4em;
-        border-left-width: 0;
-        border-top-width: 0;
-        border-bottom-width: 0;
-        border-style: solid;
+        /*border-color: #A9A9A9;*/
+        /*border-right-width: 0.4em;*/
+        /*border-left-width: 0;*/
+        /*border-top-width: 0;*/
+        /*border-bottom-width: 0;*/
+        /*border-style: solid;*/
         width: 100%;
+        height: 80%;
     }
 
     .taskimg {
@@ -72,7 +74,18 @@
         width: 100%;
     }
 
+    #border {
+        border-color: #A9A9A9;
+        border-left-width: 0.4em;
+        border-right-width: 0;
+        border-top-width: 0;
+        border-bottom-width: 0;
+        border-style: solid;
+        height: 100%;
+    }
+
     .add-task {
         font-family: Microsoft YaHei;
+        height: 100%;
     }
 </style>
