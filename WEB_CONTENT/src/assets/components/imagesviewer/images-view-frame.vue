@@ -6,11 +6,17 @@
                 <!--<el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"-->
                 <!--v-on:change="onIndexChange">-->
                 <!--<el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">-->
-                <div v-html="allEditAreaHtml">
-                    <div>{{allEditAreaHtml}}</div>
+                <div id="canvasDiv">
+                    <div v-html="canvasHtml">
+                        {{canvasHtml}}
+                    </div>
+                    <div v-html="tagHtml">{{tagHtml}}</div>
                 </div>
-                <div id="Previous-button">
-                    <el-button icon="el-icon-arrow-left" circle @click="Previous()"></el-button>
+                <!--<div v-html="allEditAreaHtml">-->
+                <!--<div>{{allEditAreaHtml}}</div>-->
+                <!--</div>-->
+                <div id="previous-button">
+                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
                 </div>
                 <div id="next-button">
                     <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
@@ -22,9 +28,8 @@
         <el-aside width="300px" style="alignment: center">
             <ul style="list-style-type:none">
                 <li>
-                    <!--<el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>-->
                 </li>
-                <li v-for="(val,index) in frames">
+                <li v-for="(val,index) in tagText">
                     <el-popover
                             placement="right"
                             width="150"
@@ -33,7 +38,7 @@
                         <el-input
                                 type="textarea"
                                 :rows="2"
-                                v-model="val.tag"
+                                v-model="val.text"
                                 :disabled="true"
                         >
                         </el-input>
@@ -90,54 +95,16 @@
 <script>
 	import ImageViewer from '../../js/ImageViewer.js'
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
+	import FrameDrawingStrage from '../../js/strategy/FrameDrawingStrategy.js'
 
 	export default {
-		computed: {
-			allEditAreaHtml() {
-				return '<div id = "canvasDiv">' + this.canvasHtml + this.tagHtml + '</div>'
-			},
-            frames(){
-				return this.viewer.shareMarking();
-            }
-		},
 		data: function () {
 			return {
 				tagHtml: '',
-                viewer:{},
-				// language=HTML
+				viewer: {},
 				canvasHtml: `
                     <canvas id="canvas" class="fl" width="600" height="400"></canvas>`,
-				context: {},
-				canvasHeight: 0,
-				canvasWidth: 0,
-				imgNames: [],
-				annotation: {},
-				annotationData: [],   //这个是供前端加载和服务器同步的标记数组
-				frames: [
-					{
-						p1: {x: 0, y: 0},
-						p2: {x: 0, y: 0},
-						tag: ""
-					}
-				],
-				frameIndex: 0,
-				nowIndex: 0,
-				pic: {},
-				color: "#df4b26",
-				isNew: [],
-				startPoint:
-					{
-						x: 0,
-						y: 0,
-					}
-				,
-				endPoint: {
-					x: 0,
-					y: 0
-				},
-				percent: 0,
-				number: 0,
-				userClick: true,
+				tagText: [{}],
 				submitDisabled: "disabled",
 				taskId: this.$route.params.taskId,
 				contractId: this.$route.params.contractId,
@@ -146,9 +113,9 @@
 		mounted() {
 			this.$nextTick(() => {
 				this.canvas = document.getElementById("canvas");
-				console.log("new canvas = " + this.canvas);
+				// console.log("new canvas = " + this.canvas);
 				this.getImgNames();
-				console.log(this.allEditAreaHtml)
+				// console.log(this.allEditAreaHtml)
 			})
 		},
 		methods: {
@@ -157,33 +124,25 @@
 				let header = {headers: {Authorization: this.$store.getters.getToken}};
 				this.$http.get(route, header)
 					.then((response) => {
-						this.getAnnotations();
-						var imageViewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
-						this.viewer = new AnnotationViewer(imageViewer, 'http://localhost:8086/frameAnnotation/contractId/', this.contractId, this.$http)
-						let canvasDiv = document.querySelector("#canvasDiv");
-						let header = {headers: {Authorization: this.$store.getters.getToken}};
-						this.viewer.drawCurrent(canvasDiv, header);
-						// this.render();
-						// this.viewer.drawNext();
-						// this.viewer.drawPrevious()
-						// console.log(this.viewer);
-						// console.log(this.canvas);
-						// this.viewer.drawCurrent();
+						let imageViewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
+						this.viewer = new AnnotationViewer(new FrameDrawingStrage(), imageViewer, 'http://localhost:8086/frameAnnotation/contractId/', this.contractId, this.$http);
+						this.viewer.drawCurrent(header, this.doThisEveryImageUpdate);
 					})
 					.catch(function (error) {
 						console.log(error);
 					})
 			},
+			doThisEveryImageUpdate() {
+				this.tagHtml = this.viewer.shareTag();
+				this.tagText = this.viewer.shareTagText();
+			},
 			onIndexChange(newIndex, oldIndex) {
 			},
-			getAnnotations() {
-				let route = ""
-			},
 			next() {
-				this.viewer.drawNext();
+				this.viewer.drawNext(this.doThisEveryImageUpdate);
 			},
-			Previous() {
-				this.viewer.drawPrevious();
+			previous() {
+				this.viewer.drawPrevious(this.doThisEveryImageUpdate);
 			}
 		}
 	}
