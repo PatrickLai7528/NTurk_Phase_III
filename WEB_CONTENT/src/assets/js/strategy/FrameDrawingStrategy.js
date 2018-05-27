@@ -1,3 +1,7 @@
+/**
+ * FrameDrawingStrategy的私有方法
+ * @type {{getTagLocation(*): {x: number|*, y: number|*}}}
+ */
 let privateMethods = {
 	/**
 	 * 取得frame方框右上角的相對canvas的坐標
@@ -30,6 +34,7 @@ let privateMethods = {
 };
 
 /**
+ * 策略模式 for Frame
  * 實現MarkingDrawingStrategy接口
  */
 class FrameDrawingStrategy {
@@ -37,16 +42,39 @@ class FrameDrawingStrategy {
 		// no need to do anything...
 	}
 
+	/**
+	 * 供annotation[markingTypeName]使用, 和其它用途
+	 * @returns {string}
+	 */
 	getMarkingTypeName() {
 		return "frames";
 	}
 
+	/**
+	 *
+	 * @param context canvas.getContext("2d")
+	 * @param answerPairs: {question: string, answer:string}
+	 * @param config:    {
+	 * 						lineWidth: number,
+	 * 						strokeStyle: string,
+	 * 						lineColor: :string,
+	 * 						fillStyle: string,
+	 * 						globalAlpha: float,
+	 * 					}
+	 */
 	drawThis(context, frame, config) {
 		console.log(frame);
 		context.strokeRect(frame.p1.x, frame.p1.y,
 			frame.p2.x - frame.p1.x, frame.p2.y - frame.p1.y);
 	}
 
+	/**
+	 * 返回tag的html字符串
+	 * @param canvas canvas.getContext("2d")
+	 * @param frame
+	 * @param index answerPairs在annotation中的index
+	 * @returns {string}
+	 */
 	addTag(canvas, frame, index) {
 		let tagLocation;
 		tagLocation = privateMethods.getTagLocation(frame);

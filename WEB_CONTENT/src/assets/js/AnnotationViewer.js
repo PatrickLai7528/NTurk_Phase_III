@@ -81,6 +81,8 @@ let privateMethods = {
 		let doAfterFinishDrawing;
 		let context;
 		let markingTypeName;
+		let marking;
+		let i;
 		markingTypeName = privateVariables.markingDrawingStrategy.getMarkingTypeName();
 		context = privateVariables.canvas.getContext("2d");
 		// context.clearRect(0, 0, privateVariables.config.defaultWidth, privateVariables.config.defaultHeight);
@@ -88,8 +90,8 @@ let privateMethods = {
 			privateVariables.tagHtml = "";
 			context.strokeStyle = privateVariables.config.strokeStyle;
 			context.lineWidth = privateVariables.config.lineWidth;
-			for (let i = 0; i < privateVariables.annotations[markingTypeName].length; i++) {
-				let marking = privateVariables.annotations[markingTypeName][i];
+			for (i = 0; i < privateVariables.annotations[markingTypeName].length; i++) {
+				marking = privateVariables.annotations[markingTypeName][i];
 				privateVariables.markingDrawingStrategy.drawThis(context, marking, privateVariables.config);
 				privateVariables.tagHtml += privateVariables.markingDrawingStrategy.addTag(privateVariables.canvas, marking, i);
 			}
