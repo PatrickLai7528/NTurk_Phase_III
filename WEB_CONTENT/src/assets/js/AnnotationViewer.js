@@ -158,7 +158,7 @@ class AnnotationViewer {
 	}) {
 		let id, doIt;
 		doIt = () => { // 加載的實際操作
-			var defaultCallback;
+			let defaultCallback;
 			if (privateVariables.header === null || privateVariables.header === undefined)
 				privateVariables.header = header;
 			/* get請求成功之後調用的回調函數 */
