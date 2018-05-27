@@ -183,11 +183,16 @@
         },
         methods: {
         	getImageNamesFromBus(){
-        		let _this = this;
-				this.$bus.$emit("getImageNames", function (value) {
-					console.log("here is callback function " + value);
-					_this.form.imgNames = value;
+				this.$bus.$emit("getImageNames", (value)=> {
+					this.form.imgNames = value;
 				});
+            },
+            getImageNumFromBus(){
+        	    let imgNum = 0;
+                this.$bus.$emit("getImageNum", (value)=> {
+                    imgNum = value;
+                });
+                return imgNum;
             },
             setUpFormData(){
 				this.form.createTime = new Date();
@@ -210,7 +215,6 @@
 					this.form.questions = [];
 				}
 
-				// console.log(that.form.dynamicTags);
 				this.form.endTime.setTime(this.form.endTime.getTime() + 8 * 60 * 60 * 1000);
             },
             decidePostData(){
@@ -236,41 +240,44 @@
 					rewardPerPerson: this.form.rewardPerPerson,
 				}
             },
-            onSubmit(formName) {      //处理提交并且post到后台
-                let _this = this;
-                // 取得所有的圖片名稱, 異步的
-                _this.getImageNamesFromBus();
-                console.log("after getImageNames" + _this.form.imgNames);
-                this.$refs[formName].validate((valid) => {
-                    console.log(valid);
-                    if (valid) {
-                        let that = _this;
-                        that.setUpFormData();
-                        console.log(that.form);              //所有属性全部确定
-                        that.$http({
+            async onSubmit(formName) {      //处理提交并且post到后台
+                let valid = false;
+                this.$refs[formName].validate((validFlag) => {
+                    valid = validFlag;
+                });
+
+                if(valid) {
+                    let imgNum = await this.getImageNumFromBus();
+                    if(imgNum === 0){
+                        this.badMessage("请添加图片！");
+                    } else {
+                        await this.uploadImageSet();
+                        await this.getImageNamesFromBus();
+                        this.setUpFormData();
+
+                        this.$http({
                             url: "http://localhost:8086/task",
                             method: "POST",
-                            headers: {Authorization: that.$store.getters.getToken},
-                            data: that.decidePostData()
-                        }).then(that.doWhileSuccess).catch(function (error) {
-                            that.badMessage();
-                            that.$router.push({path: '/profile'});
-                        });
-                    } else {
-                        console.log('error submit!!');
-                        return false;
+                            headers: {Authorization: this.$store.getters.getToken},
+                            data: this.decidePostData()
+                        }).then(this.doWhileSuccess).catch((error)=> {
+                            this.badMessage("你的积分不足，请前往个人中心进行充值");
+                            this.$router.push({path: '/profile'});
+                        })
                     }
-                });
+                }
             },
             doWhileSuccess(response) {
                 this.messageHandler();
-                this.uploadImageSet();
+                //this.uploadImageSet();
                 this.$router.push({path: '/profile'});
             },
             uploadImageSet() {
                 // 上傳圖片
-                console.log("upload image");
                 this.$bus.$emit("uploadImageSet");
+                return new Promise(resolve => {
+                    setTimeout(() => resolve(), 1000);
+                });
             },
             /*
             addQuestion: function () {
@@ -287,8 +294,8 @@
                     type: 'success'
                 })
             },
-            badMessage() {
-                this.$alert('你的积分不足，请前往个人中心进行充值', '系统警告', {
+            badMessage(msg) {
+                this.$alert(msg, '系统警告', {
                     confirmButtonText: '确定'
                 });
             },

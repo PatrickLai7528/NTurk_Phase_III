@@ -3,13 +3,13 @@
         <el-upload
                 ref="upload"
                 class="upload-demo"
-                action="http://localhost:8086/image"
                 multiple
+                :action=url
                 :auto-upload="false"
                 :headers="headers"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
                 :on-change="onChange"
+                :on-remove="onRemove"
+                :http-request="uploadToServer"
                 list-type="picture-card">
             <i class="el-icon-upload" style="alignment: left"></i>
         </el-upload>
@@ -17,15 +17,21 @@
 </template>
 
 <script>
+    import moment from 'moment'
+    import lrz from 'lrz'
+
 	export default {
 		data() {
 			return {
-				imageNames: []
+			    imageNum: 0,
+				imageNames: [],
+                url: "http://localhost:8086/image",
 			};
 		},
 		beforeDestroy() {
 			this.$bus.off("uploadImageSet");
 			this.$bus.off("getImageNames");
+            this.$bus.off("getImageNum");
 		},
 		mounted() {
 			let _this = this;
@@ -42,28 +48,58 @@
 						this.getImageNames(callback);
 					}
 				);
+                this.$bus.$on("getImageNum", (callback) => {
+                        this.getImageNum(callback);
+                    }
+                );
 			},
-			handleRemove(file, fileList) {
-				this.handleSuccess("remove", file, fileList);   //在删除后也调用emit
-				console.log(file, fileList);
-			},
-			handlePreview(file) {
-				console.log(file);
-			},
-			onChange(file, fileList) {    //在上傳圖片之前,先把圖片的名稱push到數組裡
-				// console.log(file);
-				this.imageNames.push(file.name);
-				// console.log(this.imageNames);
-			},
+            onChange(file, fileList) {
+			    this.imageNum = fileList.length;
+            },
+            onRemove(file, fileList) {
+                this.imageNum = fileList.length;
+            },
 			// 提交任務數據一同提交
 			uploadImageSet() {
 				// console.log("in upload image set");
-				this.$refs.upload.submit();
+                this.$refs.upload.submit();
 			},
 			// 異步取得圖片的名稱
 			getImageNames(callback) {
 				// console.log("here is getImageNames " + this.imageNames);
-				callback(this.imageNames);
+                callback(this.imageNames);
+			},
+            // 異步取得圖片的名稱
+            getImageNum(callback) {
+                // console.log("here is getImageNames " + this.imageNames);
+                callback(this.imageNum);
+            },
+            uploadToServer(request) {
+			    let file = request.file;
+                lrz(file, {width: 800, height: 800, quality: 0.7}).then((rst)=>{
+                    let pic = rst.file;
+                    let fileName = moment().format('YYYYMMDDHHmmssSSS') + Math.round(Math.random() * 1000).toString();
+                    let keyName = `taskPic-${fileName}.jpg`;
+                    let formData = new FormData();
+                    let renamedPic = new File([pic], keyName, {type: 'jpg'});
+
+                    formData.append('file', renamedPic);
+                    formData.append('token', this.$store.getters.getToken);
+                    formData.append('key', keyName);
+
+                    this.$http({
+                        url: this.url,
+                        method: "POST",
+                        headers: {Authorization: this.$store.getters.getToken},
+                        data: formData
+                    }).then((res)=>{
+                        this.imageNames.push(keyName);
+                    }).catch((error)=> {
+                        console.log(error);
+                    });
+                }).catch((err)=>{
+                    console.log(err);
+                });
 			}
 		},
 		computed: {
