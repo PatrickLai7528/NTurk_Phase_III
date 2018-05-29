@@ -16,13 +16,15 @@ import signUp from './assets/components/entry/sign-up.vue'
 import addTask from './assets/components/addtask/add-task.vue'
 // 關於我們
 import requesterLobby from './assets/components/common/common-requester-lobby.vue'
-//requester的lobby界面
+//requester的查看某个任务的lobby界面
 import imagesViewGeneral from './assets/components/imagesviewer/images-view-general.vue'
 //requester查看general标注界面
 import imagesViewSegment from './assets/components/imagesviewer/images-view-segment.vue'
 //requester查看segment标注界面
 import imagesViewFrame from './assets/components/imagesviewer/images-view-frame.vue'
 //requester查看frame标注界面
+import requesterTaskLobby from './assets/components/common/common-requester-task-lobby.vue'
+//requester查看所有他发起的task的信息的界面
 import about from './assets/components/common/common-about.vue'
 import userProfile from './assets/components/userprofile/user-profile.vue'
 import quickStart from './assets/components/entry/quick-start.vue'
@@ -51,14 +53,6 @@ const routes = [
         name: 'tasklobby'
     },
     {
-        path: '/requesterlobby',           //注册requesterlobby
-        component: requesterLobby,
-        name: 'requesterlobby',
-        meta: {
-            requireAuth: true,
-        }
-    },
-    {
         path: '/addtask',
         component: addTask,
         name: 'addtask',
@@ -75,6 +69,22 @@ const routes = [
         path: '/profile',
         component: userProfile,
         name: 'profile',
+        children:[
+            {
+                path: '',
+                redirect:'requestertasklobby',
+            },
+            {
+                path:'requestertasklobby',
+                component:requesterTaskLobby,
+                name:'requestertasklobby',
+            },
+            {
+                path:'requesterlobby/:taskId',
+                component:requesterLobby,
+                name:'requesterlobby',
+            }
+        ],
         meta: {
             requireAuth: true,  // 添加该字段，表示进入这个路由是需要登录的
         },

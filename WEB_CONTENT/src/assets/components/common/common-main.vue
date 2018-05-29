@@ -33,6 +33,10 @@
                     </el-form>
                 </template>
             </el-table-column>
+            <el-table-column prop="taskStatus" label="任务类型" sortable :filters="[
+                                {text: '评审任务', value: '评审任务'},
+                                {text: '标注任务', value: '标注任务'}]"
+                             :filter-method="filterStateHandler"></el-table-column>
             <el-table-column prop="taskCategoryChi" label="类别" sortable
                              :filters="[
                                 {text: '整體標註', value: 'GENERAL'},
@@ -75,7 +79,7 @@
 					requester: '',
 					reward: '',
 					endTime: '',
-					taskState: '',
+					taskStatus: '',
 					totalReward: '',    //任务的总积分奖励
 					formatEndTime: '',   //将读出来的时间进行格式化再显示
 					attendance: 0,      //表示有多少人参加了这个标注任务
@@ -96,7 +100,10 @@
 			filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
 				return row.taskCategory === value;
 			},
-			doWhileGetTableDataSuccess(response) {
+            filterStateHandler(value,row,column){
+			    return row.taskStatus === value;
+            },
+			doWhileGetTableDataSuccess(response) {        //赖总的编程风格很友好啊，将代码都优化了
 				this.tableData = response.data;
 				for (let e of this.tableData) {
 					e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
@@ -122,6 +129,7 @@
 					console.log(error);
 				});
 			},
+
 			translate: function () {
 				for (let i = 0; i < this.tableData.length; i++) {
 					if (this.tableData[i].taskCategory === "GENERAL") {
@@ -131,6 +139,13 @@
 					} else if (this.tableData[i].taskCategory === "SEGMENT") {
 						this.tableData[i].taskCategoryChi = "區域劃分";
 					}
+
+                    if(this.tableData[i].taskStatus === 'ONGOING'){
+                        this.tableData[i].taskStatus = '标注任务';
+                    }
+                    else if(this.tableData[i].taskStatus === 'UNDER_REVIEW'){
+                        this.tableData[i].taskStatus = '评审任务';
+                    }
 				}
 			},
 			handleClick(row, Id, taskCategory) {

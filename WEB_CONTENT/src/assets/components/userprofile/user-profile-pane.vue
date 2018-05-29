@@ -58,10 +58,10 @@
                         </el-col>
                     </el-row>
                     <el-row class="functionPane">
-                        <el-col>
+                        <div>
                             <task-lobby class="task-lobby" message="user" style="font-size: 16px" v-if="isWorker === true"></task-lobby>
-                            <requester-lobby class="task-lobby" message="user" style="font-size: 16px" v-if="isWorker === false"></requester-lobby>
-                        </el-col>
+                            <router-view v-if="isWorker === false" class="a"></router-view>
+                        </div>
                     </el-row>
                 </el-tab-pane>
                 <el-tab-pane label="兌換中心">
@@ -154,11 +154,13 @@
     import taskLobby from '../common/common-main.vue'
     import requesterLobby from '../common/common-requester-lobby.vue'
     import UserUtils from '../../js/utils/UserUtils.js'
+    import requesterTaskLobby from '../common/common-requester-task-lobby.vue'
     export default {
         name: "",
         components: {
             taskLobby,
             requesterLobby,
+            requesterTaskLobby,
         },
         data() {
             return {
@@ -418,5 +420,10 @@
         margin-top: 14px;
         line-height: 10px;
         font-weight: lighter;
+    }
+
+    .a{
+        padding:0px;
+
     }
 </style>

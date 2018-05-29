@@ -2,9 +2,7 @@
     <div class="main">
         <el-table :data="tableData"
                   class="table" :row-class-name="tableRowClassName" align="center">
-            <el-table-column label="任务ID" prop="taskId" sortable
-                             :filters="[{text:'已截止',value:'已截止'},{text:'正在进行',value:'正在进行'}]"
-                             :filter-method="filterTaskStatus">
+            <el-table-column label="任务ID" prop="taskId">
             </el-table-column>
             <el-table-column label="任务名称" prop="taskName">
             </el-table-column>
@@ -58,7 +56,8 @@
                     endTime:'',
                 }
                  */
-                taskData: []
+                taskData: [],
+                taskId: this.$route.params.taskId,
             }
         },
         mounted: function () {
@@ -134,11 +133,14 @@
                             for (let con of temp) {
                                 console.log(response.data);
                                 let theContract = new Contract(con.contractId, con.contractStatus, con.workerId, DateUtils.dateFormat(con.lastEditTime));
+
                                 theContract.taskId = e.taskId;
                                 theContract.taskName = e.taskName;
                                 theContract.endTime = e.endTime;    //加入时间来共筛选
                                 theContract.taskCategory = e.taskCategory;   //加入任务类型来进行路由判断
-                                that.tableData.push(theContract);
+                                if(theContract.taskId == that.$route.params.taskId){
+                                    that.tableData.push(theContract);
+                                }
                             }
                         })
                     }
