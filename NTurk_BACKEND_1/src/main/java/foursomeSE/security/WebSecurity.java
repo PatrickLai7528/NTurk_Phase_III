@@ -2,8 +2,6 @@ package foursomeSE.security;
 
 import foursomeSE.security.filter.AuthorizationTokenFilter;
 import foursomeSE.service.user.HybridUserDetailsServiceImpl;
-import foursomeSE.service.user.lower.LowerRequesterServiceImpl;
-import foursomeSE.service.user.lower.LowerWorkerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

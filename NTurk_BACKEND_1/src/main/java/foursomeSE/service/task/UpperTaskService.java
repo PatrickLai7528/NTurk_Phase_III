@@ -1,6 +1,7 @@
 package foursomeSE.service.task;
 
 import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
@@ -46,6 +47,15 @@ public interface UpperTaskService {
     List<CTask> getRequesterTasks(String username);
 
 
+    /**
+     * 返回worker自己没参加过的underReview的task
+     * */
+    List<CTaskForInspection> getNewInspectionTasks(String username);
+
+    /**
+     * 返回worker自己做过的underReview的task，不管有没有完成mandatory time
+     * */
+    List<CTaskForInspection> getWorkerInspectionTasks(String username);
 
     /**
      * Statistics

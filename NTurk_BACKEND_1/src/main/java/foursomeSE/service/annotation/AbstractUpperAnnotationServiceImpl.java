@@ -5,7 +5,6 @@ import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.user.WorkerJPA;
-import foursomeSE.service.common.CommonCongruentService;
 import foursomeSE.service.contract.UpperContractService;
 
 import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;

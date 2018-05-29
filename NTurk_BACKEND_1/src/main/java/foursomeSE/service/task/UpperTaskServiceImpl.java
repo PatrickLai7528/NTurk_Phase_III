@@ -1,8 +1,10 @@
 package foursomeSE.service.task;
 
 import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.contract.ContractStatus;
+import foursomeSE.entity.inspection.InspectionContract;
 import foursomeSE.entity.message.Message;
 import foursomeSE.entity.message.MessageType;
 import foursomeSE.entity.statistics.TaskGrowth;
@@ -15,10 +17,12 @@ import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.util.InspectionConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
 import static foursomeSE.service.task.TaskUtils.taskById;
@@ -40,13 +45,14 @@ import static foursomeSE.util.ConvenientFunctions.listConvert;
 
 @Service
 @Qualifier("i2TaskServiceImpl")
-public class UpperTaskServiceImpl implements UpperTaskService {
+public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstants {
     private WorkerJPA workerJPA;
     private RequesterJPA requesterJPA;
     //    private LowerContractService lowerContractService;
     private ContractJPA contractJPA;
     private TaskJPA taskJPA;
     private MessageJPA messageJPA;
+    private InspectionContractJPA inspectionContractJPA;
 
     private String username;
 
@@ -54,12 +60,14 @@ public class UpperTaskServiceImpl implements UpperTaskService {
                                 RequesterJPA requesterJPA,
                                 ContractJPA contractJPA,
                                 TaskJPA taskJPA,
-                                MessageJPA messageJPA) {
+                                MessageJPA messageJPA,
+                                InspectionContractJPA inspectionContractJPA) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
         this.messageJPA = messageJPA;
+        this.inspectionContractJPA = inspectionContractJPA;
     }
 
     @Override
@@ -140,6 +148,27 @@ public class UpperTaskServiceImpl implements UpperTaskService {
         long id = userByUsername(requesterJPA, username).getId();
         return listConvert(taskJPA.findByRequesterId(id), this::sToD);
     }
+
+    /**
+     * inspection
+     * */
+    @Override
+    public List<CTaskForInspection> getNewInspectionTasks(String username) {
+        this.username = username;
+
+        return null;
+    }
+
+    @Override
+    public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
+        this.username = username;
+
+        getWorkerTasks(username).stream()
+                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW);
+
+        return null;
+    }
+
 
     /**
      * statistic
@@ -314,4 +343,15 @@ public class UpperTaskServiceImpl implements UpperTaskService {
     private Task dToS(CTask cTask) {
         return new Task(cTask);
     }
+
+
+    private CTaskForInspection sToD2(Task task) {
+        CTaskForInspection result = new CTaskForInspection(task);
+        // 所有这个worker做过的关于这个task的inspection
+        result.setMandatoryTime((int)inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId()));
+        return result;
+    }
+//    private List<Task> _getWorkerTasks(String username) {
+//
+//    }
 }

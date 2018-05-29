@@ -2,7 +2,6 @@ package foursomeSE.service.message;
 
 import foursomeSE.entity.message.Message;
 import foursomeSE.jpa.message.MessageJPA;
-import foursomeSE.service.common.CommonCongruentService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

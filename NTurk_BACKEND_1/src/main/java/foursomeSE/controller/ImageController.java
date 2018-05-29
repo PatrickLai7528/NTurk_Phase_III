@@ -39,7 +39,7 @@ public class ImageController {
 //        ClassPathResource imgFile = new ClassPathResource("data/images/" + filename);
 //        byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
 //
-//        // TODO add 404 not find?
+//
 //
 //        return ResponseEntity
 //                .ok()

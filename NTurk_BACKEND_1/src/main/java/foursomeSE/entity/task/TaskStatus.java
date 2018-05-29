@@ -1,5 +1,5 @@
 package foursomeSE.entity.task;
 
 public enum TaskStatus {
-    ONGOING, FINISHED
+    ONGOING, UNDER_REVIEW, FINISHED
 }

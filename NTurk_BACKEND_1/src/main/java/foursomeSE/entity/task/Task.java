@@ -24,6 +24,8 @@ public class Task {
     private LocalDateTime createTime;
     @NotNull
     private LocalDateTime endTime; // 这个一定有
+    @NotNull
+    private LocalDateTime ddl; // 这个是标注截止，上面的endTime评审也截止。
 
     @NotNull
     private WorkerRequirement workerRequirement;
@@ -212,5 +214,13 @@ public class Task {
 
     public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public LocalDateTime getDdl() {
+        return ddl;
+    }
+
+    public void setDdl(LocalDateTime ddl) {
+        this.ddl = ddl;
     }
 }

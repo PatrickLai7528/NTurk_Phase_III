@@ -1,7 +1,6 @@
 package foursomeSE.service.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
-import foursomeSE.service.common.CommonCongruentService;
 
 public interface UpperAnnotationService<T extends Annotation> {
     /**

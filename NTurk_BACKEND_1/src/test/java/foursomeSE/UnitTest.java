@@ -14,7 +14,6 @@ import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.service.annotation.UpperAnnotationService;
-import foursomeSE.service.common.CommonCongruentService;
 import foursomeSE.service.task.UpperTaskService;
 import foursomeSE.service.user.upper.UpperRequesterService;
 import foursomeSE.service.user.upper.UpperWorkerService;
