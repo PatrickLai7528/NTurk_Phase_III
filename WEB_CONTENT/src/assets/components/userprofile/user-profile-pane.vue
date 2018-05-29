@@ -362,7 +362,7 @@
     }
 
     .functionPane {
-        height: 450px;
+        height: 500px;
         overflow: auto;
     }
 
@@ -409,8 +409,10 @@
         padding: 2px;
         color: #FF3B3F;
         font-family: Microsoft YaHei;
-        font-weight: lighter;
+        font-weight: bolder;
         background: #EFEFEF;
+        width: 40px;
+        height: 30px;
     }
 
     .exchange-counter {

@@ -1,7 +1,7 @@
 <template>
     <div class="add-task">
         <el-row style="height: 100%">
-            <el-col :span="12" style="height: 100%">
+            <el-col :span="12" id="border">
                 <div class="my-task-info">
                     <task-info v-bind:the-img="imgNames" style="display: inline-block"></task-info>
                 </div>
@@ -9,7 +9,7 @@
             <!--<transition name="el-fade-in">-->
             <!--<el-col :span="12" id="border-line">-->
             <!--</el-col>-->
-            <el-col :span="12" id="border">
+            <el-col :span="12">
                 <div class="taskimg">
                     <task-img-upload v-on:fileList2="handleAddImg"></task-img-upload>
                 </div>
@@ -47,6 +47,11 @@
 </script>
 
 <style scoped>
+    .el-col {
+        height: 100%;
+        min-width: 500px;
+    }
+
     .my-task-info {
         display: flex;
         text-align: center;
@@ -76,10 +81,7 @@
 
     #border {
         border-color: #A9A9A9;
-        border-left-width: 0.4em;
-        border-right-width: 0;
-        border-top-width: 0;
-        border-bottom-width: 0;
+        border-width: 0 4px 0 0;
         border-style: solid;
         height: 100%;
     }
