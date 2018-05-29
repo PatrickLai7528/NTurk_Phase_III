@@ -23,6 +23,7 @@ public interface UpperContractService {
 
     /**
      * 检查他真的做完了（没做）
+     * 检查他要fulfil的task还没有完成
      * 更新contractStatus为已完成，检查整个任务是否完成，
      */
     void fulfilContract(long taskId, String username);

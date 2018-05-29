@@ -5,8 +5,8 @@ import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyAuthenticationException;
 import foursomeSE.entity.communicate.jwt.JwtAuthenticationRequest;
 import foursomeSE.entity.communicate.jwt.JwtAuthenticationResponse;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.service.user.HybridUserService;
-import foursomeSE.service.user.lower.LowerUserService;
 import foursomeSE.util.MySecureConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -31,21 +31,20 @@ public class AuthenticationController implements MySecureConstants {
     private AuthenticationManager authenticationManager;
     private UserDetailsService userDetailsService; // 这两个其实是一个呃
     private HybridUserService hybridUserService;
-    private LowerUserService<Worker> workerUtilService;
 // 这里如果要拿id返回给client，但是也许也可以放到jwt里面，
     // 这里这么多service感觉不太好
 
     // @Qualifier("myUserDetailService") UserDetailsService userDetailsService
 
+//
+
 
     public AuthenticationController(AuthenticationManager authenticationManager,
                                     @Qualifier("myUserDetailService") UserDetailsService userDetailsService,
-                                    HybridUserService userUtilService,
-                                    LowerUserService<Worker> workerUtilService) {
+                                    HybridUserService hybridUserService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
-        this.hybridUserService = userUtilService;
-        this.workerUtilService = workerUtilService;
+        this.hybridUserService = hybridUserService;
     }
 
     @RequestMapping(value = "/auth",
@@ -60,7 +59,7 @@ public class AuthenticationController implements MySecureConstants {
 
         if (userDetails.getUsername().equals("admin@nturk.com")) {
             userType = UserType.ADMIN;
-        } else if (workerUtilService.isUsernameExist(authenticationRequest.getEmailAddress())) {
+        } else if (hybridUserService.isWorkerUsernameExist(authenticationRequest.getEmailAddress())) {
             userType = UserType.WORKER;
         } else {
             userType = UserType.REQUESTER;

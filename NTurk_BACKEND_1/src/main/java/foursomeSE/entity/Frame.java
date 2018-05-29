@@ -1,6 +1,10 @@
 package foursomeSE.entity;
 
-public class Frame {
+import javax.persistence.Embeddable;
+import java.io.Serializable;
+
+@Embeddable
+public class Frame implements Serializable {
     private Point p1, p2;
     private String color;
     private String tag;

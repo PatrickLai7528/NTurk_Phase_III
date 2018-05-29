@@ -8,9 +8,9 @@ import foursomeSE.entity.statistics.UserActivity;
 import foursomeSE.entity.user.CRequester;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.UserType;
-import foursomeSE.service.common.CommonCongruentService;
-import foursomeSE.service.message.LowerMessageService;
-import foursomeSE.service.user.lower.LowerUserService;
+import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.UserJPA;
 import foursomeSE.util.ConvenientFunctions;
 import org.springframework.stereotype.Service;
 
@@ -19,26 +19,31 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static foursomeSE.service.user.UserUtils.userById;
+import static foursomeSE.service.user.UserUtils.userByUsername;
+import static foursomeSE.util.ConvenientFunctions.iterableToStream;
+
+
 @Service
 public class UpperRequesterServiceImpl extends AbstractUpperUserServiceImpl<Requester, CRequester> implements UpperRequesterService {
-    private CommonCongruentService<Task> taskService;
+    private TaskJPA taskJPA;
 
-    public UpperRequesterServiceImpl(LowerUserService<Requester> service,
-                                     LowerMessageService lowerMessageService,
-                                     CommonCongruentService<Task> taskService) {
-        super(service, lowerMessageService);
-        this.taskService = taskService;
+    public UpperRequesterServiceImpl(UserJPA<Requester> userJPA,
+                                     MessageJPA messageJPA,
+                                     TaskJPA taskJPA) {
+        super(userJPA, messageJPA);
+        this.taskJPA = taskJPA;
     }
 
     @Override
     public void exchange(ExchangeRequest exchangeRequest, String username) {
-        Requester requester = service.getOneBy(r -> r.getEmailAddress().equals(username));
+        Requester requester = userByUsername(userJPA, username);
         requester.setCredit(requester.getCredit() + exchangeRequest.getPoint());
         requester.setExperiencePoint(requester.getExperiencePoint() + exchangeRequest.getPoint());
 
-        service.update(requester);
+        userJPA.save(requester);
 
-        lowerMessageService.add(Message.createMessage(username, MessageType.REQUESTER_EXCHANGE, new String[]{
+        messageJPA.save(Message.createMessage(username, MessageType.REQUESTER_EXCHANGE, new String[]{
                 String.format("%.2f", exchangeRequest.getMoney()),
                 String.format("%.2f", exchangeRequest.getPoint())
         }));
@@ -46,8 +51,8 @@ public class UpperRequesterServiceImpl extends AbstractUpperUserServiceImpl<Requ
 
     @Override
     public CRequester getById(long id) {
-        Requester requester = service.getById(id);
-        ArrayList<Requester> sortedRequesters = service.getLotBy(p -> true).stream()
+        Requester requester = userById(userJPA, id);
+        ArrayList<Requester> sortedRequesters = iterableToStream(userJPA.findAll())
                 .sorted(ConvenientFunctions::ExperiementPointDescend)
                 .collect(Collectors.toCollection(ArrayList::new));
         CRequester result = new CRequester(requester, sortedRequesters.indexOf(requester) + 1);
@@ -67,8 +72,8 @@ public class UpperRequesterServiceImpl extends AbstractUpperUserServiceImpl<Requ
                 new UserActivity(3, 0)
         );
 
-        service.getLotBy(p -> true).forEach(w -> {
-            int name = taskService.getLotBy(t -> t.getRequesterId() == w.getRequesterId()).stream()
+        iterableToStream(userJPA.findAll()).forEach(w -> {
+            int name = taskJPA.findByRequesterId(w.getId()).stream()
                     .collect(Collectors.groupingBy(Task::getTaskCategory, Collectors.counting())).size();
             result.stream().filter(u -> u.getName() == name).forEach(u -> u.setValue(u.getValue() + 1));
         });
@@ -78,8 +83,9 @@ public class UpperRequesterServiceImpl extends AbstractUpperUserServiceImpl<Requ
     @Override
     public void add(Requester user) {
         super.add(user);
-        lowerMessageService.add(Message.createMessage(user.getEmailAddress(), MessageType.CREAT_REQUESTER));
+        messageJPA.save(Message.createMessage(user.getEmailAddress(), MessageType.CREAT_REQUESTER));
     }
+
 
     /**
      * Implements

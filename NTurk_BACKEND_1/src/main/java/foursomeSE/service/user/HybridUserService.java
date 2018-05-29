@@ -4,4 +4,6 @@ public interface HybridUserService {
     long usernameToId(String username);
 
     boolean isUsernameExist(String username);
+
+    boolean isWorkerUsernameExist(String username);
 }

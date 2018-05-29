@@ -88,8 +88,4 @@ public class FileUtil {
         filePath += "/src/main/resources/data/jsons/" + tableName + ".json";
         return filePath;
     }
-
-    public static void main(String[] args) throws IOException {
-        getInputStream("test1");
-    }
 }

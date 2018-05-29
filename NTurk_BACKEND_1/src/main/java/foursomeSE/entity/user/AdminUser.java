@@ -1,4 +1,4 @@
-package foursomeSE.entity.user;
-
-public class AdminUser {
-}
+//package foursomeSE.entity.user;
+//
+//public class AdminUser {
+//}

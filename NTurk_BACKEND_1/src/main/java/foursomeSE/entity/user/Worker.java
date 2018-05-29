@@ -1,23 +1,18 @@
 package foursomeSE.entity.user;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
+@Entity
+@Table(name = "workers")
 public class Worker extends MyUser {
-    private long workerId;
-
     public Worker() {
     }
 
     public Worker(CWorker cWorker) {
         setSameFields(this, cWorker);
-    }
-
-    public long getWorkerId() {
-        return workerId;
-    }
-
-    public void setWorkerId(long workerId) {
-        this.workerId = workerId;
     }
 
     @Override
@@ -27,11 +22,11 @@ public class Worker extends MyUser {
 
         Worker worker = (Worker) o;
 
-        return workerId == worker.workerId;
+        return id == worker.id;
     }
 
     @Override
     public int hashCode() {
-        return (int) (workerId ^ (workerId >>> 32));
+        return (int) (id ^ (id >>> 32));
     }
 }

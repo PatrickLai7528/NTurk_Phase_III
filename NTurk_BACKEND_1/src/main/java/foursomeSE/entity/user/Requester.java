@@ -1,26 +1,19 @@
 package foursomeSE.entity.user;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
+@Entity
+@Table(name = "requesters")
 public class Requester extends MyUser {
-    private long requesterId;
-
     public Requester() {
     }
 
     public Requester(CRequester cRequester) {
         setSameFields(this, cRequester);
-
     }
-
-    public long getRequesterId() {
-        return requesterId;
-    }
-
-    public void setRequesterId(long requesterId) {
-        this.requesterId = requesterId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -28,11 +21,11 @@ public class Requester extends MyUser {
 
         Requester requester = (Requester) o;
 
-        return requesterId == requester.requesterId;
+        return id == requester.id;
     }
 
     @Override
     public int hashCode() {
-        return (int) (requesterId ^ (requesterId >>> 32));
+        return (int) (id ^ (id >>> 32));
     }
 }

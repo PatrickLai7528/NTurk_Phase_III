@@ -9,9 +9,11 @@ import foursomeSE.entity.message.MessageType;
 import foursomeSE.entity.task.TaskStatus;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
-import foursomeSE.service.contract.LowerContractService;
-import foursomeSE.service.message.LowerMessageService;
-import foursomeSE.service.user.lower.LowerUserService;
+import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.RequesterJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -19,51 +21,63 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static foursomeSE.service.user.UserUtils.userById;
+
 @Service
 public class FinishTaskServiceImpl implements FinishTaskService {
-    private LowerUserService<Worker> lowerWorkerService;
-    private LowerTaskService lowerTaskService;
-    private LowerUserService<Requester> lowerRequesterService;
-    private LowerContractService lowerContractService;
-    private LowerMessageService lowerMessageService;
+//    private LowerUserService<Worker> lowerWorkerService;
+    private WorkerJPA workerJPA;
+//    private LowerTaskService lowerTaskService;
+    private TaskJPA taskJPA;
+//    private LowerUserService<Requester> lowerRequesterService;
+    private RequesterJPA requesterJPA;
+    //    private LowerContractService lowerContractService;
+    private ContractJPA contractJPA;
+
+    private MessageJPA messageJPA;
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    public FinishTaskServiceImpl(LowerUserService<Worker> lowerWorkerService,
-                                 LowerTaskService lowerTaskService,
-                                 LowerContractService lowerContractService,
-                                 LowerUserService<Requester> lowerReqeusterService,
-                                 LowerMessageService lowerMessageService) {
-        this.lowerWorkerService = lowerWorkerService;
-        this.lowerTaskService = lowerTaskService;
-        this.lowerContractService = lowerContractService;
-        this.lowerRequesterService = lowerReqeusterService;
-        this.lowerMessageService = lowerMessageService;
+    public FinishTaskServiceImpl(WorkerJPA workerJPA,
+                                 TaskJPA taskJPA,
+                                 RequesterJPA requesterJPA,
+                                 ContractJPA contractJPA,
+                                 MessageJPA messageJPA) {
+        this.workerJPA = workerJPA;
+        this.taskJPA = taskJPA;
+        this.requesterJPA = requesterJPA;
+        this.contractJPA = contractJPA;
+        this.messageJPA = messageJPA;
     }
 
     @Override
     public void finishTask(Task task) {
         task.setTaskStatus(TaskStatus.FINISHED);
-        lowerTaskService.update(task);
+//        lowerTaskService.update(task);
+        taskJPA.save(task);
 
-        Requester requester = lowerRequesterService.getById(task.getRequesterId());
-        List<Contract> completedContracts = lowerContractService
-                .getLotBy(c -> c.getTaskId() == task.getTaskId()
-                        && c.getContractStatus() == ContractStatus.COMPLETED);
-        List<Contract> unfinishedContracts = lowerContractService
-                .getLotBy(c -> c.getTaskId() == task.getTaskId()
-                        && c.getContractStatus() == ContractStatus.IN_PROGRESS);
+        Requester requester = userById(requesterJPA, task.getRequesterId());
+//                lowerRequesterService.getById(task.getRequesterId());
+        List<Contract> completedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
+//                lowerContractService
+//                        .getLotBy(c -> c.getTaskId() == task.getTaskId()
+//                                && c.getContractStatus() == ContractStatus.COMPLETED);
+        List<Contract> unfinishedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.IN_PROGRESS);
+//                lowerContractService
+//                        .getLotBy(c -> c.getTaskId() == task.getTaskId()
+//                                && c.getContractStatus() == ContractStatus.IN_PROGRESS);
 
         if (completedContracts.size() == 0 && unfinishedContracts.size() == 0) {
-            lowerMessageService.add(Message.createMessage(requester.getEmailAddress(), MessageType.FINISH_TASK, new String[]{
+            messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.FINISH_TASK, new String[]{
                     task.getTaskName(),
                     "无人参与"
             }));
 
             requester.setCredit(requester.getCredit() + task.getTotalReward());
-            lowerRequesterService.update(requester);
+//            lowerRequesterService.update(requester);
+            requesterJPA.save(requester);
 
-            lowerMessageService.add(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
+            messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
                     task.getTaskName(),
                     String.format("%.2f", task.getTotalReward())
             }));
@@ -79,12 +93,14 @@ public class FinishTaskServiceImpl implements FinishTaskService {
 
 
         completedContracts.forEach(c -> {
-            Worker worker = lowerWorkerService.getById(c.getWorkerId());
+            Worker worker = userById(workerJPA, c.getWorkerId());
+//                    lowerWorkerService.getById(c.getWorkerId());
             worker.setExperiencePoint(worker.getExperiencePoint() + individalReward);
             worker.setCredit(worker.getCredit() + individalReward);
-            lowerWorkerService.update(worker);
+//            lowerWorkerService.update(worker);
+            workerJPA.save(worker);
 
-            lowerMessageService.add(Message.createMessage(worker.getEmailAddress(), MessageType.GET_REWARD, new String[]{
+            messageJPA.save(Message.createMessage(worker.getEmailAddress(), MessageType.GET_REWARD, new String[]{
                     task.getTaskName(),
                     String.format("%.2f", individalReward)
             }));
@@ -93,25 +109,28 @@ public class FinishTaskServiceImpl implements FinishTaskService {
         unfinishedContracts.forEach(c -> {
             c.setContractStatus(ContractStatus.ABORT);
             c.setLastEditTime(LocalDateTime.now());
-            lowerContractService.update(c);
+//            lowerContractService.update(c);
+            contractJPA.save(c);
 
-            Worker worker = lowerWorkerService.getById(c.getWorkerId());
-            lowerMessageService.add(Message.createMessage(worker.getEmailAddress(), MessageType.ABORT_CONTRACT, new String[]{
+            Worker worker = userById(workerJPA, c.getWorkerId());
+//                    lowerWorkerService.getById(c.getWorkerId());
+            messageJPA.save(Message.createMessage(worker.getEmailAddress(), MessageType.ABORT_CONTRACT, new String[]{
                     task.getTaskName(),
                     "任务结束"
             }));
         });
 
-        lowerMessageService.add(Message.createMessage(requester.getEmailAddress(), MessageType.FINISH_TASK, new String[]{
+        messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.FINISH_TASK, new String[]{
                 task.getTaskName(),
                 ""
         }));
         if (completedContracts.size() < task.getCapacity()) {
             double delta = task.getTotalReward() - completedContracts.size() * task.getTotalReward() / task.getCapacity();
             requester.setCredit(requester.getCredit() + delta);
-            lowerRequesterService.update(requester);
+//            lowerRequesterService.update(requester);
+            requesterJPA.save(requester);
 
-            lowerMessageService.add(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
+            messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
                     task.getTaskName(),
                     String.format("%.2f", delta)
             }));
@@ -121,12 +140,12 @@ public class FinishTaskServiceImpl implements FinishTaskService {
     @Override
     public void checkTask() {
         System.out.println("现在时间：" + dateFormat.format(new Date()));
-        lowerTaskService
-                .getLotBy(t -> {
-//                    System.out.println("searchTasks");
-                    return t.getTaskStatus() == TaskStatus.ONGOING
-                            && t.getEndTime().isBefore(LocalDateTime.now());
-                })
+//        lowerTaskService
+//                .getLotBy(t -> {
+//                    return t.getTaskStatus() == TaskStatus.ONGOING
+//                            && t.getEndTime().isBefore(LocalDateTime.now());
+//                })
+            taskJPA.findByTaskStatusAndEndTimeBefore(TaskStatus.ONGOING, LocalDateTime.now())
                 .forEach((t) -> {
                     System.out.println("finish task: id: " + t.getTaskId() + "; name: " + t.getTaskName());
                     finishTask(t);

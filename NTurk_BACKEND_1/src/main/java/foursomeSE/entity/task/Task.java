@@ -2,34 +2,55 @@ package foursomeSE.entity.task;
 
 import foursomeSE.entity.communicate.CTask;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
+@Entity
+@Table(name = "tasks")
 public class Task {
+    @Id
+    @GeneratedValue
     private long taskId;
+    @NotNull
     private String taskName;
     private String taskDescription;
+    @NotNull
     private long requesterId;
-
+    @NotNull
     private LocalDateTime createTime;
+    @NotNull
     private LocalDateTime endTime; // 这个一定有
 
+    @NotNull
     private WorkerRequirement workerRequirement;
     private double requiredExperience;
-    private long[] nominees;
+    @Basic
+    @Column(length=50000)
+    private ArrayList<Long> nominees;
 
+    @NotNull
     private TaskCategory taskCategory;
-    private String[] questions;
+    @Basic
+    @Column(length=50000)
+    private ArrayList<String> questions;
 
+    @NotNull
     private RewardStrategy rewardStrategy;
     private double totalReward;
 
-//    private double rewardPerPerson; // 这个属性不要了，就是total/capacity
+    //    private double rewardPerPerson; // 这个属性不要了，就是total/capacity
     private int capacity; // 人数限制，一定有，如果没有就是2147483648
 
-    private String[] imgNames; // 需要先用taskCategory来判断什么类型到什么数库里取
+    @Basic
+    @NotNull
+    @Column(length=100000)
+    private ArrayList<String> imgNames; // 需要先用taskCategory来判断什么类型到什么数库里取
 
+    @NotNull
     private TaskStatus taskStatus;
 
     public Task() {
@@ -129,11 +150,11 @@ public class Task {
         this.requiredExperience = requiredExperience;
     }
 
-    public long[] getNominees() {
+    public ArrayList<Long> getNominees() {
         return nominees;
     }
 
-    public void setNominees(long[] nominees) {
+    public void setNominees(ArrayList<Long> nominees) {
         this.nominees = nominees;
     }
 
@@ -145,11 +166,11 @@ public class Task {
         this.taskCategory = taskCategory;
     }
 
-    public String[] getQuestions() {
+    public ArrayList<String> getQuestions() {
         return questions;
     }
 
-    public void setQuestions(String[] questions) {
+    public void setQuestions(ArrayList<String> questions) {
         this.questions = questions;
     }
 
@@ -177,11 +198,11 @@ public class Task {
         this.capacity = capacity;
     }
 
-    public String[] getImgNames() {
+    public ArrayList<String> getImgNames() {
         return imgNames;
     }
 
-    public void setImgNames(String[] imgNames) {
+    public void setImgNames(ArrayList<String> imgNames) {
         this.imgNames = imgNames;
     }
 

@@ -14,9 +14,11 @@ import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.error.MyObjectNotFoundException;
-import foursomeSE.service.contract.LowerContractService;
-import foursomeSE.service.message.LowerMessageService;
-import foursomeSE.service.user.lower.LowerUserService;
+import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.RequesterJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -28,54 +30,61 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
+import static foursomeSE.service.task.TaskUtils.taskById;
+import static foursomeSE.service.user.UserUtils.userById;
+import static foursomeSE.service.user.UserUtils.userByUsername;
+import static foursomeSE.util.ConvenientFunctions.iterableToList;
+import static foursomeSE.util.ConvenientFunctions.iterableToStream;
 import static foursomeSE.util.ConvenientFunctions.listConvert;
 
 @Service
 @Qualifier("i2TaskServiceImpl")
 public class UpperTaskServiceImpl implements UpperTaskService {
-    private LowerUserService<Worker> workerService;
-    private LowerUserService<Requester> requesterService;
-    private LowerContractService lowerContractService;
-    private LowerTaskService service;
-    private LowerMessageService lowerMessageService;
+    private WorkerJPA workerJPA;
+    private RequesterJPA requesterJPA;
+    //    private LowerContractService lowerContractService;
+    private ContractJPA contractJPA;
+    private TaskJPA taskJPA;
+    private MessageJPA messageJPA;
 
     private String username;
 
-    public UpperTaskServiceImpl(LowerUserService<Worker> workerService,
-                                LowerUserService<Requester> requesterService,
-                                LowerContractService lowerContractService,
-                                LowerTaskService service,
-                                LowerMessageService lowerMessageService) {
-        this.workerService = workerService;
-        this.requesterService = requesterService;
-        this.lowerContractService = lowerContractService;
-        this.service = service;
-        this.lowerMessageService = lowerMessageService;
+    public UpperTaskServiceImpl(WorkerJPA workerJPA,
+                                RequesterJPA requesterJPA,
+                                ContractJPA contractJPA,
+                                TaskJPA taskJPA,
+                                MessageJPA messageJPA) {
+        this.workerJPA = workerJPA;
+        this.requesterJPA = requesterJPA;
+        this.contractJPA = contractJPA;
+        this.taskJPA = taskJPA;
+        this.messageJPA = messageJPA;
     }
 
     @Override
     public CTask getById(long id) {
-        return sToD(service.getById(id));
+        return sToD(taskById(taskJPA, id));
     }
 
     @Override
     public void add(CTask task, String username) {
-        Requester requester = requesterService.getById(task.getRequesterId());
+        Requester requester = userByUsername(requesterJPA, username);
         if (requester.getCredit() - task.getTotalReward() < 0) {
             throw new MyNotValidException();
         }
         requester.setCredit(requester.getCredit() - task.getTotalReward());
-        requesterService.update(requester);
 
         if (task.getWorkerRequirement() == WorkerRequirement.APPOINT) {
-            task.setCapacity(task.getNominees().length);
+            task.setCapacity(task.getNominees().size());
             task.setRewardStrategy(RewardStrategy.INDIVIDUAL);
         }
         task.setTaskStatus(TaskStatus.ONGOING);
         task.setCreateTime(LocalDateTime.now());
-        service.add(new Task(task));
+        taskJPA.save(new Task(task));
+        requesterJPA.save(requester);
 
-        lowerMessageService.add(Message.createMessage(username, MessageType.ISSUE_TASK, new String[]{
+        messageJPA.save(Message.createMessage(username, MessageType.ISSUE_TASK, new String[]{
                 task.getTaskName(),
                 String.format("%.2f", task.getTotalReward())
         }));
@@ -84,10 +93,10 @@ public class UpperTaskServiceImpl implements UpperTaskService {
     @Override
     public List<CTask> getNewTasks(String username) {
         this.username = username;
-        long userId = workerService.usernameToId(username);
-        Worker worker = workerService.getById(userId);
+        Worker worker = userByUsername(workerJPA, username);
 
-        List<Task> result = service.getLotBy(t -> {
+        // TODO
+        List<Task> result = iterableToStream(taskJPA.findAll()).filter(t -> {
 //            if (t.getEndTime().isBefore(LocalDateTime.now())) {
 //                return false;
 //            }
@@ -101,13 +110,14 @@ public class UpperTaskServiceImpl implements UpperTaskService {
             }
 
             if (t.getWorkerRequirement() == WorkerRequirement.APPOINT) {
-                return Arrays.stream(t.getNominees()).anyMatch(n -> n == userId);
+                return t.getNominees().stream().anyMatch(n -> n == worker.getId());
             }
             if (t.getWorkerRequirement() == WorkerRequirement.EXPERIENCE) {
                 return t.getRequiredExperience() <= worker.getExperiencePoint();
             }
             return true;
-        });
+        }).collect(Collectors.toCollection(ArrayList::new));
+
         result.removeAll(getWorkerTasks(username));
         return listConvert(result, this::sToD);
     }
@@ -116,8 +126,7 @@ public class UpperTaskServiceImpl implements UpperTaskService {
     public List<CTask> getWorkerTasks(String username) {
         this.username = username;
 
-        return lowerContractService
-                .getLotBy(c -> c.getWorkerId() == workerService.usernameToId(username))
+        return contractJPA.findByWorkerId(userByUsername(workerJPA, username).getId())
                 .stream()
                 .mapToLong(Contract::getTaskId)
                 .mapToObj(this::getById)
@@ -127,8 +136,9 @@ public class UpperTaskServiceImpl implements UpperTaskService {
     @Override
     public List<CTask> getRequesterTasks(String username) {
         this.username = null;
-        return listConvert(service.getLotBy(t -> t.getRequesterId() == requesterService.usernameToId(username)),
-                this::sToD);
+
+        long id = userByUsername(requesterJPA, username).getId();
+        return listConvert(taskJPA.findByRequesterId(id), this::sToD);
     }
 
     /**
@@ -136,7 +146,7 @@ public class UpperTaskServiceImpl implements UpperTaskService {
      */
     @Override
     public List<TaskNum> getTaskNums() {
-        List<Task> ls = service.getLotBy(p -> true);
+        List<Task> ls = iterableToList(taskJPA.findAll());
         // 算了，这里不用stream的groupingBy了，本来也没什么好用stream的，
         // 不过这里是因为task的分类知道，不然还是groupingBy成了map以后再自己操作吧
         TaskNum tnf = new TaskNum(TaskCategory.FRAME, 0);
@@ -164,7 +174,7 @@ public class UpperTaskServiceImpl implements UpperTaskService {
     public List<TaskGrowth> getTaskGrowth() {
         List<TaskGrowth> result = new ArrayList<>();
 
-        Map<LocalDate, List<Task>> collect = service.getLotBy(p -> true).stream()
+        Map<LocalDate, List<Task>> collect = iterableToStream(taskJPA.findAll())
                 .collect(Collectors.groupingBy(t -> t.getCreateTime().toLocalDate()));
         collect.forEach((d, cts) -> {
             TaskGrowth toBeAdded = new TaskGrowth(d, 0, 0, 0);
@@ -193,7 +203,7 @@ public class UpperTaskServiceImpl implements UpperTaskService {
         List<TaskStatusData> result = new ArrayList<>();
 
 
-        Map<TaskCategory, List<Task>> collect = service.getLotBy(p -> true).stream()
+        Map<TaskCategory, List<Task>> collect = iterableToStream(taskJPA.findAll())
                 .collect(Collectors.groupingBy(Task::getTaskCategory));
 
         collect.forEach((t, cts) -> {
@@ -202,12 +212,12 @@ public class UpperTaskServiceImpl implements UpperTaskService {
             Map<TaskStatus, Long> collect1 = cts.stream().collect(Collectors.groupingBy(Task::getTaskStatus, Collectors.counting()));
 
             collect1.forEach((ts, l) -> {
-                switch (ts){
+                switch (ts) {
                     case FINISHED:
-                        toBeAdded.setCompleted(toBeAdded.getCompleted() + (int)l.longValue());
+                        toBeAdded.setCompleted(toBeAdded.getCompleted() + (int) l.longValue());
                         break;
                     case ONGOING:
-                        toBeAdded.setInProgress(toBeAdded.getInProgress() + (int)l.longValue());
+                        toBeAdded.setInProgress(toBeAdded.getInProgress() + (int) l.longValue());
                         break;
                 }
             });
@@ -257,8 +267,8 @@ public class UpperTaskServiceImpl implements UpperTaskService {
 
 
         // 不要用task来找，真接从contract里找
-        lowerContractService.getLotBy(p -> true).forEach(c -> {
-            switch (service.getById(c.getTaskId()).getTaskCategory()) {
+        contractJPA.findAll().forEach(c -> {
+            switch (taskById(taskJPA, (c.getTaskId())).getTaskCategory()) {
                 case FRAME:
                     tnf.setValue(tnf.getValue() + 1);
                     break;
@@ -278,21 +288,23 @@ public class UpperTaskServiceImpl implements UpperTaskService {
      * private
      */
     private CTask sToD(Task task) {
-        int attendance = lowerContractService.getLotBy(
-                c -> c.getTaskId() == task.getTaskId()
-                        && c.getContractStatus() == ContractStatus.COMPLETED
-        ).size();
+        int attendance = (int)contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
+//                lowerContractService.getLotBy(
+//                        c -> c.getTaskId() == task.getTaskId()
+//                                && c.getContractStatus() == ContractStatus.COMPLETED
+//                ).size();
 
-        String requesterName = requesterService.getById(task.getRequesterId()).getNickname();
+        String requesterName = userById(requesterJPA, task.getRequesterId()).getNickname();
 
         if (username == null) {
             return new CTask(task, attendance, requesterName);
         }
         try {
-            ContractStatus contractStatus = lowerContractService
-                    .getOneBy(c -> c.getTaskId() == task.getTaskId()
-                            && c.getWorkerId() == workerService.usernameToId(username))
-                    .getContractStatus(); // TODO 这里用到了getByTaskIdByUsername，用软件工程我解决不了，
+            ContractStatus contractStatus = contractByTaskIdAndUsername(contractJPA, workerJPA, task.getTaskId(), username).getContractStatus();
+//                    lowerContractService
+//                    .getOneBy(c -> c.getTaskId() == task.getTaskId()
+//                            && c.getWorkerId() == userByUsername(workerJPA, username).getId())
+//                    .getContractStatus(); // 这里用到了getByTaskIdByUsername，用软件工程我解决不了，
             return new CTask(task, attendance, requesterName, contractStatus);
         } catch (MyObjectNotFoundException e) {
             return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);

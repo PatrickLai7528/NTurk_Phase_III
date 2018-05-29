@@ -6,17 +6,21 @@ import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.annotation.SegmentAnnotation;
 import foursomeSE.entity.statistics.*;
-import foursomeSE.entity.user.Requester;
+import foursomeSE.entity.user.CRequester;
+import foursomeSE.entity.user.CWorker;
 import foursomeSE.entity.user.UserType;
-import foursomeSE.entity.user.Worker;
+import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.RequesterJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.service.annotation.UpperAnnotationService;
 import foursomeSE.service.common.CommonCongruentService;
-import foursomeSE.service.task.LowerTaskService;
 import foursomeSE.service.task.UpperTaskService;
-import foursomeSE.service.user.lower.LowerUserService;
 import foursomeSE.service.user.upper.UpperRequesterService;
 import foursomeSE.service.user.upper.UpperWorkerService;
-import foursomeSE.util.DataKeeper;
+import foursomeSE.util.DBDataKeeper;
+import foursomeSE.util.DataSupplier;
+import foursomeSE.util.JsonDataKeeper;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import static foursomeSE.service.user.UserUtils.userByUsername;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static foursomeSE.util.DataSupplier.*;
@@ -46,41 +51,58 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
     @Autowired
     private UpperAnnotationService<SegmentAnnotation> segmentAnnotationService;
 
+//    @Autowired
+//    private CommonCongruentService<Contract> lowerContractService;
     @Autowired
-    private CommonCongruentService<Contract> lowerContractService;
+    private ContractJPA contractJPA;
 
     @Autowired
     private UpperTaskService upperTaskService;
 
     @Autowired
-    private LowerTaskService lowerTaskService;
+//    private LowerTaskService lowerTaskService;
+    private TaskJPA taskJPA;
 
     @Autowired
     private UpperWorkerService workerService;
 
     @Autowired
-    private LowerUserService<Worker> lowerWorkerService;
+//    private LowerUserService<Worker> lowerWorkerService;
+    private WorkerJPA workerJPA;
 
     @Autowired
     private UpperRequesterService requesterService;
 
     @Autowired
-    private LowerUserService<Requester> lowerRequesterService;
+//    private LowerUserService<Requester> lowerRequesterService;
+    private RequesterJPA requesterJPA;
+
+
+    // keeper and supplier
+    @Autowired
+    private DBDataKeeper dbDataKeeper;
+
+    @Autowired
+    private DataSupplier dataSupplier;
 
 
     @Before
     public void doBeforeClass() {
-        DataKeeper.stashAll();
+        JsonDataKeeper.stashAll();
+        dbDataKeeper.stashAll();
 
-        mockWorkers().forEach(w -> lowerWorkerService.add(w));
-        mockRequesters().forEach(r -> lowerRequesterService.add(r));
-        mockContract().forEach(c -> lowerContractService.add(c));
-        mockTasks().forEach(t -> lowerTaskService.add(t));
+        workerJPA.saveAll(dataSupplier.mockWorkers());
+        requesterJPA.saveAll(dataSupplier.mockRequesters());
+        taskJPA.saveAll(dataSupplier.mockTasks());
+        contractJPA.saveAll(dataSupplier.mockContract());
+
+//        dataSupplier.mockContract().forEach(c -> lowerContractService.add(c));
     }
 
     @After
     public void doAfterClass() {
-//        DataKeeper.reclaimAll();
+        JsonDataKeeper.reclaimAll();
+        dbDataKeeper.reclaimAll();
     }
 
     @Test
@@ -102,7 +124,7 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
     }
 
     @Test
-    public void testWorkerGrowth() {
+    public void testWorkerGrowth() { // 这个不过可能是时间的问题，已经过了一天了，等把数据库的还原也做了以后再说吧…
         List<UserGrowth> actual = workerService.getUserGrowth();
         List<UserGrowth> expected = Arrays.asList(
                 new UserGrowth(LocalDateTime.now().minusDays(50).toLocalDate(), 2),
@@ -125,7 +147,7 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
     }
 
     @Test
-    public void testWorkerActivity() {
+    public void testWorkerActivity() { // 兩个activity不过也是因为id的问题，activity涉及任务了。可以把supplier里的getTask接受一个userJPA参数，用于转username成id
         List<UserActivity> actual = workerService.getUserActivity();
         List<UserActivity> expected = Arrays.asList(
                 new UserActivity(0, 1),
@@ -133,7 +155,7 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
                 new UserActivity(2, 1),
                 new UserActivity(3, 0)
         );
-
+        System.out.println("pre print");
         System.out.println(actual);
         assertTrue(actual.size() == expected.size() && actual.containsAll(expected));
     }
@@ -147,7 +169,7 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
                 new UserActivity(2, 0),
                 new UserActivity(3, 0)
         );
-
+        System.out.println("pre print");
         System.out.println(actual);
         assertTrue(actual.size() == expected.size() && actual.containsAll(expected));
     }
@@ -178,15 +200,20 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
     }
 
     @Test
-    public void testUserRank() {
-        assertEquals(1, workerService.getById(0).getRank());
-        assertEquals("worker1@ex.com", workerService.getById(0).getEmailAddress());
+    public void testUserRank() { // 这个不过是因为用了getById，不过活该
+        CWorker cw = workerService.getById(userByUsername(workerJPA, "worker1@ex.com").getId());
+        assertEquals(1, cw.getRank());
+        assertEquals("worker1@ex.com", cw.getEmailAddress());
 
-        assertEquals(2, requesterService.getById(0).getRank());
+        CRequester cr = requesterService.getById(userByUsername(requesterJPA, "requester1@ex.com").getId());
+        assertEquals(2, cr.getRank());
     }
 
     @Test
     public void testGetTasks() {
+        System.out.println("pre print");
+        System.out.println(upperTaskService.getWorkerTasks("worker2@ex.com"));
+
         assertEquals(3, upperTaskService.getWorkerTasks("worker2@ex.com").size());
         assertEquals(0, upperTaskService.getNewTasks("worker2@ex.com").size());
     }

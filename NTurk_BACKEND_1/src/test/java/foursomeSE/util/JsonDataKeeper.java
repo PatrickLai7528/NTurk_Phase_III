@@ -11,7 +11,7 @@ import foursomeSE.entity.user.Worker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataKeeper {
+public class JsonDataKeeper {
     private static List<Contract> contracts;
     private static List<Task> tasks;
 
@@ -22,7 +22,7 @@ public class DataKeeper {
     private static List<Worker> workers;
     private static List<Requester> requesters;
 
-    public static void stashAll() { // TODO bad smell，文件读写应该和service做在一处的
+    public static void stashAll() { // bad smell，文件读写应该和service做在一处的
         contracts = FileUtil.readAll(Contract[].class, "contract");
         tasks = FileUtil.readAll(Task[].class, "task");
 
