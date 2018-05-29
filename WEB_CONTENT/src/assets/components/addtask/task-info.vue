@@ -1,57 +1,65 @@
 <template>
     <div class="taskInfo">
-        <el-form ref="form" :rules="rules" :model="form" label-width="80px">
+        <el-form ref="form" :rules="rules" :model="form" label-width="100px">
             <el-form-item>
-                <label class="title">新增任務</label>
+                <label class="title">新增任务</label>
             </el-form-item>
-            <el-form-item label="任務名稱" prop="taskName">
+            <el-form-item label="任务名称" prop="taskName">
                 <el-input class="input" v-model="form.taskName"></el-input>
             </el-form-item>
-            <el-form-item label="任務描述" prop="taskDescription">
+            <el-form-item label="任务描述" prop="taskDescription">
                 <el-input type="textarea" class="input" v-model="form.taskDescription">
                 </el-input>
             </el-form-item>
 
-            <el-form-item label="标签" prop="dynamicTags">
+            <el-form-item label="任务标签" prop="taskTags">
                 <el-tag
                         :key="tag"
-                        v-for="tag in form.dynamicTags"
+                        v-for="tag in form.taskTags"
                         closable
                         :disable-transitions="false"
                         class="tag"
-                        @close="tagClose(tag)">
+                        @close="tagClose(tag)"
+                >
                     {{tag}}
                 </el-tag>
-                <el-input v-if="tagVisible"
-                          v-model="tagValue"
-                          ref="saveTagInput"
-                          size="small"
-                          @keyup.enter.native="tagInputConfirm"
-                          @blur="tagInputConfirm"
-                >
-                </el-input>
-                <el-button v-else size="small" @click="tagInput" style="font-size: 16px">+</el-button>
+                <el-button size="small" @click="dialogFormVisible = true" style="font-size: 16px">+</el-button>
+
+                <el-dialog title="添加标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="500px">
+                    <div style="font-size: 16px; display: inline; margin-right: 20px">标签名称</div>
+                    <el-autocomplete
+                            v-model="tagValue"
+                            :fetch-suggestions="querySearch"
+                            placeholder="请输入标签（建议使用系统推荐标签）"
+                            style="width: 300px"
+                            @keyup.enter.native="tagInputConfirm"
+                    ></el-autocomplete>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="tagInputConfirm">确 定</el-button>
+                    </div>
+                </el-dialog>
             </el-form-item>
 
-            <el-form-item label="任務類型" prop="taskCategory">
-                <el-select class="input" v-model="form.taskCategory" placeholder="請選擇任務類型">
-                    <el-option class="option" label="區域劃分" value="SEGMENT"></el-option>
-                    <el-option class="option" label="整體標註" value="GENERAL"></el-option>
-                    <el-option class="option" label="區域標註" value="FRAME"></el-option>
+            <el-form-item label="任务类型" prop="taskCategory">
+                <el-select class="input" v-model="form.taskCategory" placeholder="请选择任务类型">
+                    <el-option class="option" label="整体标注" value="GENERAL"></el-option>
+                    <el-option class="option" label="画框标注" value="FRAME"></el-option>
+                    <el-option class="option" label="区域标注" value="SEGMENT"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="截止日期" prop="endTime">
-                <el-date-picker class="input" type="datetime" placeholder="選擇日期"
+                <el-date-picker class="input" type="datetime" placeholder="选择日期"
                                 v-model="form.endTime" :picker-options="handlePicker"></el-date-picker>
             </el-form-item>
             <el-form-item label="工人要求" prop="workerRequirement">
                 <el-radio-group v-model="form.workerRequirement">
-                    <el-radio label="NONE">無要求</el-radio>
-                    <el-radio label="EXPERIENCE">經驗要求</el-radio>
-                    <el-radio label="APPOINT">工人指定</el-radio>
+                    <el-radio label="NONE">无要求</el-radio>
+                    <el-radio label="EXPERIENCE">经验要求</el-radio>
+                    <el-radio label="APPOINT">指定工人</el-radio>
                 </el-radio-group>
             </el-form-item>
-            <el-form-item v-if="form.workerRequirement=='EXPERIENCE'" prop="requiredExperience" label="要求經驗">
+            <el-form-item v-if="form.workerRequirement=='EXPERIENCE'" prop="requiredExperience" label="经验要求">
                 <el-input class="input" v-model.number="form.requiredExperience"></el-input>
             </el-form-item>
             <div>
@@ -64,21 +72,21 @@
                     </el-select>
                 </el-form-item>
             </div>
-            <el-form-item id='d' label="獎勵形式" prop="rewardStrategy">
+            <el-form-item id='d' label="奖励形式" prop="rewardStrategy">
                 <el-radio-group v-model="form.rewardStrategy">
-                    <el-radio label="TOTAL">固定積分</el-radio>
-                    <el-radio label="INDIVIDUAL">平均積分</el-radio>
+                    <el-radio label="TOTAL">固定积分</el-radio>
+                    <el-radio label="INDIVIDUAL">平分积分</el-radio>
                 </el-radio-group>
             </el-form-item>
-            <el-form-item label="合計獎勵" prop="totalReward">
+            <el-form-item label="合计奖励" prop="totalReward">
                 <el-input class="input" v-model.number="form.totalReward"></el-input>
             </el-form-item>
-            <el-form-item v-if="form.rewardStrategy=='INDIVIDUAL' && form.workerRequirement !== 'APPOINT'"
-                          prop="capacity" label="限制人數">
+            <el-form-item v-if="form.rewardStrategy=='INDIVIDUAL' && form.workerRequirement != 'APPOINT'"
+                          prop="capacity" label="限制人数">
                 <el-input class="input" v-model.number="form.capacity"></el-input>
             </el-form-item>
 
-            <el-form-item label="問題" v-if="form.taskCategory == 'GENERAL'" prop="dynamicTags">
+            <el-form-item label="问题" v-if="form.taskCategory == 'GENERAL'" prop="questions">
                 <el-input v-if="questionVisible"
                           v-model="questionValue"
                           ref="saveQuestionInput"
@@ -102,7 +110,6 @@
                 <el-button class="finishButton" @click="onSubmit('form')">完成</el-button>
             </el-form-item>
         </el-form>
-
     </div>
 </template>
 
@@ -145,12 +152,13 @@
                     questions: [],
                     nominees: [],//要求的工人
                     rewardPerPerson: 0,//对于每个人所给的钱
-                    dynamicTags: [],
+                    taskTags: [],
                 },
                 tempQuestion: '',
                 allWorkers: [],  //在初始化的时候去后端拿所有工人列表   多选框的key是workerId  value是workerName
+                dialogFormVisible: false,
                 tagValue: "",
-                tagVisible: false,
+                systemTags: [],
                 questionValue: "",
                 questionVisible: false,
                 handlePicker: {
@@ -163,6 +171,7 @@
                 rules: {
                     taskName: [{required: true, message: '请输入任务名称', trigger: 'blur'}],
                     taskCategory: [{required: true, message: '请选择任务类型', trigger: 'change'}],
+                    taskTags: [{type: 'array', required: true, message: '请添加至少一个任务标签', trigger: 'blur'}],
                     workerRequirement: [{required: true, message: '请选择工人要求', trigger: 'change'}],
                     endTime: [{type: 'date', required: true, message: '请选择截止日期', trigger: 'change'}],
                     rewardStrategy: [{required: true, message: '请选择奖励方式', trigger: 'change'}],
@@ -175,9 +184,9 @@
             }
         },
         mounted: function () {
-            let _this = this;
-            this.$nextTick(function () {
-                _this.getAllWorkers();   //获得所有当前的工人列表
+            this.$nextTick(()=> {
+                this.getAllWorkers();   //获得所有当前的工人列表
+                this.getSystemTags();   //获得系统Tag列表
             });
 
         },
@@ -226,6 +235,7 @@
 					taskName: this.form.taskName,
                     taskCategory: this.form.taskCategory,
 					taskDescription: this.form.taskDescription,
+                    taskTags: this.form.taskTags,
 					endTime: this.form.endTime,
 					workerRequirement: this.form.workerRequirement,
 					rewardStrategy: this.form.rewardStrategy,
@@ -279,15 +289,6 @@
                     setTimeout(() => resolve(), 1000);
                 });
             },
-            /*
-            addQuestion: function () {
-                if (this.tempQuestion !== null && this.tempQuestion.length !== 0) {
-                    this.form.questions.push(this.tempQuestion);
-                    this.tempQuestion = '';
-                }
-                console.log(this.form.questions)
-            },
-            */
             messageHandler() {
                 this.$message({
                     message: '任务已经成功上传',
@@ -300,21 +301,31 @@
                 });
             },
             tagClose(tag) {
-                this.form.dynamicTags.splice(this.form.dynamicTags.indexOf(tag), 1);
-            },
-            tagInput() {
-                this.tagVisible = true;
-                this.$nextTick(_ => {
-                    this.$refs.saveTagInput.$refs.input.focus();
-                });
+                this.form.taskTags.splice(this.form.taskTags.indexOf(tag), 1);
             },
             tagInputConfirm() {
                 let tagValue = this.tagValue;
-                if (tagValue) {
-                    this.form.dynamicTags.push(tagValue);
+                if(this.duplicateKeys(tagValue, this.form.taskTags)) {
+                    this.badMessage("标签重复");
+                    this.tagValue = "";
+                } else {
+                    if (tagValue) {
+                        this.form.taskTags.push(tagValue);
+                    }
+                    this.dialogFormVisible = false;
+                    this.tagValue = '';
                 }
-                this.tagVisible = false;
-                this.tagValue = '';
+            },
+            querySearch(queryString, cb) {
+                let systemTags = this.systemTags;
+                let results = queryString ? systemTags.filter(this.createFilter(queryString)) : systemTags;
+                // 调用 callback 返回建议列表的数据
+                cb(results);
+            },
+            createFilter(queryString) {
+                return (systemTag) => {
+                    return (systemTag.value.toLowerCase().indexOf(queryString.toLowerCase()) >= 0);
+                };
             },
 
             questionClose(question) {
@@ -328,28 +339,53 @@
             },
             questionInputConfirm() {
                 let questionValue = this.questionValue;
-                if (questionValue) {
-                    this.form.questions.push(questionValue);
+                if(this.duplicateKeys(questionValue, this.form.questions)) {
+                    this.badMessage("问题重复");
+                    this.questionValue = "";
+                } else {
+                    if (questionValue) {
+                        this.form.questions.push(questionValue);
+                    }
+                    this.questionVisible = false;
+                    this.questionValue = '';
                 }
-                this.questionVisible = false;
-                this.questionValue = '';
             },
 
             getAllWorkers() {
-                let _this = this;
-                //console.log(store);
-                this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    _this.allWorkers = response.data;
-                    for (let e of _this.allWorkers) {
+                this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
+                    this.allWorkers = response.data;
+                    for (let e of this.allWorkers) {
                         e.workerName = e.nickname + '/(' + e.emailAddress + ')';
                     }
                 })
+            },
+            getSystemTags() {
+                // this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
+                //     this.systemTags = response.data;
+                // })
+                this.systemTags =
+                        [{value: "花朵"}, {value: "运动"}, {value: "食物"}, {value: "军事"},
+                            {value: "生活"}, {value: "风景"}, {value: "自然"}, {value: "树木"},
+                            {value: "生命"}, {value: "军人"}, {value: "食品"}];
+            },
+            duplicateKeys(key, list) {
+        	    for(let i=0;i<list.length;i++){
+        	        if(key===list[i]){
+        	            return true;
+                    }
+                }
+                return false;
             }
         }
     }
 </script>
 
-<style scoped>
+<style>
+    .el-form-item__label {
+        font-size: 16px!important;
+        padding: 0 20px 0 0!important;
+    }
+
     .taskInfo {
         text-align: left;
         margin-left: auto;
@@ -363,6 +399,7 @@
 
     .input {
         width: 24em;
+        font-size: 16px;
     }
 
     .finishButton {
@@ -385,10 +422,6 @@
         max-width: 336px;
     }
 
-    .el-form-item__label {
-        font-size: 16px;
-    }
-
     #d {
         clear: both;
     }
@@ -405,4 +438,7 @@
         font-weight: bold;
     }
 
+    .el-radio__label {
+        font-size: 16px!important;
+    }
 </style>
