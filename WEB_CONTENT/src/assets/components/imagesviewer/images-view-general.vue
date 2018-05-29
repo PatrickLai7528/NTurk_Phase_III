@@ -14,15 +14,27 @@
             <el-form ref="form" :model="form">
                 <el-form v-model="form.region" v-for="pair in annotationData[nowIndex].answerPairs">
                     <el-form-item class="Q_And_A" v-bind:label="pair.question">
-                        <el-input v-model="pair.answer" disabled="true"></el-input>
+                        <el-input v-model="pair.answer" disabled></el-input>
                     </el-form-item>
                 </el-form>
             </el-form>
+            <div v-if="isRequester === false">
+                <div id="prompt">请点击星级进行评分：</div>
+                <el-rate
+                        id="rate-bar"
+                        v-model="nowRating"
+                        :colors="['#99A9BF', '#F7BA2A', '#FF6347']"
+                        v-on:change="ratingChange"
+                >
+                </el-rate>
+                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
+            </div>
         </el-aside>
     </el-container>
 </template>
 
 <script>
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data(){
             return{
@@ -51,19 +63,36 @@
                 questionData: [],     //应该增加questionData在加载任务的时候就将questionData加载出来
                 nowIndex: 0,
                 contractId: this.$route.params.contractId,
-                taskId: this.$route.params.taskId
+                taskId: this.$route.params.taskId,
+                nowRating: 0,        //对当前图片的评分
+                ratings: [],           //对这个合同所有的评分数组
+                commitDisabled: 'disabled',
+                isRequester: null
             }
         },
         mounted: function () {
             this.$nextTick(function () {
                 //保证el已经插入文档
                 let _this = this;
+                this.isRequester = UserUtils.isRequester(this);
                 this.$nextTick(function () {
                     _this.load();
                 })
             });
         },
         methods:{
+            //像评分和提交的组件，如果当前登陆者是发起者，是不显示的
+            commitRating(){
+                //to-do
+            },
+            canCommit(){
+                if(this.ratings.length === this.tableData.imgNames.length){
+                    this.commitDisabled = false;
+                }
+                else{
+                    this.commitDisabled = 'disabled';
+                }
+            },
             load() {
                 let _this = this;
                 let theId = this.$route.params.taskId;
@@ -89,6 +118,12 @@
             },
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
+                this.nowRating = 0;
+                this.commitDisabled = 'disabled';
+            },
+            ratingChange: function(score){
+                this.ratings[this.nowIndex] = score;
+                this.canCommit();
             },
             getAnnotation: function () {
                 let _this = this;
@@ -160,5 +195,17 @@
     .el-button {
         width: 100px;
         margin: 10px;
+    }
+
+    #prompt {
+        margin-top: 100px;
+    }
+
+    #rate-bar {
+        margin-top: 20px;
+    }
+
+    #commit-button {
+        margin-top: 50px;
     }
 </style>

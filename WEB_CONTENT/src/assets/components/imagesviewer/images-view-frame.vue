@@ -45,6 +45,17 @@
                     </el-popover>
                 </li>
             </ul>
+            <div v-if="isRequester === false">
+                <div id="prompt">请点击星级进行评分：</div>
+                <el-rate
+                        id="rate-bar"
+                        v-model="nowRating"
+                        :colors="['#99A9BF', '#F7BA2A', '#FF6347']"
+                        v-on:change="ratingChange"
+                >
+                </el-rate>
+                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
+            </div>
         </el-aside>
     </el-container>
 </template>
@@ -88,9 +99,21 @@
         color: white;
     }
 
+    #prompt {
+        margin-top: 250px;
+    }
+
+    #rate-bar {
+        margin-top: 20px;
+    }
+
+    #commit-button {
+        margin-top: 50px;
+    }
 </style>
 
 <script>
+    import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data() {
             return {
@@ -134,9 +157,12 @@
                 percent: 0,
                 number: 0,
                 userClick: true,
-                submitDisabled: "disabled",
                 taskId: this.$route.params.taskId,
-                contractId: this.$route.params.contractId
+                contractId: this.$route.params.contractId,
+                nowRating: 0,        //对当前图片的评分
+                ratings: [],           //对这个合同所有的评分数组
+                commitDisabled: 'disabled',
+                isRequester: null
             }
         },
         mounted() {
@@ -146,10 +172,26 @@
                 const canvas = document.querySelector('#canvas');
                 _this.context = canvas.getContext('2d');
                 */
+                this.isRequester = UserUtils.isRequester(this);
                 _this.getImgNames();
             })
         },
         methods: {
+            commitRating(){
+                //to-do
+            },
+            canCommit(){
+                if(this.ratings.length === this.imgNames.length){
+                    this.commitDisabled = false;
+                }
+                else{
+                    this.commitDisabled = 'disabled';
+                }
+            },
+            ratingChange: function(score){
+                this.ratings[this.nowIndex] = score;
+                this.canCommit();
+            },
             getImgNames() {
                 let _this = this;
                 let theId = this.taskId;
@@ -179,6 +221,8 @@
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
                 this.loadWhenChange(newIndex);
+                this.nowRating = 0;
+                this.commitDisabled = 'disabled';
             },
             loadFrontList() {   //用这种方式来初始化前端的annotation数组
                 let _this = this;
