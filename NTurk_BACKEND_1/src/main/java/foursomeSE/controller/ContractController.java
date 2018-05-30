@@ -97,4 +97,16 @@ public class ContractController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
+
+    @RequestMapping(value = "/contract/review/{taskId}",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getContractForReview(@RequestHeader("Authorization") String token,
+                                                  @PathVariable("taskId") long taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+        Contract cddt = service.getByTaskIdForInspection(taskId, username);
+        if (cddt == null) {
+            return new ResponseEntity<>(new MyErrorType("no tasks to inspect"), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(cddt, HttpStatus.OK);
+    }
 }

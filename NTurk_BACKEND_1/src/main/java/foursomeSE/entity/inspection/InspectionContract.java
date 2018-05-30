@@ -23,7 +23,6 @@ public class InspectionContract {
     @NotNull
     private long workerId;
 
-    @NotNull
     private InspectionContractStatus inspectionContractStatus;
 
     public InspectionContract() {

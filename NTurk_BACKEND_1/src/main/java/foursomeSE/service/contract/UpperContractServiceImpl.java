@@ -105,7 +105,16 @@ public class UpperContractServiceImpl implements UpperContractService {
         messageJPA.save(Message.createMessage(username, MessageType.FULFIL_CONTRACT, new String[]{task.getTaskName()}));
     }
 
-//    /**
+    @Override
+    public Contract getByTaskIdForInspection(long taskId, String username) {
+        List<Contract> cddts = contractJPA.findByTaskIdForInspection(taskId);
+        if (cddts.isEmpty()) {
+            return null; // 这样可能不好？
+        }
+        return cddts.get(0);
+    }
+
+    //    /**
 //     * private methods
 //     */
 //    private Contract contractByTaskIdAndUsername(long taskId, String username) {

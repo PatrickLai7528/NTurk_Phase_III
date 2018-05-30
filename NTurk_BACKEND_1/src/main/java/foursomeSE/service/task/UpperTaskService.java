@@ -6,6 +6,7 @@ import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
 import foursomeSE.entity.statistics.TaskStatusData;
+import foursomeSE.entity.task.Task;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public interface UpperTaskService {
     /**
      * 返回worker自己没参加过的underReview的task
      * */
-    List<CTaskForInspection> getNewInspectionTasks(String username);
+    List<Task> getNewInspectionTasks(String username);
 
     /**
      * 返回worker自己做过的underReview的task，不管有没有完成mandatory time

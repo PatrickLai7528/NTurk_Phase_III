@@ -27,4 +27,13 @@ public interface UpperContractService {
      * 更新contractStatus为已完成，检查整个任务是否完成，
      */
     void fulfilContract(long taskId, String username);
+
+    /**
+     * inspection
+     *
+     * 返回这个task中最少的被inspect的contract
+     *
+     * 检查task是under review状态的
+     * */
+    Contract getByTaskIdForInspection(long taskId, String username);
 }

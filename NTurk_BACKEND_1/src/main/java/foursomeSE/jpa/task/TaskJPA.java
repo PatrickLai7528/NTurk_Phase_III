@@ -21,6 +21,9 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
 
     List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
 
+    // TODO 突然发现上面那个endTimeBefore好像不需要，反正有轮询endTime来改taskStatus
+    List<Task> findByTaskStatus(TaskStatus taskStatus);
+
     /**
      * 这个方法只是测试用…感觉这样很不好……
      * */

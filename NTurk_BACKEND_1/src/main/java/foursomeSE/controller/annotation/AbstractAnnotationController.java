@@ -30,7 +30,9 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
     @RequestMapping(value = "/taskId/{taskId}/imgName/{imgName}",
             method = RequestMethod.GET)
     @PreAuthorize("hasRole('WORKER')")
-    public ResponseEntity<?> getAnnotation(@RequestHeader("Authorization") String token, @PathVariable("taskId") long taskId, @PathVariable("imgName") String imgName) {
+    public ResponseEntity<?> getAnnotation(@RequestHeader("Authorization") String token,
+                                           @PathVariable("taskId") long taskId,
+                                           @PathVariable("imgName") String imgName) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         try {

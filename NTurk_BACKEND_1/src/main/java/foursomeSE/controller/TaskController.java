@@ -104,6 +104,24 @@ public class TaskController {
     }
 
     /**
+     * inspection
+     * */
+
+    @RequestMapping(value = "/tasks/newInspectionTasks",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getNewInspectionTasks(@RequestHeader("Authorization") String token) {
+        String username = JwtUtil.getUsernameFromToken(token);
+        return new ResponseEntity<>(taskService.getNewInspectionTasks(username), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/tasks/workerInspectionTasks",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getWorkerInspectionTasks(@RequestHeader("Authorization") String token) {
+        String username = JwtUtil.getUsernameFromToken(token);
+        return new ResponseEntity<>(taskService.getWorkerInspectionTasks(username), HttpStatus.OK);
+    }
+
+    /**
      * statistics
      * */
 

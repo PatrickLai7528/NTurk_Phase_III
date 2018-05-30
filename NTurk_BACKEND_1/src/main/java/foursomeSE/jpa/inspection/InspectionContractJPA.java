@@ -5,10 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Transactional
 public interface InspectionContractJPA extends CrudRepository<InspectionContract, Long> {
-    @Query(value = "select count(*) from inspection_contracts\n" +
+    @Query(value =
+            "select count(*) from inspection_contracts\n" +
             "where contract_id in (\n" +
             "    select contract_id from contracts\n" +
             "    where task_id = ?2\n" +
@@ -18,6 +20,8 @@ public interface InspectionContractJPA extends CrudRepository<InspectionContract
             ")",
             nativeQuery = true)
     long countByWorkerUsernameAndTaskId(String username, long taskId);
+
+    Optional<InspectionContract> findByContractIdAndWorkerId(long contractId, long workerId);
 }
 
 /*

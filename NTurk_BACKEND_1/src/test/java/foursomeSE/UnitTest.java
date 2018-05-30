@@ -87,7 +87,6 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
 
     @Before
     public void doBeforeClass() {
-        JsonDataKeeper.stashAll();
         dbDataKeeper.stashAll();
 
         workerJPA.saveAll(dataSupplier.mockWorkers());
@@ -95,12 +94,10 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
         taskJPA.saveAll(dataSupplier.mockTasks());
         contractJPA.saveAll(dataSupplier.mockContract());
 
-//        dataSupplier.mockContract().forEach(c -> lowerContractService.add(c));
     }
 
     @After
     public void doAfterClass() {
-        JsonDataKeeper.reclaimAll();
         dbDataKeeper.reclaimAll();
     }
 

@@ -2,33 +2,56 @@ package experiment;
 
 import com.google.gson.Gson;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 class E extends RuntimeException {
 }
 
-public class A {
-    static void a(Runnable runnable) {
-        runnable.run();
+class CL<T> implements Iterable<T> {
+    private int currentPos = 0;
+    private List<T> lst;
+
+    public CL(List<T> lst) {
+        this.lst = lst;
     }
 
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            int i = 0;
+
+            @Override
+            public boolean hasNext() {
+                return i < lst.size();
+            }
+
+            @Override
+            public T next() {
+                i++;
+                return lst.get((currentPos++) % lst.size());
+            }
+        };
+    }
+}
+
+public class A {
     public static void main(String[] args) {
-//        try {
-//            a(() -> {
-//                throw new E();
-//            });
-//        } catch (E e) {
-//            System.out.println("ok");
-//        }
+        CL<String> cl = new CL<>(Arrays.asList("1", "2", "a", "b"));
+        int i = 0;
+        for (String c: cl) {
+            System.out.println(c);
+            if (i == 2) {
+                break;
+            }
+            i++;
+        }
 
-        Map<String, Integer> map = new HashMap<>();
-        map.put("fdas", 134);
-        map.put("fsda", 543);
+        System.out.println();
 
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(map));
+        for (String c: cl) {
+            System.out.println(c);
+        }
     }
 }

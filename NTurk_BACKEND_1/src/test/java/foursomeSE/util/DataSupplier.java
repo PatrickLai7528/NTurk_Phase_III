@@ -136,6 +136,7 @@ public class DataSupplier {
 
         t1.setCreateTime(LocalDateTime.now().minusDays(10));
         t1.setEndTime(LocalDateTime.now().plusDays(10));
+        t1.setDdl(LocalDateTime.now().plusDays(8));
 //        t1.setEndTime(LocalDateTime.now().minusDays(10));
 
         t1.setWorkerRequirement(WorkerRequirement.NONE);
@@ -162,6 +163,7 @@ public class DataSupplier {
 
         t2.setCreateTime(LocalDateTime.now().minusDays(20));
         t2.setEndTime(LocalDateTime.now().plusDays(3));
+        t2.setDdl(LocalDateTime.now().plusDays(2));
 
         t2.setWorkerRequirement(WorkerRequirement.APPOINT);
         // 呃
@@ -192,6 +194,7 @@ public class DataSupplier {
 
         t3.setCreateTime(LocalDateTime.now().minusDays(10).minusMinutes(3));
         t3.setEndTime(LocalDateTime.now().plusDays(8));
+        t3.setDdl(LocalDateTime.now().plusDays(4));
 
         t3.setWorkerRequirement(WorkerRequirement.EXPERIENCE);
         t3.setRequiredExperience(20);

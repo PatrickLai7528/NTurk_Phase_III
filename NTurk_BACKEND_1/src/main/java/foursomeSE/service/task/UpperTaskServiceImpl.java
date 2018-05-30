@@ -4,7 +4,6 @@ import foursomeSE.entity.communicate.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.contract.ContractStatus;
-import foursomeSE.entity.inspection.InspectionContract;
 import foursomeSE.entity.message.Message;
 import foursomeSE.entity.message.MessageType;
 import foursomeSE.entity.statistics.TaskGrowth;
@@ -33,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
 import static foursomeSE.service.task.TaskUtils.taskById;
@@ -151,22 +149,25 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
 
     /**
      * inspection
-     * */
+     */
     @Override
-    public List<CTaskForInspection> getNewInspectionTasks(String username) {
+    public List<Task> getNewInspectionTasks(String username) {
         this.username = username;
 
-        return null;
+        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW);
+        result.removeAll(getWorkerInspectionTasks(username));
+
+        return result;
     }
 
     @Override
     public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
         this.username = username;
 
-        getWorkerTasks(username).stream()
-                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW);
-
-        return null;
+        return getWorkerTasks(username).stream()
+                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW)
+                .map(this::sToD2)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 
@@ -317,7 +318,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
      * private
      */
     private CTask sToD(Task task) {
-        int attendance = (int)contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
+        int attendance = (int) contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
 //                lowerContractService.getLotBy(
 //                        c -> c.getTaskId() == task.getTaskId()
 //                                && c.getContractStatus() == ContractStatus.COMPLETED
@@ -348,7 +349,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
     private CTaskForInspection sToD2(Task task) {
         CTaskForInspection result = new CTaskForInspection(task);
         // 所有这个worker做过的关于这个task的inspection
-        result.setMandatoryTime((int)inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId()));
+        result.setMandatoryTime((int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId()));
         return result;
     }
 //    private List<Task> _getWorkerTasks(String username) {
