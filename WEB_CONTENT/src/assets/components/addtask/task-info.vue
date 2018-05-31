@@ -49,7 +49,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="截止日期" prop="endTime">
-                <el-date-picker class="input" type="datetime" placeholder="选择日期"
+                <el-date-picker class="input" id="picker" type="datetime" placeholder="选择日期，请至少预留72小时的任务间隔"
                                 v-model="form.endTime" :picker-options="handlePicker"></el-date-picker>
             </el-form-item>
             <el-form-item label="工人要求" prop="workerRequirement">
@@ -138,7 +138,7 @@
                     taskName: '',       //新创建的task的名字
                     taskCategory: '',
                     taskDescription: '',
-                    endTime: new Date(),
+                    endTime: '',
                     workerRequirement: '',           //是否對工人有要求
                     rewardStrategy: '',//修改为rewardStrategy
                     imgNames: [],
@@ -153,6 +153,7 @@
                     nominees: [],//要求的工人
                     rewardPerPerson: 0,//对于每个人所给的钱
                     taskTags: [],
+                    ddl: new Date(),    //任务的完成截止时间
                 },
                 tempQuestion: '',
                 allWorkers: [],  //在初始化的时候去后端拿所有工人列表   多选框的key是workerId  value是workerName
@@ -164,7 +165,8 @@
                 handlePicker: {
                     disabledDate(nowDate) {
                         let date = new Date();
-                        return nowDate.getTime() < date;    //设置禁用时间，在今天之前是禁用的。
+                        date.setDate(date.getDate() + 3);
+                        return nowDate.getTime() < date;    //设置禁用时间，在三天内是禁用的。
                     }
                 },
 
@@ -178,7 +180,7 @@
                     nominees: [{type: 'array', required: true, message: '请至少选择一个工人', trigger: 'change'}],
                     questions: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
                     capacity: [{validator: bePositive, trigger: "blur"}],
-                    totalReward: [{validator: bePositive, trigger: "blur"}],
+                    totalReward: [{validator: bePositive,required: true, message: '请填入一个正整数', trigger: "blur"}],
                     requiredExperience: [{validator: bePositive, trigger: "blur"}]
                 }
             }
@@ -225,6 +227,7 @@
 				}
 
 				this.form.endTime.setTime(this.form.endTime.getTime() + 8 * 60 * 60 * 1000);
+				this.form.ddl.setTime(this.form.endTime.getTime() - 72 * 60 * 60 * 1000);      //
             },
             decidePostData(){
 				return {
@@ -248,6 +251,7 @@
 					questions: this.form.questions,
 					nominees: this.form.nominees,
 					rewardPerPerson: this.form.rewardPerPerson,
+                    ddl: this.form.ddl,
 				}
             },
             async onSubmit(formName) {      //处理提交并且post到后台
@@ -440,5 +444,10 @@
 
     .el-radio__label {
         font-size: 16px!important;
+    }
+
+    #picker{
+        min-width: 384px;
+        max-width: 384px;
     }
 </style>
