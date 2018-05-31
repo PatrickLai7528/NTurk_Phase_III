@@ -107,7 +107,7 @@ public class UpperContractServiceImpl implements UpperContractService {
 
     @Override
     public Contract getByTaskIdForInspection(long taskId, String username) {
-        List<Contract> cddts = contractJPA.findByTaskIdForInspection(taskId);
+        List<Contract> cddts = contractJPA.findByTaskIdForInspection(taskId, userByUsername(workerJPA, username).getId());
         if (cddts.isEmpty()) {
             return null; // 这样可能不好？
         }

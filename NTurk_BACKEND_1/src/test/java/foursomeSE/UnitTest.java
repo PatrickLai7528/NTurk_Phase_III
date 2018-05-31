@@ -1,6 +1,5 @@
 package foursomeSE;
 
-import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.TaskCategory;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
@@ -18,8 +17,7 @@ import foursomeSE.service.task.UpperTaskService;
 import foursomeSE.service.user.upper.UpperRequesterService;
 import foursomeSE.service.user.upper.UpperWorkerService;
 import foursomeSE.util.DBDataKeeper;
-import foursomeSE.util.DataSupplier;
-import foursomeSE.util.JsonDataKeeper;
+import foursomeSE.util.DataSupplierForT1;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +31,6 @@ import java.util.List;
 
 import static foursomeSE.service.user.UserUtils.userByUsername;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static foursomeSE.util.DataSupplier.*;
 
 import static org.junit.Assert.*;
 
@@ -82,7 +78,7 @@ public class UnitTest { // 虽然叫UnitTest，但是先都写在一起了
     private DBDataKeeper dbDataKeeper;
 
     @Autowired
-    private DataSupplier dataSupplier;
+    private DataSupplierForT1 dataSupplier;
 
 
     @Before

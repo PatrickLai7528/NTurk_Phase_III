@@ -1,5 +1,6 @@
 package foursomeSE.service.inspection;
 
+import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
@@ -9,6 +10,7 @@ import foursomeSE.jpa.inspection.InspectionJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static foursomeSE.service.user.UserUtils.userByUsername;
@@ -45,8 +47,17 @@ public class UpperInspectionServiceImpl implements UpperInspectionService {
     }
 
     @Override
-    public List<Inspection> getBestKth(String imgName, String username) {
-        // TODO 真的todo
-        return null;
+    public List<CInspection> getBestKth(String imgName, String username) {
+        List<Object[]> emm = inspectionJPA.getBestForImgname(imgName);
+        List<CInspection> result = new ArrayList<>();
+        emm.forEach(os -> {
+            CInspection e = new CInspection(
+                    Long.parseLong(String.valueOf(os[0])),
+                    Double.parseDouble(String.valueOf(os[1]))
+            );
+
+            result.add(e);
+        });
+        return result;
     }
 }

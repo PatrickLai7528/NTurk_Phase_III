@@ -3,12 +3,16 @@ package foursomeSE.entity.communicate;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
 public class CInspectionContract extends InspectionContract {
-    private List<Inspection> inspections;
+    private List<Inspection> inspections = new ArrayList<>();
+
+    public CInspectionContract() {
+    }
 
     public CInspectionContract(InspectionContract inspectionContract) {
         setSameFields(this, inspectionContract);

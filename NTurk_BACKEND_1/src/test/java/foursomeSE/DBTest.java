@@ -1,7 +1,6 @@
 package foursomeSE;
 
 import foursomeSE.entity.user.Requester;
-import foursomeSE.entity.user.Worker;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import org.junit.After;
@@ -12,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-
 import static foursomeSE.service.user.UserUtils.userByUsername;
-import static foursomeSE.util.DataSupplier.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

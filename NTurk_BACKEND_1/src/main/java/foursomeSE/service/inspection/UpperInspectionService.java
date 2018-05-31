@@ -1,5 +1,6 @@
 package foursomeSE.service.inspection;
 
+import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
@@ -16,6 +17,6 @@ public interface UpperInspectionService {
     /**
      * 先返回最好的k个inspection吧，就不和annotation整合了
      */
-    List<Inspection> getBestKth(String imgName, String username);
+    List<CInspection> getBestKth(String imgName, String username);
 
 }

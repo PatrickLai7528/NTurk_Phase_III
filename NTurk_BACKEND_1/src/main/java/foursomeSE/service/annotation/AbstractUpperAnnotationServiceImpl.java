@@ -2,11 +2,11 @@ package foursomeSE.service.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.error.MyObjectNotFoundException;
-import foursomeSE.jpa.annotation.AnnotationJPA;
+import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.user.WorkerJPA;
-import foursomeSE.service.contract.UpperContractService;
 
+import static foursomeSE.service.annotation.AnnotationUtils.annotationByContractIdAndImgName;
 import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
 
 public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation> implements UpperAnnotationService<T> {
@@ -14,7 +14,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation> i
 //    private UpperContractService contractService;
     private ContractJPA contractJPA;
 
-    private AnnotationJPA<T> annotationJPA;
+    private AbstractAnnotationJPA<T> annotationJPA;
 
     private WorkerJPA workerJPA;
 
@@ -22,7 +22,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation> i
 
 
     public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA,
-                                              AnnotationJPA<T> annotationJPA,
+                                              AbstractAnnotationJPA<T> annotationJPA,
                                               WorkerJPA workerJPA) {
         this.contractJPA = contractJPA;
         this.annotationJPA = annotationJPA;
@@ -31,7 +31,11 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation> i
 
     @Override
     public T getOneBy(long taskId, String username, String imgName) {
-        return getOneBy(contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username).getContractId(), imgName);
+        return getOneBy(
+                contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username)
+                        .getContractId(),
+                imgName
+        );
     }
 
     @Override
@@ -40,8 +44,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation> i
 //                a.getContractId() == contractId
 //                        && a.getImgName().equals(imgName));
 
-        return annotationJPA.findByContractIdAndImgName(contractId, imgName)
-                .orElseThrow(() -> new MyObjectNotFoundException("annotation with contractId " + contractId + " and imgName " + imgName + " is not found"));
+        return annotationByContractIdAndImgName(annotationJPA, contractId, imgName);
     }
 
     @Override

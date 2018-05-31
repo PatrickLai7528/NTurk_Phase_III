@@ -21,7 +21,7 @@ public class Inspection implements Serializable {
     private long annotationId;
 
     @NotNull
-    private int rate;
+    private double rate;
 
     public long getInspectionId() {
         return inspectionId;
@@ -47,11 +47,11 @@ public class Inspection implements Serializable {
         this.annotationId = annotationId;
     }
 
-    public int getRate() {
+    public double getRate() {
         return rate;
     }
 
-    public void setRate(int rate) {
+    public void setRate(double rate) {
         this.rate = rate;
     }
 }

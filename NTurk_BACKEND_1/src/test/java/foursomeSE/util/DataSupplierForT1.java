@@ -40,14 +40,14 @@ import static foursomeSE.service.user.UserUtils.userByUsername;
 * 不过这种软件工程的东西还是算了。
 * */
 @Service
-public class DataSupplier {
+public class DataSupplierForT1 {
     private WorkerJPA workerJPA;
     private RequesterJPA requesterJPA;
     private TaskJPA taskJPA;
 
-    public DataSupplier(WorkerJPA workerJPA,
-                        RequesterJPA requesterJPA,
-                        TaskJPA taskJPA) {
+    public DataSupplierForT1(WorkerJPA workerJPA,
+                             RequesterJPA requesterJPA,
+                             TaskJPA taskJPA) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.taskJPA = taskJPA;

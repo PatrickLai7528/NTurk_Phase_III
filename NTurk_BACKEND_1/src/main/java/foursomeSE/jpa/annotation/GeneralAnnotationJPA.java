@@ -5,5 +5,5 @@ import foursomeSE.entity.annotation.GeneralAnnotation;
 import javax.transaction.Transactional;
 
 @Transactional
-public interface GeneralAnnotationJPA extends AnnotationJPA<GeneralAnnotation> {
+public interface GeneralAnnotationJPA extends AbstractAnnotationJPA<GeneralAnnotation> {
 }

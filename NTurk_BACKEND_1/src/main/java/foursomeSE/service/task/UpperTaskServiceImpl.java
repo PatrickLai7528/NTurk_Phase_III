@@ -154,7 +154,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
     public List<Task> getNewInspectionTasks(String username) {
         this.username = username;
 
-        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW);
+        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal());
         result.removeAll(getWorkerInspectionTasks(username));
 
         return result;
@@ -164,10 +164,16 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
     public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
         this.username = username;
 
-        return getWorkerTasks(username).stream()
-                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW)
+        return taskJPA.findWorkerInspectionTasks(username)
+                .stream()
                 .map(this::sToD2)
                 .collect(Collectors.toCollection(ArrayList::new));
+
+//        return getWorkerTasks(username).stream()
+//                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW
+//                        && t.get)
+//                .map(this::sToD2)
+//                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 
