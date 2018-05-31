@@ -3,6 +3,7 @@ package foursomeSE;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
+import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.task.Task;
@@ -129,7 +130,9 @@ public class UnitTest2 implements ConstsForT2 {
 
 
         // 测getNewInspectionTasks和getWorkerInspectionTasks
-        assertEquals(1, taskService.getWorkerInspectionTasks("worker2@ex.com").size());
+        List<CTaskForInspection> w2ti = taskService.getWorkerInspectionTasks("worker2@ex.com");
+        assertEquals(1, w2ti.size());
+        assertEquals(3, w2ti.get(0).getMandatoryTime());
         List<Task> newInspectionTasks1 = taskService.getNewInspectionTasks("worker2@ex.com");
         assertEquals(1, newInspectionTasks1.size());
         assertEquals("task2", newInspectionTasks1.get(0).getTaskName());

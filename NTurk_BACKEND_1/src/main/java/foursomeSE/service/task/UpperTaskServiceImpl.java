@@ -355,7 +355,13 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
     private CTaskForInspection sToD2(Task task) {
         CTaskForInspection result = new CTaskForInspection(task);
         // 所有这个worker做过的关于这个task的inspection
-        result.setMandatoryTime((int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId()));
+        int alreadyDone = (int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId());
+        if (alreadyDone >= 3) {
+            result.setMandatoryTime(0);
+        } else {
+            result.setMandatoryTime(3 - alreadyDone);
+        }
+
         return result;
     }
 //    private List<Task> _getWorkerTasks(String username) {
