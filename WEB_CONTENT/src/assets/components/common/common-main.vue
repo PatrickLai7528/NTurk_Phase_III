@@ -101,9 +101,9 @@
 			filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
 				return row.taskCategory === value;
 			},
-            filterStateHandler(value,row,column){
-			    return row.taskStatus === value;
-            },
+			filterStateHandler(value, row, column) {
+				return row.taskStatus === value;
+			},
 			doWhileGetTableDataSuccess(response) {        //赖总的编程风格很友好啊，将代码都优化了
 				this.tableData = response.data;
 				for (let e of this.tableData) {
@@ -121,47 +121,19 @@
 					return "http://localhost:8086/newTasks"
 			},
 			getTableData() {
-				let header = {headers : {Authorization: this.$store.getters.getToken}};
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
 				let getUrl = this.decideGetTableDataUrl();
 				this.$http.get(getUrl, header)
-                    .then(this.doWhileGetTableDataSuccess)
-                    .catch(function (error) {
-					console.log(error);
-				});
+					.then(this.doWhileGetTableDataSuccess)
+					.catch(function (error) {
+						console.log(error);
+					});
 			},
 
 			translate: function () {
-<<<<<<< HEAD
-				for (let i = 0; i < this.tableData.length; i++) {
-					if (this.tableData[i].taskCategory === "GENERAL") {
-						this.tableData[i].taskCategoryChi = "整體標註";
-					} else if (this.tableData[i].taskCategory === "FRAME") {
-						this.tableData[i].taskCategoryChi = "區域標註";
-					} else if (this.tableData[i].taskCategory === "SEGMENT") {
-						this.tableData[i].taskCategoryChi = "區域劃分";
-					}
-
-                    if(this.tableData[i].taskStatus === 'ONGOING'){
-                        this.tableData[i].taskStatus = '标注任务';
-                    }
-                    else if(this.tableData[i].taskStatus === 'UNDER_REVIEW'){
-                        this.tableData[i].taskStatus = '评审任务';
-                    }
-				}
-=======
-				this.tableData.forEach((value, index, array)=>{
+				this.tableData.forEach((value, index, array) => {
 					value.taskCategoryChi = TranslateUtils.translateTaskCategory(value.taskCategory);
-                });
-				// for (let i = 0; i < this.tableData.length; i++) {
-				// 	if (this.tableData[i].taskCategory === "GENERAL") {
-				// 		this.tableData[i].taskCategoryChi = "整體標註";
-				// 	} else if (this.tableData[i].taskCategory === "FRAME") {
-				// 		this.tableData[i].taskCategoryChi = "區域標註";
-				// 	} else if (this.tableData[i].taskCategory === "SEGMENT") {
-				// 		this.tableData[i].taskCategoryChi = "區域劃分";
-				// 	}
-				// }
->>>>>>> 161250051_refactor
+				});
 			},
 			handleClick(row, Id, taskCategory) {
 				let _this = this;

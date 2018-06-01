@@ -39,7 +39,7 @@ let privateMethods = {
 		})
 		;
 	},
-	submitCurrent(callback = function(){
+	submitCurrent(callback = function () {
 	}) {
 		let router, header, http, data;
 		header = privateVariables.header;
@@ -334,14 +334,14 @@ class AnnotationEditor {
 				annotation[markingTypeName].splice(index, 1);
 			}
 			privateVariables.editedAnnotation.set(currentImageName, annotation);
-			privateVariables.isEdited.set(currentImageName, annotation);
+			privateVariables.isEdited.set(currentImageName, true);
 			privateMethods.submitCurrent(() => {
 				this.drawCurrent(privateVariables.header);
 			});
 			// console.log(annotation);
 			privateMethods.initTagHtml(annotation);
 			privateMethods.initTagText(annotation);
-			privateVariables.viewer.forceUpdate(currentImageName);
+			// privateVariables.viewer.forceUpdate(currentImageName);
 		}
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
