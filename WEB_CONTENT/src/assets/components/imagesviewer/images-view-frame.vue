@@ -95,7 +95,8 @@
 <script>
 	import ImageViewer from '../../js/ImageViewer.js'
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
-	import FrameDrawingStrage from '../../js/strategy/FrameDrawingStrategy.js'
+	import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
+	import AnnotationEditor from '../../js/AnnotaionEditor.js'
 
 	export default {
 		data: function () {
@@ -103,7 +104,7 @@
 				tagHtml: '',
 				viewer: {},
 				canvasHtml: `
-                    <canvas id="canvas" class="fl" width="600" height="400"></canvas>`,
+                    <canvas id="canvas" class="fl"></canvas>`,
 				tagText: [{}],
 				submitDisabled: "disabled",
 				taskId: this.$route.params.taskId,
@@ -125,7 +126,7 @@
 				this.$http.get(route, header)
 					.then((response) => {
 						let imageViewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
-						this.viewer = new AnnotationViewer(new FrameDrawingStrage(), imageViewer, 'http://localhost:8086/frameAnnotation/contractId/', this.contractId, this.$http);
+						this.viewer = new AnnotationViewer(new FrameDrawingStrategy(), imageViewer, 'http://localhost:8086/frameAnnotation/contractId/', this.contractId, this.$http);
 						this.viewer.drawCurrent(header, this.doThisEveryImageUpdate);
 					})
 					.catch(function (error) {

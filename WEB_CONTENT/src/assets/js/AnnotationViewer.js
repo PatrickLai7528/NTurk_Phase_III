@@ -1,5 +1,5 @@
 import VirtualInterface from './interfaces/VirtualInterface.js'
-import DrawableInterface from './interfaces/DrawableViewerInterface.js'
+import DrawableInterface from './interfaces/DrawableInterface.js'
 import CanvasShareableInterface from './interfaces/CanvasShareableInterface.js'
 import MarkingDrawingStrategy from './interfaces/MarkingDrawingStrategy.js'
 
@@ -7,7 +7,7 @@ import MarkingDrawingStrategy from './interfaces/MarkingDrawingStrategy.js'
  * AnnotationViewer的私有變量
  * @type {{
  * 			tagHtml: string,
- * 			contractId: string,
+ * 			id: string,
  * 			viewer: {},
  * 			annotations: {},
  * 			canvas: {},
@@ -26,22 +26,28 @@ import MarkingDrawingStrategy from './interfaces/MarkingDrawingStrategy.js'
  */
 let privateVariables = {
 	tagHtml: "", /* 顯示tag的html */
-	contractId: "", /* 合同ID */
+	id: "", /* 合同ID */
 	viewer: {}, /* instance of ImageViewer */
-	annotations: {}, /* get請求的數據保存在此 */
+	annotations: new Map(), /* get請求的數據保存在此 */
 	canvas: {},
 	baseUrl: "", /* get請求的url, 需包括最後一個"/" */
 	http: {}, /* 具有發get請求的東西 */
 	isLastAnnotationLoading: false, /* 上一個annotation的get請求是否加載中了, 主要用於輪詢 */
+	isCurrentAnnotationNew: true,
 	config: {
 		/* canvas相關配置, 打算寫成可配置 */
 		lineWidth: 5,
-		strokeStyle: "#df4b26",
-		lineColor: "#000000",
-		fillStyle: "blue",
-		globalAlpha: 0.3,
+		strokeStyle:
+			"#df4b26",
+		lineColor:
+			"#000000",
+		fillStyle:
+			"blue",
+		globalAlpha:
+			0.3,
 	},
-	markingDrawingStrategy: {} // 注釋上沒有, 等一下加上
+	markingDrawingStrategy: {},
+	isForceUpdate: new Map()
 };
 /**
  *
@@ -54,7 +60,7 @@ let privateVariables = {
  */
 let privateMethods = {
 	/**
-	 * 往baseUrl+contractId+/imageName/+currentImageName 發get請求
+	 * 往baseUrl+id+/imageName/+currentImageName 發get請求
 	 * 使用privateVariables.header, 應該是不安全的...
 	 * @param callback 請求獲得回應後調用的回調函數
 	 */
@@ -64,16 +70,29 @@ let privateMethods = {
 		/* 檢查參數 */
 		if ("function" !== typeof callback)
 			throw new Error("loadCurrentAnnotation in AnnotationViewer: callback = " + callback + "is not a function");
-		url = `${privateVariables.baseUrl + privateVariables.contractId}/imgName/${privateVariables.viewer.shareCurrentImageName()}`;
+		url = `${privateVariables.baseUrl + privateVariables.id}/imgName/${privateVariables.viewer.shareCurrentImageName()}`;
 		header = privateVariables.header;
 		privateVariables.isLastAnnotationLoading = true; // 標記位, 開始加載
 		privateVariables.http.get(url, header)
 			.then((response) => {
-				privateVariables.annotations = response.data; // 保存數據
-				callback();
+				// console.log("in then");
+				console.log(response);
+				privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), response.data);
+				privateVariables.isCurrentAnnotationNew = false;
 			})
 			.catch((error) => {
-				console.log(error);
+				let annotation = {};
+				annotation.imgName = privateVariables.viewer.shareCurrentImageName();
+				annotation[privateVariables.markingDrawingStrategy.getMarkingTypeName()] = [];
+				privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), annotation);
+				privateVariables.isCurrentAnnotationNew = true;
+				// error.absorb();
+				// console.log("in cather");
+				// console.log(error);
+			})
+			.finally(() => {
+				privateVariables.isLastAnnotationLoading = false;
+				callback();
 			})
 	},
 	_drawCurrentAnnotation: function (callback) {
@@ -90,16 +109,18 @@ let privateMethods = {
 			privateVariables.tagHtml = "";
 			context.strokeStyle = privateVariables.config.strokeStyle;
 			context.lineWidth = privateVariables.config.lineWidth;
-			for (i = 0; i < privateVariables.annotations[markingTypeName].length; i++) {
-				marking = privateVariables.annotations[markingTypeName][i];
+			for (i = 0; i < this.getCurrentAnnotation()[markingTypeName].length; i++) {
+				marking = this.getCurrentAnnotation()[markingTypeName][i];
 				privateVariables.markingDrawingStrategy.drawThis(context, marking, privateVariables.config);
 				privateVariables.tagHtml += privateVariables.markingDrawingStrategy.addTag(privateVariables.canvas, marking, i);
 			}
 			callback();
-			privateVariables.isLastAnnotationLoading = false;
 		};
 		privateVariables.viewer.drawCurrent(doAfterFinishDrawing);
 	},
+	getCurrentAnnotation() {
+		return privateVariables.annotations.get(privateVariables.viewer.shareCurrentImageName());
+	}
 };
 
 /**
@@ -112,16 +133,16 @@ class AnnotationViewer {
 	 * 構造器
 	 * @param imageViewer has to implement CanvasSharable and Drawable, or instance of ImageViewer Class
 	 * @param baseUrl has to contain the last "/"
-	 * @param contractId can be string or number
+	 * @param id can be string or number
 	 * @param http has to have a method call "get"
 	 */
-	constructor(markingDrawingStrategy, imageViewer, baseUrl, contractId, http) {
+	constructor(markingDrawingStrategy, imageViewer, baseUrl, id, http) {
 		/* 檢查參數 */
 		if (typeof baseUrl !== "string")
 			throw new Error("AnnotationViewer's constructor viewer expected a baseUrl of string, but got a " + typeof baseUrl);
 
-		if (typeof contractId !== "string" && typeof contractId !== "number")
-			throw new Error("AnnotationViewer's constructor viewer expected a contractId of string, but got a " + typeof contractId);
+		if (typeof id !== "string" && typeof id !== "number")
+			throw new Error("AnnotationViewer's constructor viewer expected a id of string, but got a " + typeof id);
 
 		if (baseUrl[baseUrl.length - 1] !== "/")
 			throw new Error("AnnotationViewer's constructor: baseUrl should included the last '/'");
@@ -140,7 +161,7 @@ class AnnotationViewer {
 		privateVariables.config.defaultWidth = imageViewer.shareWidth();
 		privateVariables.config.defaultHeight = imageViewer.shareHeight();
 		privateVariables.baseUrl = baseUrl;
-		privateVariables.contractId = contractId;
+		privateVariables.id = id;
 		privateVariables.http = http;
 		privateVariables.tagHtml = "";
 		privateVariables.markingDrawingStrategy = markingDrawingStrategy;
@@ -148,7 +169,7 @@ class AnnotationViewer {
 
 	/**
 	 * 加載viewer.getCurrentImageName對應的圖片, 和
-	 * 加載viewer.getCurrentImageName和contractId對應的annotation
+	 * 加載viewer.getCurrentImageName和id對應的annotation
 	 * @param tagHtml i do not think this is needed any more
 	 * @param header header就是header
 	 * @param callback 不保證即時能加載完, 若有操作需依賴繪製完的狀態, 需用回調函數
@@ -156,16 +177,28 @@ class AnnotationViewer {
 	 */
 	drawCurrent(header, callback = function () {
 	}) {
-		let id, doIt;
+		let id, doIt, isCurrentImageForcedUpdate, currentImageName;
+		// console.log(privateVariables.isForceUpdate);
+
+		privateVariables.isForceUpdate.set(currentImageName, false);
 		doIt = () => { // 加載的實際操作
 			let defaultCallback;
+			currentImageName = privateVariables.viewer.shareCurrentImageName();
+			isCurrentImageForcedUpdate = privateVariables.isForceUpdate.get(currentImageName);
+
 			if (privateVariables.header === null || privateVariables.header === undefined)
 				privateVariables.header = header;
 			/* get請求成功之後調用的回調函數 */
+
 			defaultCallback = () => {
 				privateMethods._drawCurrentAnnotation(callback);
 			};
-			privateMethods.loadCurrentAnnotation(defaultCallback);
+			if (!isCurrentImageForcedUpdate && privateMethods.getCurrentAnnotation() !== null && privateMethods.getCurrentAnnotation() !== undefined) {
+				// console.log("already has this data");
+				privateMethods._drawCurrentAnnotation(callback);
+			} else {
+				privateMethods.loadCurrentAnnotation(defaultCallback);
+			}
 		};
 		/* 上一個annotation已加載完成, 加載現在的annotation*/
 		if (privateVariables.isLastAnnotationLoading === false) {
@@ -177,7 +210,7 @@ class AnnotationViewer {
 					doIt();
 					clearInterval(id); // 取消輪詢
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}
@@ -204,7 +237,7 @@ class AnnotationViewer {
 					doIt();
 					clearInterval(id);
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}
@@ -231,7 +264,7 @@ class AnnotationViewer {
 					doIt();
 					clearInterval(id);
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}
@@ -245,7 +278,7 @@ class AnnotationViewer {
 	shareTagText() {
 		let tagText = new Array(), item, markingTypeName;
 		markingTypeName = privateVariables.markingDrawingStrategy.getMarkingTypeName();
-		for (item of privateVariables.annotations[markingTypeName]) {
+		for (item of privateMethods.getCurrentAnnotation()[markingTypeName]) {
 			tagText.push({text: item.tag});
 		}
 		return tagText;
@@ -291,6 +324,33 @@ class AnnotationViewer {
 	 */
 	shareCurrentImageName() {
 		return privateVariables.viewer.shareCurrentImageName();
+	}
+
+	shareMarkingDrawingStrategy() {
+		return privateVariables.markingDrawingStrategy;
+	}
+
+	shareCurrentAnnotation() {
+		return privateMethods.getCurrentAnnotation()
+	}
+
+	isCurrentAnnotationNew() {
+		return privateVariables.isCurrentAnnotationNew;
+	}
+
+	shareHttp() {
+		// let submit;
+		// if (privateVariables.isCurrentAnnotationNew) {
+		// 	submit = privateVariables.http.post;
+		// } else {
+		// 	submit = privateVariables.http.put;
+		// }
+		// return {submit: submit};
+		return privateVariables.http;
+	}
+
+	forceUpdate(imageName) {
+		privateVariables.isForceUpdate.set(imageName, true);
 	}
 }
 

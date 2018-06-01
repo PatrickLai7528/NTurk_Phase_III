@@ -59,6 +59,7 @@ let privateMethods = {
 			return privateVariables.images[privateVariables.currentImageIndex];
 	},
 };
+
 /**
  *  圖片瀏覽器類
  *  實現CanvasShareableInterface接口, DrawableInterface接口
@@ -92,6 +93,8 @@ class ImageViewer {
 			throw new Error("ImageViewer's constructor: baseUrl should included the last '/'");
 
 		privateVariables.canvas = canvas;
+		privateVariables.canvas.height = privateVariables.config.defaultHeight;
+		privateVariables.canvas.width = privateVariables.config.defaultWidth;
 		privateVariables.imageNames = imageNames;
 		privateVariables.baseUrl = baseUrl;
 		privateVariables.currentImageIndex = 0;
@@ -134,7 +137,7 @@ class ImageViewer {
 					doIt();
 					clearInterval(id);
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}
@@ -173,7 +176,7 @@ class ImageViewer {
 					doIt();
 					clearInterval(id);
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}
@@ -212,7 +215,7 @@ class ImageViewer {
 					doIt();
 					clearInterval(id); // 取消輪詢
 				}
-			}, 100);
+			}, 10);
 		}
 		return this;
 	}

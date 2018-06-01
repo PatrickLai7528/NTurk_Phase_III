@@ -55,23 +55,39 @@ class AnswerPairsDrawingStrategy {
 	interpretTag(tags) {
 		let returnObject = [];
 		let tagArray, tagPerLine, tagElement;
-		try {
-			tagArray = tags.split(";");
-			for (tagPerLine of tagArray) {
-				if (tagPerLine === null || tagPerLine === undefined || tagPerLine === "")
-					continue;
-				tagElement = tagPerLine.split(",");
-				returnObject.push({
-					index: tagElement[0].split(":")[1],
-					question: tagElement[1].split(":")[1],
-					answer: tagElement[2].split(":")[1],
-				})
-			}
-		} catch (error) {
-			throw new Error("interpretTags in AnswerPairsDrawingStrategy: the format of tags is not correct\n" + "raw error message:" + error);
+		// try {
+		if (tags === null || tags === undefined)
+			return;
+		console.log(tags);
+		tagArray = tags.split(";");
+		for (tagPerLine of tagArray) {
+			if (tagPerLine === null || tagPerLine === undefined || tagPerLine === "")
+				continue;
+			tagElement = tagPerLine.split(",");
+			returnObject.push({
+				index: tagElement[0].split(":")[1],
+				question: tagElement[1].split(":")[1],
+				answer: tagElement[2].split(":")[1],
+			})
 		}
+		// } catch (error) {
+		// throw new Error("interpretTags in AnswerPairsDrawingStrategy: the format of tags is not correct\n" + "raw error message:" + error);
+		// }
 		return returnObject;
 	}
+
+	generateMarkingAfterMouseUp(e) {
+		null;
+	}
+
+	generateMarkingAfterMouseDown(e) {
+		return null;
+	}
+
+	generateMarkingAfterMouseMove(e) {
+		return null;
+	}
+
 }
 
 export default AnswerPairsDrawingStrategy;

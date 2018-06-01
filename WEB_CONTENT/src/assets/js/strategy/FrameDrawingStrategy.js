@@ -1,3 +1,9 @@
+let privateVariables = {
+	startPoint: {},
+	endPoint: {},
+	isMouseDown: false
+}
+
 /**
  * FrameDrawingStrategy的私有方法
  * @type {{getTagLocation(*): {x: number|*, y: number|*}}}
@@ -63,7 +69,7 @@ class FrameDrawingStrategy {
 	 * 					}
 	 */
 	drawThis(context, frame, config) {
-		console.log(frame);
+		// console.log(frame);
 		context.strokeRect(frame.p1.x, frame.p1.y,
 			frame.p2.x - frame.p1.x, frame.p2.y - frame.p1.y);
 	}
@@ -77,11 +83,51 @@ class FrameDrawingStrategy {
 	 */
 	addTag(canvas, frame, index) {
 		let tagLocation;
+		// console.log(canvas);
+		// console.log(frame);
+		// console.log(index);
 		tagLocation = privateMethods.getTagLocation(frame);
 		// 小心這個newTagHtml的格式...很容易寫錯的
 		let newTagHtml = "<el-tag style='background: #e5e9f2;position:absolute; white-space: nowrap;" + "top:" + (tagLocation.y + canvas.offsetTop) + "px;" + "left:" + tagLocation.x + "px;'>標記" + (index + 1) + "</el-tag>";
 		// tagHtml += newTagHtml; // += 可能一張圖片有多個Tag
 		return newTagHtml;
+	}
+
+	generateMarkingAfterMouseUp(e) {
+		let frame;
+		privateVariables.endPoint = {x: e.offsetX, y: e.offsetY};
+		// startPoint = privateVariables.startPoint;
+		// endPoint = {x: e.offsetX, y: e.offsetY};
+		privateVariables.isMouseDown = false;
+		frame = {p1: privateVariables.startPoint, p2: privateVariables.endPoint};
+		if (privateVariables.startPoint.x === privateVariables.startPoint.x && privateVariables.startPoint.y === privateVariables.endPoint.y) {
+			privateVariables.isMouseDown = false;
+			return null;
+		}
+		return frame;
+	}
+
+	generateMarkingAfterMouseDown(e) {
+		console.log("in")
+		let frame;
+		privateVariables.startPoint = {x: e.offsetX, y: e.offsetY};
+		privateVariables.endPoint = privateVariables.startPoint;
+		privateVariables.isMouseDown = true;
+		frame = {p1: privateVariables.startPoint, p2: privateVariables.endPoint}
+		return frame
+	}
+
+	generateMarkingAfterMouseMove(e) {
+		let frame;
+		if (privateVariables.isMouseDown) {
+			privateVariables.endPoint = {x: e.offsetX, y: e.offsetY};
+			// startPoint = privateVariables.points[0];
+			// privateVariables.points[1] = currentPoint;
+			frame = {p1: privateVariables.startPoint, p2: privateVariables.endPoint}
+		} else {
+			frame = null;
+		}
+		return frame;
 	}
 }
 

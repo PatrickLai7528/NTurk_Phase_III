@@ -1,3 +1,7 @@
+let privateVariables = {
+	pointList: [],
+	isMouseDown: false
+}
 /**
  * SegmentDrawingStrategy的私有方法
  * @type {{getTagLocation(*): {x: number|*, y: number|*}}}
@@ -74,6 +78,76 @@ class SegmentDrawingStrategy {
 		// tagHtml += newTagHtml; // += 可能一張圖片有多個Tag
 		return newTagHtml;
 	}
+
+	generateMarkingAfterMouseUp(e) {
+		let currentPoint;
+		currentPoint = {x: e.offsetX, y: e.offsetY};
+		privateVariables.isMouseDown = false;
+		privateVariables.pointList.push(currentPoint);
+		return {polygon: privateVariables.pointList};
+		// this.flag.paintingEnabled = false;
+		// this.context.closePath();
+		// this.context.save();
+		// this.context.globalAlpha = 0.3;
+		// this.context.fillStyle = this.config.fillStyle;
+		// this.context.fill();
+		// this.context.restore();
+		// this.canvasMoveUse = false;
+		// const canvasX = e.offsetX;
+		// const canvasY = e.offsetY;
+
+		// if (Math.abs(canvasX - this.lastPoint.x) > 3 && Math.abs(canvasY - this.lastPoint.y) > 3) {
+		// this.segments[this.segmentIndex].polygon.push({
+		// 	x: canvasX,
+		// 	y: canvasY,
+		// })
+		// console.log("it is going to add tag");
+		// this.addTag(this.segments[this.segmentIndex], this.segments.length);
+		// console.log(this.segments[this.segmentIndex].polygon);
+		// console.log(this.segmentIndex)
+		// if (this.segmentIndex < this.segments.length) {
+		// 	this.segmentIndex++;
+		// }
+		// this.addTag(this.segments[this.segments.length - 1], this.segments.length - 1);
+		// console.log("segment index = " + this.segmentIndex);
+	}
+
+	generateMarkingAfterMouseDown(e) {
+		let currentPoint;
+		currentPoint = {x: e.offsetX, y: e.offsetY};
+		privateVariables.isMouseDown = true;
+		privateVariables.pointList = [];
+		privateVariables.pointList.push(currentPoint);
+		// this.lastPoint.x = canvasX;
+		// this.lastPoint.y = canvasY;
+		// this.context.beginPath();
+		// this.context.moveTo(canvasX, canvasY);
+		// console.log('moveTo', canvasX, canvasY);
+		return {polygon: privateVariables.pointList};
+	}
+
+	generateMarkingAfterMouseMove(e) {
+		let currentPoint;
+		if (privateVariables.isMouseDown === true) {
+			currentPoint = {x: e.offsetX, y: e.offsetY};
+			privateVariables.pointList.push(currentPoint);
+			return {polygon: privateVariables.pointList};
+			// const t = e.target;
+			// let canvasX;
+			// let canvasY;
+			// canvasX = e.offsetX;
+			// canvasY = e.offsetY;
+			// this.context.lineTo(canvasX, canvasY);
+			// this.context.stroke();
+			// if (Math.abs(canvasX - this.lastPoint.x) > 3 && Math.abs(canvasY - this.lastPoint.y) > 3) {
+			// this.segments[this.segmentIndex].polygon.push({
+			// 	x: canvasX,
+			// 	y: canvasY,
+			// })
+		}
+		return null;
+	}
+
 }
 
 export default SegmentDrawingStrategy;
