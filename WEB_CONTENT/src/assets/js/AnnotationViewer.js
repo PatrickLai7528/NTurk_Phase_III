@@ -76,7 +76,6 @@ let privateMethods = {
 		privateVariables.http.get(url, header)
 			.then((response) => {
 				// console.log("in then");
-				console.log(response);
 				privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), response.data);
 				privateVariables.isCurrentAnnotationNew = false;
 			})
@@ -180,12 +179,11 @@ class AnnotationViewer {
 		let id, doIt, isCurrentImageForcedUpdate, currentImageName;
 		// console.log(privateVariables.isForceUpdate);
 
-		privateVariables.isForceUpdate.set(currentImageName, false);
 		doIt = () => { // 加載的實際操作
 			let defaultCallback;
 			currentImageName = privateVariables.viewer.shareCurrentImageName();
 			isCurrentImageForcedUpdate = privateVariables.isForceUpdate.get(currentImageName);
-
+			privateVariables.isForceUpdate.set(currentImageName, false);
 			if (privateVariables.header === null || privateVariables.header === undefined)
 				privateVariables.header = header;
 			/* get請求成功之後調用的回調函數 */

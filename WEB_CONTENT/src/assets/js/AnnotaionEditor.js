@@ -39,7 +39,7 @@ let privateMethods = {
 		})
 		;
 	},
-	submitCurrent(callback = function () {
+	submitCurrent(callback = function(){
 	}) {
 		let router, header, http, data;
 		header = privateVariables.header;
@@ -116,7 +116,6 @@ let privateMethods = {
 		length = this.getCurrentEditedAnnotation()[markingTypeName].length - 1;
 		currentTagHtml = privateVariables.markingDrawingStrategy.addTag(privateVariables.canvas, marking, length);
 		currentTotalTagHtml = caller.shareTag();
-		privateVariables.isEdited.set(currentImageName, true);
 		if (currentTotalTagHtml === null || currentTotalTagHtml === undefined) {
 			currentTotalTagHtml = currentTagHtml;
 		} else {
@@ -124,6 +123,7 @@ let privateMethods = {
 		}
 		privateVariables.tagHtml.set(currentImageName, currentTotalTagHtml);
 		privateVariables.editedAnnotation.set(currentImageName, annotation);
+		privateVariables.isEdited.set(currentImageName, true);
 		// privateVariables.viewer.forceUpdate(currentImageName);
 		this.submitCurrent(() => {
 			this.drawThis(marking);
@@ -214,7 +214,7 @@ class AnnotationEditor {
 				privateVariables.viewer.drawNext(defaultCallback)
 			} else {
 				privateMethods.submitCurrent(() => {
-					privateVariables.viewer.forceUpdate(currentImageName);
+					// privateVariables.viewer.forceUpdate(currentImageName);
 					privateVariables.viewer.drawNext(defaultCallback) // 提交完當前標註再跳轉下一張
 				})
 			}
@@ -248,7 +248,7 @@ class AnnotationEditor {
 				privateVariables.viewer.drawPrevious(defaultCallback)
 			} else {
 				privateMethods.submitCurrent(() => {
-					privateVariables.viewer.forceUpdate(currentImageName);
+					// privateVariables.viewer.forceUpdate(currentImageName);
 					privateVariables.viewer.drawPrevious(defaultCallback) // 提交完當前標註再跳轉下一張
 				})
 			}
@@ -298,8 +298,8 @@ class AnnotationEditor {
 		let marking;
 		marking = privateVariables.markingDrawingStrategy.generateMarkingAfterMouseUp(e);
 		if (null !== marking && undefined !== marking) {
-			privateMethods.drawThis(marking);
 			privateMethods.addOneMarking(this, marking);
+			privateMethods.drawThis(marking);
 		}
 	}
 
@@ -341,7 +341,7 @@ class AnnotationEditor {
 			// console.log(annotation);
 			privateMethods.initTagHtml(annotation);
 			privateMethods.initTagText(annotation);
-			// privateVariables.viewer.forceUpdate(currentImageName);
+			privateVariables.viewer.forceUpdate(currentImageName);
 		}
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
