@@ -2,20 +2,23 @@
     <el-container>
         <el-main class="wrap">
             <div class="block">
-                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
-                             v-on:change="onIndexChange">
-                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
-                        <div id="canvasDiv">
-                            <canvas id="canvas" class="fl">
-                            </canvas>
-                        </div>
-                    </el-carousel-item>
-                </el-carousel>
+                <div id="canvasDiv">
+                    <div v-html="canvasHtml">
+                        {{canvasHtml}}
+                    </div>
+                    <div v-html="tagHtml">{{tagHtml}}</div>
+                </div>
+                <div id="previous-button">
+                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
+                </div>
+                <div id="next-button">
+                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
+                </div>
             </div>
         </el-main>
         <el-aside width="300px" style="alignment: center">
             <ul style="list-style-type:none">
-                <li v-for="(val,index) in segments">
+                <li v-for="(val,index) in tagText">
                     <el-popover
                             placement="right"
                             width="150"
@@ -24,7 +27,7 @@
                         <el-input
                                 type="textarea"
                                 :rows="2"
-                                v-model="val.tag"
+                                v-model="val.text"
                                 :disabled="true"
                         >
                         </el-input>
@@ -101,6 +104,7 @@
 </style>
 
 <script>
+<<<<<<< HEAD
     import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data() {
@@ -371,4 +375,56 @@
             },
         }
     }
+=======
+	import ImageViewer from '../../js/ImageViewer.js'
+	import AnnotationViewer from '../../js/AnnotationViewer.js'
+	import SegmentDrawingStrategy from '../../js/strategy/SegmentDrawingStrategy.js'
+
+	export default {
+		data() {
+			return {
+				viewer: {},
+				tagText: [{}],
+				tagHtml: "",
+				canvasHtml: `<canvas id="canvas" class="fl" width="600" height="400"></canvas>`,
+				taskId: this.$route.params.taskId,
+				contractId: this.$route.params.contractId,
+				canvas: {}
+			}
+		},
+		mounted() {
+			this.$nextTick(function () {
+				this.canvas = document.getElementById("canvas");
+				this.getImageNames();
+			})
+		},
+		methods: {
+			getImageNames() {
+				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
+				this.$http.get(route, header)
+					.then((response) => {
+						let imageViewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
+						// imageViewer.drawCurrent();
+						this.viewer = new AnnotationViewer(new SegmentDrawingStrategy(), imageViewer, 'http://localhost:8086/segmentAnnotation/contractId/', this.contractId, this.$http);
+						this.viewer.drawCurrent(header, this.doThisEveryImageUpdate);
+						// this.trySomething();
+					})
+					.catch(function (error) {
+						console.log(error);
+					})
+			},
+			doThisEveryImageUpdate() {
+				this.tagHtml = this.viewer.shareTag();
+				this.tagText = this.viewer.shareTagText();
+			},
+			next() {
+				this.viewer.drawNext(this.doThisEveryImageUpdate);
+			},
+			previous() {
+				this.viewer.drawPrevious(this.doThisEveryImageUpdate);
+			}
+		}
+	}
+>>>>>>> 161250051_refactor
 </script>

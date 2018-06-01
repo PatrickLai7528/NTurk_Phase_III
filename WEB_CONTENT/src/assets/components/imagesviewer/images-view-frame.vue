@@ -3,31 +3,33 @@
     <el-container>
         <el-main class="wrap">
             <div class="block">
-                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
-                             v-on:change="onIndexChange">
-                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
-                        <div id="canvasDiv">
-                            <canvas
-                                    id="canvas"
-                                    class="fl"
-                            >
-                            </canvas>
-                        </div>
-                    </el-carousel-item>
-                </el-carousel>
+                <!--<el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"-->
+                <!--v-on:change="onIndexChange">-->
+                <!--<el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">-->
+                <div id="canvasDiv">
+                    <div v-html="canvasHtml">
+                        {{canvasHtml}}
+                    </div>
+                    <div v-html="tagHtml">{{tagHtml}}</div>
+                </div>
+                <!--<div v-html="allEditAreaHtml">-->
+                <!--<div>{{allEditAreaHtml}}</div>-->
+                <!--</div>-->
+                <div id="previous-button">
+                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
+                </div>
+                <div id="next-button">
+                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
+                </div>
+                <!--</el-carousel-item>-->
+                <!--</el-carousel>-->
             </div>
         </el-main>
         <el-aside width="300px" style="alignment: center">
-            <!--<el-button @click="updateThisAnnotation()">更新</el-button>-->
-            <!--<el-button @click="previousPictureAndUpdateThisAnnotation()">上一個</el-button>-->
-            <!--<el-button @click="nextPictureAndUpdateThisAnnotation()">下一個</el-button>-->
-            <!--<el-button @click="clearThisAnnotation()">清除</el-button>-->
-            <!--<el-button @click="undoThisAnnotation()">UNDO</el-button>-->
             <ul style="list-style-type:none">
                 <li>
-                    <!--<el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>-->
                 </li>
-                <li v-for="(val,index) in frames">
+                <li v-for="(val,index) in tagText">
                     <el-popover
                             placement="right"
                             width="150"
@@ -36,7 +38,7 @@
                         <el-input
                                 type="textarea"
                                 :rows="2"
-                                v-model="val.tag"
+                                v-model="val.text"
                                 :disabled="true"
                         >
                         </el-input>
@@ -113,6 +115,7 @@
 </style>
 
 <script>
+<<<<<<< HEAD
     import UserUtils from '../../js/utils/UserUtils.js'
     export default {
         data() {
@@ -417,4 +420,61 @@
             },
         }
     }
+=======
+	import ImageViewer from '../../js/ImageViewer.js'
+	import AnnotationViewer from '../../js/AnnotationViewer.js'
+	import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
+	import AnnotationEditor from '../../js/AnnotaionEditor.js'
+
+	export default {
+		data: function () {
+			return {
+				tagHtml: '',
+				viewer: {},
+				canvasHtml: `
+                    <canvas id="canvas" class="fl"></canvas>`,
+				tagText: [{}],
+				submitDisabled: "disabled",
+				taskId: this.$route.params.taskId,
+				contractId: this.$route.params.contractId,
+			}
+		},
+		mounted() {
+			this.$nextTick(() => {
+				this.canvas = document.getElementById("canvas");
+				// console.log("new canvas = " + this.canvas);
+				this.getImgNames();
+				// console.log(this.allEditAreaHtml)
+			})
+		},
+		methods: {
+			getImgNames() {
+				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
+				this.$http.get(route, header)
+					.then((response) => {
+						let imageViewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
+						this.viewer = new AnnotationViewer(new FrameDrawingStrategy(), imageViewer, 'http://localhost:8086/frameAnnotation/contractId/', this.contractId, this.$http);
+						this.viewer.drawCurrent(header, this.doThisEveryImageUpdate);
+					})
+					.catch(function (error) {
+						console.log(error);
+					})
+			},
+			doThisEveryImageUpdate() {
+				this.tagHtml = this.viewer.shareTag();
+				this.tagText = this.viewer.shareTagText();
+			},
+			onIndexChange(newIndex, oldIndex) {
+			},
+			next() {
+				this.viewer.drawNext(this.doThisEveryImageUpdate);
+			},
+			previous() {
+				this.viewer.drawPrevious(this.doThisEveryImageUpdate);
+			}
+		}
+	}
+
+>>>>>>> 161250051_refactor
 </script>

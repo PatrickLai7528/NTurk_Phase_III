@@ -59,7 +59,6 @@
 	import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
 	import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
 	import ProvinceDataUtils from '../../js/utils/ProvinceDataUtils.js'
-
 	export default {
 		data() {
 			var validatePassword = (rule, value, callback) => {
