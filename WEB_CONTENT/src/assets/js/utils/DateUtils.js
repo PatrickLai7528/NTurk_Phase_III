@@ -1,7 +1,12 @@
 /*
 	日期處理的工具類
  */
-class DateUtils{
+class DateUtils {
+	static simpleDateFormate(oldDate) {
+		// date has the format: "yyyy-MM-dd hh:mm:ss"
+		return oldDate === null ? "null" : oldDate.substring(0, 10);
+	}
+
 	static dateFormat(oldDate) {
 		Date.prototype.format = function (fmt) {
 			let o = {
@@ -29,4 +34,5 @@ class DateUtils{
 		return ans;
 	}
 }
+
 export default DateUtils;

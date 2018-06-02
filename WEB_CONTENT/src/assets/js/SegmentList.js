@@ -31,7 +31,7 @@ var SegmentList = function () {
         if (_currentSegmentIndex === -1)
             this.newOne();
         // the first polygon of the _segmentList[_currentSegmentIndex], which is the begin point
-        const p = _segmentList[_currentSegmentIndex].polygon[0];
+        let p = _segmentList[_currentSegmentIndex].polygon[0];
         // const canvas = document.querySelector('#canvas');
         // place this tag on the begin point, p
         const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";

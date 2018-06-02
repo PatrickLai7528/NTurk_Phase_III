@@ -1,299 +1,188 @@
 <template>
+
     <el-container>
-        <el-main>
+        <el-main class="wrap">
             <el-header>
                 <el-progress :text-inside="true" :stroke-width="18" v-bind:percentage=percent
                              status="success"></el-progress>
             </el-header>
             <div class="block">
-                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
-                             v-on:change="onIndexChange">
-                    <el-carousel-item v-for="single in tableData.imgNames">
-                        <img v-bind:src="'http://localhost:8086/image/' + single" alt="图片" class="pic">
-                    </el-carousel-item>
-                </el-carousel>
+                <div id="canvasDiv">
+                    <div v-html="canvasHtml">
+                        {{canvasHtml}}
+                    </div>
+                    <div v-html="tagHtml">{{tagHtml}}</div>
+                </div>
+                <div id="previous-button">
+                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
+                </div>
+                <div id="next-button">
+                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
+                </div>
             </div>
         </el-main>
         <el-aside width="300px" style="alignment: center">
-            <el-form ref="form" :model="form">
-                <el-form v-model="form.region" v-for="pair in annotationData[nowIndex].answerPairs">
-                    <el-form-item class="Q_And_A" v-bind:label="pair.question">
-                        <el-input v-model="pair.answer" v-on:blur="allDone" v-on:focus="allDone" v-on:change="allDone"></el-input>
-                    </el-form-item>
-                </el-form>
-
-                <el-form-item>
-                    <el-button type="primary" @click="saveAndCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>
-                    <el-button @click="onCancel">取消</el-button>
-                </el-form-item>
-            </el-form>
+            <ul style="list-style-type:none">
+                <li>
+                    <el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>
+                    <el-button @click="onCancel()">取消</el-button>
+                </li>
+                <li>
+                    <el-form v-for="pair in answerPairs">
+                        <el-form-item class="Q_And_A" :label="pair.question">
+                            <el-input v-model="pair.answer"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </li>
+            </ul>
         </el-aside>
     </el-container>
 </template>
 <script>
-    export default {
-        data() {
-            return {
-                form: {
-                    name: '',
-                    region: '',
-                    date1: '',
-                    date2: '',
-                    delivery: false,
-                    type: [],
-                    resource: '',
-                    desc: '',
-                },
-                annotationData: [],    //在后端读出的annotation信息放在annotationData中
-                questionData: [],     //应该增加questionData在加载任务的时候就将questionData加载出来
-                isNew: [],     //在这个数组中放布尔值来表示应该是更新还是新建记录  如果之前后端加载不出来这个标记就是true=post 如果可以就是false=put
-                percent: 0,
-                nowIndex: 0,
-                number: 0,
-                tableData: [{//这个是通过taskId读出来的task
-                    taskId: '',
-                    taskName: '',
-                    requesterId: '',
-                    taskCategory: '',
-                    requester: '',
-                    reward: '',
-                    imgNames: [],
-                    questions: [],
-                }],
-                userClick: true,
-                submitDisabled: "disabled",
-            }
-        },
-        mounted: function () {
-            this.$nextTick(function () {
-                //保证el已经插入文档
-                let _this = this;
-                this.$nextTick(function () {
-                    _this.load();
-                    _this.allDone();  //在跳转到这个页面的时候调用allDone方法
-                })
-            });
-        },
-        methods: {
-            load() {
-                let _this = this;
-                let theId = this.$route.params.taskId;
-                let route = 'http://localhost:8086/tasks/id/' + theId;
-                //{headers:{Authorization:that.$store.getters.getToken}
-                this.$http.get(route,{headers:{Authorization:_this.$store.getters.getToken}}).then(function (response) {
-                    _this.tableData = response.data;//将特定task的内容读入tableData,然后去后端的annotation里面遍历
-                    _this.number = _this.tableData.imgNames.length;
-                    _this.questionData = _this.tableData.questions;
+	import ImageViewer from '../../js/ImageViewer.js'
+	import AnnotationViewer from '../../js/AnnotationViewer.js'
+	import AnnotationEditor from '../../js/AnnotaionEditor.js'
+	import AnswerPairsDrawingStrategy from '../../js/strategy/AnswerPairsDrawingStrategy.js'
 
-                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    _this.getAnnotation();
-                    //console.log(_this.isNew);
-                    //console.log(_this.annotationData);
-
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            saveAndCommit(newIndex){    //对用按钮点击提交再封装一个方法  装饰者模式
-                let flag = this.judgeEmpty(newIndex);
-                if(flag === false){
-                    this.badMessage();
-                }
-                else{
-                    this.onSave(newIndex);
-                    //在这里调用commit方法
-                    let _this = this;
-                    let route = 'http://localhost:8086/contract/complete/' + _this.tableData.taskId;
-                    let data = {};
-                    _this.$http.put(route,data,{headers:{Authorization:_this.$store.getters.getToken}}).then(function(response){
-                        console.log("finish");
-                    }).catch(function(error){
-                        console.log(_this.$store.getters.getToken);
-                       console.log(error);
-                    });
-                    _this.messageHandler();
-                    _this.$router.push({path: '/profile'});
-                }
-            },
-            messageHandler(){
-                this.$message({
-                    message:'任务已经提交，请安心等待结果和奖励^_^',
-                    type:'success'
-                })
-            },
-            badMessage(){
-                this.$alert('您还没有完成这个任务', '系统警告', {
-                    confirmButtonText: '确定'
-                });
-            },
-            onSave(newIndex) {
-                let _this = this;
-                if (this.isNew[this.nowIndex] === false) {
-                    this.$http.put('http://localhost:8086/generalAnnotation',
-
-                        JSON.stringify(_this.annotationData[_this.nowIndex]),
-                        {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response) {
-                        _this.nowIndex = newIndex;
-                        _this.percent = parseFloat(((newIndex + 1) / _this.number * 100).toFixed(1));
-                    }).catch(function (error) {
-                        console.log(error);
-                    });
-                }
-                else {
-                    this.isNew[this.nowIndex] = false;
-                    this.$http.post('http://localhost:8086/generalAnnotation/taskId/' + _this.tableData.taskId,
-                        JSON.stringify(_this.annotationData[_this.nowIndex]),
-                        {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response) {
-
-                        let nowPath = _this.annotationData[_this.nowIndex].imgName;
-                        let route = 'http://localhost:8086/generalAnnotation/taskId/' + _this.tableData.taskId + '/imgName/' + nowPath;
-                        _this.$http.get(route,{headers:{Authorization:_this.$store.getters.getToken}}).then(function (res) {
-                            _this.$set(_this.annotationData, _this.nowIndex, res.data);   //更新前端数组中的元素,因为异步执行的关系，所以必须放在add里面
-
-                            _this.nowIndex = newIndex;
-                            _this.percent = parseFloat(((newIndex + 1) / _this.number * 100).toFixed(1));
-                        }).catch(function (err) {
-                            console.log(err);
-                        })
-                    }).catch(function (error) {
-                        console.log(error);
-                    });
-                }
-
-                console.log(this.isNew);
-
-            },
-            allDone(){//在这里判断和改变提交按钮的disabled与否
-                /*
-                for(let i = 0;i < this.annotationData.length;i++){
-                    let valid = this.judgeEmpty(i);
-                    if(valid === false){
-                        this.submitDisabled = 'disabled';   //只要有一个没有填写完成就不能提交
-                        break;
-                    }
-                }
-
-                this.submitDisabled = false;
-                */
-                let flag = false;
-                console.log(this.annotationData);
-                for(let e of this.annotationData){
-                    for(let pairs of e.answerPairs){
-                        if(pairs.answer === null || pairs.answer === undefined || pairs.answer === ""){
-                            this.submitDisabled = 'disabled';
-                            flag = true;
-                        }
-                    }
-                }
-                if(flag === false){
-                    this.submitDisabled = false;
-                }
-            },
-            onCancel() {
-                this.$router.push({path: '/tasklobby'});
-            },
-            onIndexChange: function (newIndex, oldIndex) {
-                // oldIndex===-1是一开始加载走马灯的情况
-                //this.nowIndex = newIndex;
-                // this.percent = parseFloat(((newIndex + 1) / this.number * 100).toFixed(1));
-                if (oldIndex !== -1) {
-                    // 阻止从第一张直接切换到最后一张
-                    if (oldIndex === 0 && newIndex === this.tableData.imgNames.length - 1 && this.userClick === true) {
-                        this.userClick = false;
-                        this.$refs.carousel.setActiveItem(0);
-                    }
-                    else if (newIndex === 0 && oldIndex === this.tableData.imgNames.length - 1 && this.userClick === false) {
-                        this.userClick = true;
-                    }
-
-                    // 阻止从最后一张直接切换到第一张
-                    else if (oldIndex === this.tableData.imgNames.length - 1 && newIndex === 0 && this.userClick === true) {
-                        this.userClick = false;
-                        this.$refs.carousel.setActiveItem(this.tableData.imgNames.length - 1);
-                    }
-                    else if (newIndex === this.tableData.imgNames.length - 1 && oldIndex === 0 && this.userClick === false) {
-                        this.userClick = true;
-                    }
-
-                    // 正常情况
-                    else {
-                        if (this.userClick === true) {
-                            if (this.judgeEmpty(oldIndex) === false && newIndex > oldIndex) {
-                                this.userClick = false;
-                                this.$refs.carousel.setActiveItem(oldIndex);
-                                this.badMessage();
-                            }
-                            else {
-                                this.saveAndLoad(newIndex);
-                            }
-                        }
-                        else {
-                            this.userClick = true;
-                        }
-                    }
-                }
-            },
-            async saveAndLoad(newIndex) {
-                await this.onSave(newIndex);
-            },
-            getIndex: function (imgSrc) {          //调用这个方法得到当前图片在imgNames中的位置保持同步
-                for (let i = 0; i < this.tableData.imgNames.length; i++) {
-                    if (imgSrc === this.tableData.imgNames[i]) {
-                        return i;
-                    }
-                }
-            },
-            judgeEmpty:function(oldIndex){
-                let flag = true;
-                for(let ans of this.annotationData[oldIndex].answerPairs){
-                    if(ans.answer === null || ans.answer === undefined || ans.answer === ''){
-                        flag = false;   //在general标记中只要有一个没有填写就是没有完成
-                        break;
-                    }
-                }
-
-                return flag;   //如果flag为false就不能翻页
-            },
-            getAnnotation: function () {
-                let _this = this;
-                for (let path of _this.tableData.imgNames) {
-                    let route = 'http://localhost:8086/generalAnnotation/taskId/' + _this.tableData.taskId +'/imgName/' + path;
-                    this.$http.get(route,{headers:{Authorization:_this.$store.getters.getToken}}).then(function (response) {
-                        //let tem = eval(response.data);
-                        //_this.testData = response.data;
-                        let index = _this.getIndex(path);
-                        _this.$set(_this.annotationData, index, response.data);    //在组件中不能使用Vue.set来进行注册，应该用this.$set方法
-                        //_this.annotationData.splice(index,1,response.data);   //必须用splice方法vue才能检测到数组元素的变化
-                        _this.isNew[index] = false;//不是新的
-
-                    }).catch(function (error) { //如果后端没有数据记录要自己造一个空的标注对象push进去
-                        let index = _this.getIndex(path);
-                        _this.isNew[index] = true;
-
-                        function QuesAndAnswer(ques) {
-                            this.question = ques;
-                            this.answer = '';
-                        }
-
-                        function Annotation(img) {
-                            this.imgName = img;
-                            this.answerPairs = [];
-                        }
-
-                        let emptyAnnotation = new Annotation(path);
-                        for (let ques of _this.questionData) {
-                            let tem = new QuesAndAnswer(ques);
-                            emptyAnnotation.answerPairs.push(tem);
-                        }
-                        _this.$set(_this.annotationData, index, emptyAnnotation);
-
-                        _this.allDone();
-                        //_this.annotationData.splice(index,1,emptyAnnotation);
-                    })
-                }
-            }
-        }
-    }
+	export default {
+		data() {
+			return {
+				tagHtml: '',
+				viewer: {},
+				canvasHtml: '<canvas id="canvas"></canvas>',
+				answerPairs: [],
+				answerPairsDrawingStrategy: {},
+				submitDisabled: "disabled",
+				contractId: this.$route.params.contractId,
+				taskId: this.$route.params.taskId,
+				imageLength: 0,
+				currentPlace: 1
+			}
+		},
+		computed: {
+			percent() {
+				console.log(this.currentPlace)
+				let result, lowerLimit;
+				lowerLimit = 1 / this.imageLength * 100;
+				result = this.currentPlace / this.imageLength * 100;
+				result = result.toFixed(1);
+				console.log(lowerLimit);
+				console.log(result);
+				lowerLimit = lowerLimit.toFixed(1);
+				// if (result >= 100) {
+				// 	return parseFloat(100.0);
+				if (result != 100 && result < lowerLimit)
+					return parseFloat(lowerLimit);
+				// 	return parseFloat(lowerLimit);
+				// } else {
+				return parseFloat(result);
+				// }
+			}
+		},
+		mounted() {
+			this.$nextTick(() => {
+				this.canvas = document.getElementById("canvas");
+				this.canvas.addEventListener("mousedown", this.canvasDown);
+				this.canvas.addEventListener("mouseup", this.canvasUp);
+				this.canvas.addEventListener("mousemove", this.canvasMove);
+				this.canvas.addEventListener("touchstart", this.canvasDown);
+				this.getImgNames();
+			})
+		},
+		methods: {
+			getImgNames() {
+				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
+				let header = {
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: this.$store.getters.getToken
+					}
+				}
+				this.$http.get(route, header)
+					.then((response) => {
+						console.log(response);
+						this.questions = response.data.questions;
+						console.log(this.questions)
+						this.initQuestion(this.questions);
+						let viewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
+						this.imageLength = response.data.imgNames.length;
+						this.answerPairsDrawingStrategy = new AnswerPairsDrawingStrategy()
+						viewer = new AnnotationViewer(this.answerPairsDrawingStrategy, viewer, 'http://localhost:8086/generalAnnotation/taskId/', this.taskId, this.$http);
+						this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/generalAnnotation/taskId/', 'http://localhost:8086/generalAnnotation', this.taskId, this.$http);
+						this.viewer.drawCurrent(header, () => {
+							this.viewer.setTagUpdateCallback(this.updateTagHtml);
+							this.viewer.setTagTextUpdateCallback(this.updateTagText);
+							this.viewer.setTagTextGettingCallback(this.getTagText);
+						});
+					})
+					.catch(function (error) {
+						console.log(error);
+					})
+			},
+			updateTagHtml() {
+				let temp = this.viewer.shareTag();
+				console.log(this.tagHtml);
+				if (temp === "") return;
+				this.answerPairs = this.answerPairsDrawingStrategy.interpretTag(temp);
+			},
+			updateTagText() {
+				// let temp = this.viewer.shareTag();
+				// console.log(this.tagHtml);
+				// this.answerPairs = this.answerPairsDrawingStrategy.interpretTag(temp);
+				// let temp = this.viewer.shareTagText();
+				// if (temp.length !== 0) {
+				// 	this.answerPairs = temp;
+				// }
+				// console.log(this.answerPairs)
+			},
+			getTagText() {
+				// let temp;
+				// this.answerPairs.forEach((value, index, array) => {
+				// 	temp += this.answerPairsDrawingStrategy.addTag({}, value, index);
+				// });
+				// return temp;
+			},
+			next() {
+				this.viewer.setAnswerPairs(this.answerPairs);
+				this.viewer.drawNext(() => {
+					this.initQuestion(this.questions);
+					if (this.currentPlace < this.imageLength)
+						this.currentPlace++;
+				});
+			},
+			previous() {
+				this.viewer.setAnswerPairs(this.answerPairs);
+				this.viewer.drawPrevious(() => {
+					this.initQuestion(this.questions);
+					if (this.currentPlace > 1)
+						this.currentPlace--;
+				});
+			},
+			canvasDown(e) {
+				this.viewer.handleMouseDown(e);
+			},
+			canvasUp(e) {
+				this.viewer.handleMouseUp(e);
+			},
+			canvasMove(e) {
+				this.viewer.handleMouseMove(e);
+			},
+			forceUpdate() {
+				this.viewer.forceUpdate(this.answerPairs);
+			},
+			deleteTag(index) {
+				// this.viewer.forceUpdate(this.tagText);
+				this.viewer.deleteTag(index);
+			},
+			initQuestion(questions) {
+				let q;
+				this.answerPairs = [];
+				for (q of questions) {
+					this.answerPairs.push({question: q, answer: ""})
+				}
+			}
+		}
+	}
 </script>
 
 <style scoped>
