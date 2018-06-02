@@ -37,7 +37,7 @@ import static foursomeSE.service.user.UserUtils.userByUsername;
  * <p>
  * <p> // 测GetByTaskIdForInspection
  * worker2开始打，这时应该拿到的是worker5的contract。
- * 之后再让worker5对worker2打(3, 5, 3), worker3(2, 3, 1), worker4(5, 2, 3)。
+ * 之后再让worker5对worker2打(3, 5, 3), worker3(2, 3, 1), worker2对worker4打(5, 2, 3)。
  * <p>
  * <p> // 测getBestKth
  * 这时requester如果要看task1的第一个小任务，那么得到的BestKth的顺序应该是：worker4的那个annotationId, rate = 5

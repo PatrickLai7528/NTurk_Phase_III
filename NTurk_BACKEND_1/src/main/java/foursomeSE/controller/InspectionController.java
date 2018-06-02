@@ -18,7 +18,7 @@ public class InspectionController {
 
     @RequestMapping(value = "/inspect",
             method = RequestMethod.POST)
-    @PreAuthorize("hasRole('REQUESTER')")
+    @PreAuthorize("hasRole('WORKER')")
     public ResponseEntity<?> addInspections(@RequestHeader("Authorization") String token,
                                             @RequestBody CInspectionContract cInspectionContract) {
         String username = JwtUtil.getUsernameFromToken(token);
