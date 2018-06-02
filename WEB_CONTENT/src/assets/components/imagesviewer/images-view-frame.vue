@@ -159,6 +159,7 @@
                 userClick: true,
                 taskId: this.$route.params.taskId,
                 contractId: this.$route.params.contractId,
+                mandatoryTime:this.$route.params.mandatoryTime,   //表示还要再评几次
                 nowRating: 0,        //对当前图片的评分
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
@@ -176,9 +177,88 @@
                 _this.getImgNames();
             })
         },
+        watch:{
+            $route: function (to,from) {
+                if(to.name === 'viewframe'){
+                    this.taskId = this.$route.params.taskId;
+                    this.contractId = this.$route.params.contractId;
+                    this.mandatoryTime = this.$route.params.mandatoryTime;   //表示还要再评几次
+                    this.ratings = [];
+                    this.imgNames = [];
+                    this.nowRating = 0;
+                    this.annotation = {};
+                    console.log("haha Im in");
+                    this.getImgNames();
+                }
+            }
+        },
         methods: {
             commitRating(){
-                //to-do
+                //list里面的对象包含annotationId和rate
+                function Inspection(annotationId,rate){
+                    this.annotationId = annotationId;
+                    this.rate = rate;
+                }
+
+                let inspections = [];   //这是最后的数组，所有的评分结果放在这个数组里
+                console.log(this.annotationData[0]);
+                for(let i = 0;i < this.ratings.length;i++){
+                    let nowInspection = new Inspection(this.annotationData[i].annotationId,this.ratings[i]);
+                    inspections.push(nowInspection);
+                }
+
+                function AllInspection(contractId,inspectionList){
+                    this.inspections = inspectionList;
+                    this.contractId = contractId;
+                }
+
+                let InspectionContract = new AllInspection(this.contractId,inspections);
+                console.log(InspectionContract);
+
+                let _this = this;
+                this.$http.post('http://localhost:8086/inspect',
+                    JSON.stringify(InspectionContract),
+                    {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
+                        _this.mandatoryTime = _this.mandatoryTime - 1;   //将必做次数递减
+                        if(_this.mandatoryTime >= 1){
+                            _this.showMessage();    //显示提示，要接着做
+                        }
+                        else{       //完成了，显示提示消息，返回上一级
+                            _this.successMessage();
+                            _this.$router.push({path:'/profile'});
+                        }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            successMessage(){
+                this.$notify({
+                    title: '提交成功',
+                    message: '恭喜你完成评审任务，请耐心等待系统发放奖励^_^',
+                    type: 'success'
+                });
+            },
+            showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
+                let _this = this;
+                this.$confirm('您还有要进行评审的任务，是否继续', '温馨提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let contractId = '';
+                    _this.$http.get('http://localhost:8086/contract/review/' + _this.taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                        contractId = response.data.contractId;   //得到contractId
+                        console.log(contractId);
+                        _this.$router.push({name: 'viewframe',params:{taskId:_this.taskId,contractId:contractId,mandatoryTime:_this.mandatoryTime}});
+                    }).catch(function (error) {
+                        _this.successMessage();
+                        _this.$router.push({path: '/profile'});
+                        console.log(error);
+                    })
+                }).catch(() => {
+                    _this.$router.push({path: '/profile'});    //任务取消，返回任务中心
+                    console.log("-1");
+                });
             },
             canCommit(){
                 if(this.ratings.length === this.imgNames.length){
@@ -210,9 +290,6 @@
                         _this.isNew.push(true);
                     }
                     _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    // _this.loadFrontList(function () {
-                    //     _this.canCommit();      //利用回调函数在初始化的时候判断能否提交
-                    // });
 
                 }).catch(function (error) {
                     console.log(error);
@@ -247,7 +324,6 @@
                         };
                         _this.$set(_this.annotationData, index, tempAnnotation);  //在前端注册index
                         _this.isNew[index] = true;
-                        console.log("he");
                         console.log(_this.annotationData);
                     })
                 }
@@ -299,12 +375,14 @@
                     _this.frames = _this.annotation.frames;
                     _this.initialDraw();
                     _this.isNew[_this.nowIndex] = false;    //如果是从后端加载的标注信息，isNew为false
+                    _this.annotationData[_this.nowIndex] = _this.annotation;    //如果是评分，不会有没有做完的annotation
                 }).catch(function (error) {
                     _this.frames = [];
                     _this.annotation = {
                         'imgName': _this.imgNames[_this.nowIndex],
                         'frames': _this.frames
                     };
+                    _this.annotationData[_this.nowIndex] = _this.annotation;    //如果是评分，不会有没有做完的annotation
                     _this.initialDraw();
                     console.log(error);
                 })

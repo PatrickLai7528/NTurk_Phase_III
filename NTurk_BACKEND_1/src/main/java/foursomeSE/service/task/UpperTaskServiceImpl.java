@@ -111,7 +111,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
 //            if (t.getCapacity() <= haveFinished) {
 //                return false;
 //            }
-            if (t.getTaskStatus() == TaskStatus.FINISHED) {
+            if (t.getTaskStatus() != TaskStatus.ONGOING) {
                 return false;
             }
 

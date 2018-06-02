@@ -227,7 +227,7 @@
 				}
 
 				this.form.endTime.setTime(this.form.endTime.getTime() + 8 * 60 * 60 * 1000);
-				this.form.ddl.setTime(this.form.endTime.getTime() - 72 * 60 * 60 * 1000);      //
+				this.form.ddl.setTime(this.form.endTime.getTime() - 72 * 60 * 60 * 1000);      //将ddl设在endTime的72小时前
             },
             decidePostData(){
 				return {

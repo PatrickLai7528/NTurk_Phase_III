@@ -70,13 +70,13 @@
         methods: {
             handleClick(row){
                 if(row.taskCategory === "GENERAL"){
-                    this.$router.push({name: 'viewgeneral',params:{taskId:row.taskId,contractId:row.contractId}});
+                    this.$router.push({name: 'viewgeneral',params:{taskId:row.taskId,contractId:row.contractId,mandatoryTime:0}});    //因为是requester看，不要求评分
                 }
                 else if(row.taskCategory === "SEGMENT"){
-                    this.$router.push({name: 'viewsegment',params:{taskId:row.taskId,contractId:row.contractId}});
+                    this.$router.push({name: 'viewsegment',params:{taskId:row.taskId,contractId:row.contractId,mandatoryTime:0}});
                 }
                 else if(row.taskCategory === "FRAME"){
-                    this.$router.push({name: 'viewframe',params:{taskId:row.taskId,contractId:row.contractId}});
+                    this.$router.push({name: 'viewframe',params:{taskId:row.taskId,contractId:row.contractId,mandatoryTime:0}});
                 }
             },
             filterStatus(value, row) {    //根据合同状态筛选
