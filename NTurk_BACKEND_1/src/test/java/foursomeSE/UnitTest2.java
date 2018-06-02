@@ -178,7 +178,7 @@ public class UnitTest2 implements ConstsForT2 {
                 ci1.getInspections().add(i1);
             }
 
-            inspectionService.add(ci1, "worker5@ex.com");
+            inspectionService.add(ci1, i == 2 || i == 3 ? "worker5@ex.com" : "worker2@ex.com");
         }
 
         // 测getBestKth
@@ -190,6 +190,9 @@ public class UnitTest2 implements ConstsForT2 {
                 new CInspection(aid[5], 1.4)
         ));
         assertTrue(target.containsAll(bestKth) && bestKth.containsAll(target));
+
+        // 再测mandatoryTime
+        assertEquals(2, taskService.getWorkerInspectionTasks("worker2@ex.com").get(0).getMandatoryTime());
     }
 }
 /*

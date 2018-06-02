@@ -17,52 +17,27 @@
 </template>
 
 <script>
-    import UserUtils from '../../js/utils/UserUtils.js'
+	import UserUtils from '../../js/utils/UserUtils.js'
+	import DateUtils from '../../js/utils/DateUtils.js'
+
 	export default {
-		data () {
+		data() {
 			return {
 				iconName: "",
 				userName: "",
 				infoList: {
-					type: {
-						iconType: "el-icon-document",
-						showName: "類別",
-						value: ""
-					},
-					province: {
-						iconType: "el-icon-location",
-						showName: "地址",
-						value: ""
-					},
-					emailAddress: {
-						iconType: "el-icon-message",
-						showName: "郵箱",
-						value: ""
-					},
-					createTime: {
-						iconType: "el-icon-date",
-						showName: "注冊日期",
-						value: ""
-					},
-					credit: {
-						iconType: "el-icon-goods",
-						showName: "积分",
-						value: ""
-					},
-					experiencePoint: {
-						iconType: "el-icon-star-on",
-						showName: "經驗",
-						value: ""
-					},
-					rank: {
-						iconType: "el-icon-view",
-						showName: "排名",
-						value: ""
-					}
+					/* 順序會影響, 不要打亂 */
+					type: {iconType: "el-icon-document", showName: "類別", value: ""},
+					province: {iconType: "el-icon-location", showName: "地址", value: ""},
+					emailAddress: {iconType: "el-icon-message", showName: "郵箱", value: ""},
+					createTime: {iconType: "el-icon-date", showName: "注冊日期", value: ""},
+					credit: {iconType: "el-icon-goods", showName: "积分", value: ""},
+					experiencePoint: {iconType: "el-icon-star-on", showName: "經驗", value: ""},
+					rank: {iconType: "el-icon-view", showName: "排名", value: ""}
 				}
 			};
 		},
-		created () {
+		created() {
 			this.$bus.$on("refreshInfo", () => {
 				this.loadInfo();
 			});
@@ -71,26 +46,32 @@
 			this.loadInfo();
 		},
 		methods: {
-			dateFormat (date) {
-				// date has the format: "yyyy-MM-dd hh:mm:ss"
-				return date === null ? "null" : date.substring(0, 10);
+			// dateFormat(date) {
+			// 	// date has the format: "yyyy-MM-dd hh:mm:ss"
+			// 	return date === null ? "null" : date.substring(0, 10);
+			// },
+			doWhileGetInfoSuccess(response) {
+				let data = response.data;
+				this.iconName = "http://localhost:8086/image/" + data.iconName;
+				this.infoList.type.value = UserUtils.isWorker(this) ? "工人" : "发起者";
+				this.userName = data.nickname;
+				this.infoList.province.value = data.province;
+				this.infoList.emailAddress.value = data.emailAddress;
+				console.log("before : " + data.createTime);
+				this.infoList.createTime.value = DateUtils.simpleDateFormate(data.createTime);
+				console.log("after : " + this.infoList.createTime.value);
+				this.infoList.credit.value = data.credit;
+				this.infoList.experiencePoint.value = data.experiencePoint;
+				this.infoList.rank.value = data.rank;
 			},
-			loadInfo () {
+			loadInfo() {
 				let route = "http://localhost:8086/myInfo";
-				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					let data = response.data;
-					this.iconName = "http://localhost:8086/image/" + data.iconName;
-					this.infoList.type.value = UserUtils.isWorker(this) ? "工人" : "发起者";
-					this.userName = data.nickname;
-					this.infoList.province.value = data.province;
-					this.infoList.emailAddress.value = data.emailAddress;
-					this.infoList.createTime.value = this.dateFormat(data.createTime);
-					this.infoList.credit.value = data.credit;
-					this.infoList.experiencePoint.value = data.experiencePoint;
-					this.infoList.rank.value = data.rank;
-				}).catch(function (error) {
-					console.log(error);
-				});
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
+				this.$http.get(route, header)
+					.then(this.doWhileGetInfoSuccess)
+					.catch(function (error) {
+						console.log(error);
+					});
 			}
 		}
 	};

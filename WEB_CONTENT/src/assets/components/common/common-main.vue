@@ -186,7 +186,6 @@
                             mandatory = row.mandatoryTime;
                         }
                     }
-
                     _this.$router.push({name: _this.routerDictionary[taskCategory],params:{taskId:taskId,contractId:contractId,mandatoryTime:mandatory}});
                 }).catch(function (error) {
                     //如果在这里出现问题说明将所有标注都评分过了

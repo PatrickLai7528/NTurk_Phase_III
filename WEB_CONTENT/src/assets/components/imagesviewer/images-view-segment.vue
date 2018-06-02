@@ -2,20 +2,23 @@
     <el-container>
         <el-main class="wrap">
             <div class="block">
-                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
-                             v-on:change="onIndexChange">
-                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
-                        <div id="canvasDiv">
-                            <canvas id="canvas" class="fl">
-                            </canvas>
-                        </div>
-                    </el-carousel-item>
-                </el-carousel>
+                <div id="canvasDiv">
+                    <div v-html="canvasHtml">
+                        {{canvasHtml}}
+                    </div>
+                    <div v-html="tagHtml">{{tagHtml}}</div>
+                </div>
+                <div id="previous-button">
+                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
+                </div>
+                <div id="next-button">
+                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
+                </div>
             </div>
         </el-main>
         <el-aside width="300px" style="alignment: center">
             <ul style="list-style-type:none">
-                <li v-for="(val,index) in segments">
+                <li v-for="(val,index) in tagText">
                     <el-popover
                             placement="right"
                             width="150"
@@ -24,7 +27,7 @@
                         <el-input
                                 type="textarea"
                                 :rows="2"
-                                v-model="val.tag"
+                                v-model="val.text"
                                 :disabled="true"
                         >
                         </el-input>
@@ -42,7 +45,8 @@
                         v-on:change="ratingChange"
                 >
                 </el-rate>
-                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
+                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i
+                        class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
     </el-container>
