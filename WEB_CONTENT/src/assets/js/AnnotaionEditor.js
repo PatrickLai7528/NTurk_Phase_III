@@ -96,6 +96,7 @@ let privateMethods = {
 		privateVariables.tagTextUpdateWay();
 	},
 	getSubmitData() {
+		//....
 		let markingType, annotation;
 		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
 		annotation = this.getCurrentEditedAnnotation();
