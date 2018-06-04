@@ -96,12 +96,9 @@ let privateMethods = {
 		privateVariables.tagTextUpdateWay();
 	},
 	getSubmitData() {
-		let marking, markingType, tagTexts, i, annotation;
+		let markingType, annotation;
 		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
-		// console.log(privateVariables.editedAnnotation);
 		annotation = this.getCurrentEditedAnnotation();
-		// console.log(annotation);
-		// this.updateTagText();
 		return annotation;
 	},
 	addOneMarking(caller, marking) {

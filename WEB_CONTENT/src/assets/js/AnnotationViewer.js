@@ -80,13 +80,13 @@ let privateMethods = {
 				privateVariables.isCurrentAnnotationNew = false;
 			})
 			.catch((error) => {
-				if (error.response.status === "404") {
-					let annotation = {};
-					annotation.imgName = privateVariables.viewer.shareCurrentImageName();
-					annotation[privateVariables.markingDrawingStrategy.getMarkingTypeName()] = [];
-					privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), annotation);
-					privateVariables.isCurrentAnnotationNew = true;
-				}
+				// if (error.response.status === "404") {
+				let annotation = {};
+				annotation.imgName = privateVariables.viewer.shareCurrentImageName();
+				annotation[privateVariables.markingDrawingStrategy.getMarkingTypeName()] = [];
+				privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), annotation);
+				privateVariables.isCurrentAnnotationNew = true;
+				// }
 				// error.absorb();
 				// console.log("in cather");
 				// console.log(error);
