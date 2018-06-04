@@ -52,7 +52,7 @@
                     <!--<router-link v-blind:to="'pagesSelector(taskCategory)'">-->
                     <!--<router-link>-->
                     <el-button plain size="mini" class="submitButton"
-                               @click="handleClick(scope.row,scope.row.taskId,scope.row.taskCategory)">
+                               @click="handleClick(scope.row,scope.row.taskStatus,scope.row.taskId,scope.row.taskCategory)">
                         进入
                     </el-button>
                     <!--</router-link>-->
@@ -63,220 +63,229 @@
 </template>
 
 <script>
-	import DateUtils from '../../js/utils/DateUtils.js'
-	import TranslateUtils from '../../js/utils/TranslateUtils.js'
+    import DateUtils from '../../js/utils/DateUtils.js'
 
-	export default {
-		props: ['message'],
-		data() {
-			return {
-				tableData: [{
-					taskId: '',
-					taskName: '',
-					requesterId: '',
-					requesterName: '',
-					taskCategory: '',
-					taskCategoryChi: '',
-					requester: '',
-					reward: '',
-					endTime: '',
-					taskStatus: '',
-					totalReward: '',    //任务的总积分奖励
-					formatEndTime: '',   //将读出来的时间进行格式化再显示
-					attendance: 0,      //表示有多少人参加了这个标注任务
-					capacity: 0,          //表示这个标注任务共限制多少人参加
-				}],
-				contractData: '',
-			}
-		}
-		,
-		mounted: function () {
-			let _this = this;
-			this.$nextTick(function () {
-				console.log(_this.message);
-				_this.getAll();
-			})
-		},
-		methods: {
-			filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
-				return row.taskCategory === value;
-			},
-			filterStateHandler(value, row, column) {
-				return row.taskStatus === value;
-			},
-			doWhileGetTableDataSuccess(response) {        //赖总的编程风格很友好啊，将代码都优化了
-				this.tableData = response.data;
-				for (let e of this.tableData) {
-					e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
-					if (e.capacity === 2147483647) {
-						e.capacity = "无限制";
-					}
-				}
-				this.translate();
-			},
-			decideGetTableDataUrl() {
-				if (this.message === "user")
-					return "http://localhost:8086/workerTasks"; //用户中心得到的是以前存在的任务
-				else
-					return "http://localhost:8086/newTasks"
-			},
-			getTableData() {
-				let header = {headers: {Authorization: this.$store.getters.getToken}};
-				let getUrl = this.decideGetTableDataUrl();
-				this.$http.get(getUrl, header)
-					.then(this.doWhileGetTableDataSuccess)
-					.catch(function (error) {
-						console.log(error);
-					});
-			},
+    export default {
+        props: ['message'],
+        data() {
+            return {
+                /*
+                    taskId: '',
+                    taskName: '',
+                    requesterId: '',
+                    requesterName: '',
+                    taskCategory: '',
+                    taskCategoryChi: '',
+                    requester: '',
+                    reward: '',
+                    endTime: '',
+                    taskStatus: '',
+                    totalReward: '',    //任务的总积分奖励
+                    formatEndTime: '',   //将读出来的时间进行格式化再显示
+                    attendance: 0,      //表示有多少人参加了这个标注任务
+                    capacity: 0,          //表示这个标注任务共限制多少人参加
+                 */
+                tableData: [],
+                contractData: '',
+                routerDictionary: [],     //进一步优化代码，用一个字典来装router要跳转的名称
+            }
+        }
+        ,
+        mounted: function () {
+            let _this = this;
+            this.$nextTick(function () {
+                console.log(_this.message);
+                this.routerDictionary = new Array();
+                this.routerDictionary['GENERAL'] = 'viewgeneral';
+                this.routerDictionary['SEGMENT'] = 'viewsegment';
+                this.routerDictionary['FRAME'] = 'viewframe';
+                _this.getAll();
 
-			translate: function () {
-				this.tableData.forEach((value, index, array) => {
-					value.taskCategoryChi = TranslateUtils.translateTaskCategory(value.taskCategory);
-				});
-			},
-			handleClick(row, Id, taskCategory) {
-				let _this = this;
-				const h = this.$createElement;
-				this.$message({
-					message: h('p', null, [
-						h('i', {style: 'color: teal'}, '參加成功:' + taskCategory)
-					])
-				});
+            })
+        },
+        methods: {
+            filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
+                return row.taskCategory === value;
+            },
+            filterStateHandler(value,row,column){
+                return row.taskStatus === value;
+            },
+            doWhileGetTableDataSuccess(response) {        //赖总的编程风格很友好啊，将代码都优化了
+                console.log(response.data);
+                if(response.data.length != 0){
+                    this.tableData = this.tableData.concat(response.data);     //现在是多个response.data  用数组连接
+                }
+                for (let e of this.tableData) {
+                    e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
+                    if (e.capacity === 2147483647) {
+                        e.capacity = "无限制";
+                    }
+                }
+                this.translate();
+            },
+            decideGetTableDataUrl() {//现在的返回值是一个数组
+                if (this.message === "user")
+                    return ["http://localhost:8086/workerTasks","http://localhost:8086/tasks/workerInspectionTasks"]; //用户中心得到的是以前存在的任务
+                else
+                    return ["http://localhost:8086/newTasks","http://localhost:8086/tasks/newInspectionTasks"];
+            },
+            getTableData() {
+                let header = {Authorization: this.$store.getters.getToken};
+                let getUrl = this.decideGetTableDataUrl();
+                for(let url of getUrl){
+                    this.$http.get(
+                        url,
+                        {headers: header}
+                    ).then(this.doWhileGetTableDataSuccess).catch(function (error) {
+                        console.log(error);
+                    });
+                }
+            },
 
-				function Contract(taskId, workerId) {
-					this.taskId = taskId;
-					this.workerId = workerId;
-				}
+            translate: function () {
+                for (let i = 0; i < this.tableData.length; i++) {
+                    if (this.tableData[i].taskCategory === "GENERAL") {
+                        this.tableData[i].taskCategoryChi = "整體標註";
+                    } else if (this.tableData[i].taskCategory === "FRAME") {
+                        this.tableData[i].taskCategoryChi = "區域標註";
+                    } else if (this.tableData[i].taskCategory === "SEGMENT") {
+                        this.tableData[i].taskCategoryChi = "區域劃分";
+                    }
 
-				if (taskCategory === "GENERAL") {    //不仅要跳转还要判断是否要压入一个新的contract
-					if (_this.message !== 'user') {
-						let contract = new Contract(Id, _this.$store.getters.getUserId);
-						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-							headers: {
-								Authorization: _this.$store.getters.getToken,
-								'Content-Type': 'application/json'
-							}
-						}).then(function (response) {
-							_this.$router.push({name: 'general', params: {taskId: Id}});
-						}).catch(function (error) {
-							console.log(error);
-						})
+                    //这里有bug
+                    if(this.message === 'user'){
+                        if(this.tableData[i].mandatoryTime !== undefined){
+                            this.tableData[i].taskStatus = '评审任务';
+                        }
+                        else{
+                            this.tableData[i].taskStatus = '标注任务';   //这是原来完成的任务，不是评审任务，虽然taskStatus不一样
+                        }
+                    }
+                    else{
+                        if(this.tableData[i].taskStatus === 'ONGOING'){
+                            this.tableData[i].taskStatus = '标注任务';
+                        }
+                        else if(this.tableData[i].taskStatus === 'UNDER_REVIEW'){
+                            this.tableData[i].taskStatus = '评审任务';
+                        }
+                    }
+                }
+            },
+            handleReviewJump(row,taskCategory,taskId){     //处理是review的jump
+                let contractId = '';
+                let _this = this;
+                _this.$http.get('http://localhost:8086/contract/review/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                    contractId = response.data.contractId;   //得到contractId
+                    console.log(contractId);
+                    let mandatory = 0
+                    if(row.mandatoryTime === undefined){
+                        mandatory = 1;
+                    }
+                    else{
+                        if(row.mandatoryTime !== 0){
+                            mandatory = row.mandatoryTime;
+                        }
+                    }
+                    _this.$router.push({name: _this.routerDictionary[taskCategory],params:{taskId:taskId,contractId:contractId,mandatoryTime:mandatory}});
+                }).catch(function (error) {
+                    //如果在这里出现问题说明将所有标注都评分过了
+                    _this.successMessage();
+                    console.log(error);
+                })
+            },
+            successMessage(){
+                this.$notify({
+                    title: '系统提示',
+                    message: '您已经完成了这个项目的所有评审任务，换一个任务试试呦^_^',
+                    type: 'success'
+                });
+            },
+            handleNewJump(taskId,path){      //处理任务中心的jump标注
+                function Contract(taskId, workerId) {
+                    this.taskId = taskId;
+                    this.workerId = workerId;
+                }
 
-					} else {
-						//在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
-						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-							_this.contractData = response.data;
-							if (_this.contractData.contractStatus === 'COMPLETED') {
-								_this.messageHandler();
-							}
-							else if (_this.contractData.contractStatus === 'ABORT') {
-								_this.badMessage();
-							}
-							else {
-								_this.$router.push({name: 'general', params: {taskId: Id}});
-							}
-						}).catch(
-							function (error) {
-								console.log(error)
-							}
-						);
-					}
-				} else if (taskCategory === "SEGMENT") {
-					if (_this.message !== 'user') {
-						let contract = new Contract(Id, _this.$store.getters.getUserId);
-						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-							headers: {
-								Authorization: _this.$store.getters.getToken,
-								'Content-Type': 'application/json'
-							}
-						}).then(function (response) {
-							_this.$router.push({name: 'segment', params: {taskId: Id}});
-						}).catch(function (error) {
-							console.log(error);
-						})
+                let _this = this;
+                let contract = new Contract(taskId, _this.$store.getters.getUserId);
+                _this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
+                    headers: {
+                        Authorization: _this.$store.getters.getToken,
+                        'Content-Type': 'application/json'
+                    }
+                }).then(function (response) {
+                    _this.$router.push({name: path.toLowerCase(), params: {taskId: taskId}});
+                }).catch(function (error) {
+                    console.log(error);
+                })
+            },
+            handleUserJump(taskId,path){     //处理个人中心的jump标注
+                //在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
+                let _this = this;
+                _this.$http.get('http://localhost:8086/contract/taskId/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                    _this.contractData = response.data;
+                    if (_this.contractData.contractStatus === 'COMPLETED') {
+                        _this.messageHandler();
+                    }
+                    else if (_this.contractData.contractStatus === 'ABORT') {
+                        _this.badMessage();
+                    }
+                    else {
+                        _this.$router.push({name: path.toLowerCase(), params: {taskId: taskId}});
+                    }
+                }).catch(
+                    function (error) {
+                        console.log(error)
+                    }
+                );
+            },
+            handleClick(row,taskStatus, Id, taskCategory) {
+                let _this = this;
+                const h = this.$createElement;
 
-					}
-					else {
-						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-							_this.contractData = response.data;
-							if (_this.contractData.contractStatus === 'COMPLETED') {
-								_this.messageHandler();
-							}
-							else if (_this.contractData.contractStatus === 'ABORT') {
-								_this.badMessage();
-							}
-							else {
-								_this.$router.push({name: 'segment', params: {taskId: Id}});
-							}
-						}).catch(
-							function (error) {
-								console.log(error)
-							}
-						);
-					}
-				} else if (taskCategory === "FRAME") {
-					if (_this.message !== 'user') {
-						let contract = new Contract(Id, _this.$store.getters.getUserId);
-						_this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-							headers: {
-								Authorization: _this.$store.getters.getToken,
-								'Content-Type': 'application/json'
-							}
-						}).then(function (response) {
-							_this.$router.push({name: 'frame', params: {taskId: Id}});
-						}).catch(function (error) {
-							console.log(error);
-						})
-
-					}
-					else {
-						_this.$http.get('http://localhost:8086/contract/taskId/' + Id, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-							_this.contractData = response.data;
-							if (_this.contractData.contractStatus === 'COMPLETED') {
-								_this.messageHandler();
-							}
-							else if (_this.contractData.contractStatus === 'ABORT') {
-								_this.badMessage();
-							}
-							else {
-								_this.$router.push({name: 'frame', params: {taskId: Id}});
-							}
-						}).catch(
-							function (error) {
-								console.log(error)
-							}
-						);
-					}
-				}
-			}
-			,
-			messageHandler() {
-				this.$message({
-					message: '您已经提交了该任务，不能对结果进行修改，请安心等待结果和奖励^_^',
-					type: 'success'
-				})
-			},
-			badMessage() {
-				this.$alert('这个任务已经过期了，不能对结果进行修改', '系统警告', {
-					confirmButtonText: '确定'
-				});
-			},
-			getAll() {
-				this.getTableData();
-			}
-			,
-			tableRowClassName({row, rowIndex}) {
-				console.log("here" + rowIndex);
-				if (rowIndex % 2 === 1) {
-					return 'odd-row';
-				} else {
-					return 'even-row';
-				}
-			}
-			,
-		}
-	}
+                //优化跳转判断逻辑,分成好几个方法，减少重复代码
+                if(taskStatus === '评审任务'){
+                    this.handleReviewJump(row,taskCategory,Id);
+                }
+                else if(taskStatus === '标注任务'){
+                    if(_this.message === 'user'){
+                        this.handleUserJump(Id,taskCategory);
+                    }
+                    else{
+                        this.handleNewJump(Id,taskCategory);
+                    }
+                }
+                else{
+                    console.log("Oops");        //调试使用
+                }
+            }
+            ,
+            messageHandler() {
+                this.$message({
+                    message: '您已经提交了该任务，不能对结果进行修改，请安心等待结果和奖励^_^',
+                    type: 'success'
+                })
+            },
+            badMessage() {
+                this.$alert('这个任务已经过期了，不能对结果进行修改', '系统警告', {
+                    confirmButtonText: '确定'
+                });
+            },
+            getAll() {
+                this.getTableData();
+            }
+            ,
+            tableRowClassName({row, rowIndex}) {
+                console.log("here" + rowIndex);
+                if (rowIndex % 2 === 1) {
+                    return 'odd-row';
+                } else {
+                    return 'even-row';
+                }
+            }
+            ,
+        }
+    }
 </script>
 
 <style>

@@ -90,7 +90,7 @@ const routes = [
         },
     },
     {
-        path:'/viewgeneral/:taskId/:contractId',
+        path:'/viewgeneral/:taskId/:contractId/:mandatoryTime',
         component:imagesViewGeneral,
         name:'viewgeneral',
         meta:{
@@ -98,7 +98,7 @@ const routes = [
         }
     },
     {
-        path:'/viewframe/:taskId/:contractId',
+        path:'/viewframe/:taskId/:contractId/:mandatoryTime',
         component:imagesViewFrame,
         name:'viewframe',
         meta:{
@@ -106,7 +106,7 @@ const routes = [
         }
     },
     {
-        path:'/viewsegment/:taskId/:contractId',
+        path:'/viewsegment/:taskId/:contractId/:mandatoryTime',
         component:imagesViewSegment,
         name:'viewsegment',
         meta:{

@@ -46,7 +46,7 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
 
     @RequestMapping(value = "/contractId/{contractId}/imgName/{imgName}",
             method = RequestMethod.GET)
-    @PreAuthorize("hasRole('REQUESTER')")
+    //@PreAuthorize("hasRole('REQUESTER')")
     public ResponseEntity<?> getAnnotationByRequester(@PathVariable("contractId") long contractId, @PathVariable("imgName") String imgName) {
         try {
             T annotation = annotationService.getOneBy(contractId, imgName);
