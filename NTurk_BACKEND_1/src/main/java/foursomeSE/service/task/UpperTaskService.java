@@ -51,7 +51,7 @@ public interface UpperTaskService {
     /**
      * 返回worker自己没参加过的underReview的task
      * */
-    List<Task> getNewInspectionTasks(String username);
+    List<CTask> getNewInspectionTasks(String username);
 
     /**
      * 返回worker自己做过的underReview的task，不管有没有完成mandatory time

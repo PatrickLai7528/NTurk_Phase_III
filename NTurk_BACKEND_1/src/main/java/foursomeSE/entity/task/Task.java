@@ -6,6 +6,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
@@ -43,6 +46,10 @@ public class Task {
     @NotNull
     private RewardStrategy rewardStrategy;
     private double totalReward;
+
+//    @OneToMany(orphanRemoval = true)
+//    @JoinColumn(name = "task_id")
+//    private Set<Tag> taskTags = new HashSet<>();
 
     //    private double rewardPerPerson; // 这个属性不要了，就是total/capacity
     private int capacity; // 人数限制，一定有，如果没有就是2147483648
@@ -223,4 +230,5 @@ public class Task {
     public void setDdl(LocalDateTime ddl) {
         this.ddl = ddl;
     }
+
 }

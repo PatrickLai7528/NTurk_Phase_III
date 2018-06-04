@@ -25,13 +25,9 @@ import static foursomeSE.service.user.UserUtils.userById;
 
 @Service
 public class FinishTaskServiceImpl implements FinishTaskService {
-//    private LowerUserService<Worker> lowerWorkerService;
     private WorkerJPA workerJPA;
-//    private LowerTaskService lowerTaskService;
     private TaskJPA taskJPA;
-//    private LowerUserService<Requester> lowerRequesterService;
     private RequesterJPA requesterJPA;
-    //    private LowerContractService lowerContractService;
     private ContractJPA contractJPA;
 
     private MessageJPA messageJPA;
@@ -51,21 +47,44 @@ public class FinishTaskServiceImpl implements FinishTaskService {
     }
 
     @Override
+    public void enterReview(Task task) {
+        Requester requester = userById(requesterJPA, task.getRequesterId());
+        List<Contract> completedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
+        List<Contract> unfinishedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.IN_PROGRESS);
+
+        unfinishedContracts.forEach(c -> {
+            c.setContractStatus(ContractStatus.ABORT);
+            contractJPA.save(c);
+
+            Worker worker = userById(workerJPA, c.getWorkerId());
+            messageJPA.save(Message.createMessage(worker.getEmailAddress(), MessageType.ABORT_CONTRACT, new String[]{
+                    task.getTaskName(),
+                    "任务到期"
+            }));
+        });
+
+
+        if (completedContracts.size() == 0) {
+            task.setTaskStatus(TaskStatus.FINISHED);
+            taskJPA.save(task);
+
+            requester.setCredit(requester.getCredit() + task.getTotalReward());
+            requesterJPA.save(requester);
+            return;
+        }
+
+        task.setTaskStatus(TaskStatus.UNDER_REVIEW);
+        taskJPA.save(task);
+    }
+
+    @Override
     public void finishTask(Task task) {
         task.setTaskStatus(TaskStatus.FINISHED);
-//        lowerTaskService.update(task);
         taskJPA.save(task);
 
         Requester requester = userById(requesterJPA, task.getRequesterId());
-//                lowerRequesterService.getById(task.getRequesterId());
         List<Contract> completedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
-//                lowerContractService
-//                        .getLotBy(c -> c.getTaskId() == task.getTaskId()
-//                                && c.getContractStatus() == ContractStatus.COMPLETED);
         List<Contract> unfinishedContracts = contractJPA.findByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.IN_PROGRESS);
-//                lowerContractService
-//                        .getLotBy(c -> c.getTaskId() == task.getTaskId()
-//                                && c.getContractStatus() == ContractStatus.IN_PROGRESS);
 
         if (completedContracts.size() == 0 && unfinishedContracts.size() == 0) {
             messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.FINISH_TASK, new String[]{
@@ -74,7 +93,6 @@ public class FinishTaskServiceImpl implements FinishTaskService {
             }));
 
             requester.setCredit(requester.getCredit() + task.getTotalReward());
-//            lowerRequesterService.update(requester);
             requesterJPA.save(requester);
 
             messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
@@ -94,29 +112,13 @@ public class FinishTaskServiceImpl implements FinishTaskService {
 
         completedContracts.forEach(c -> {
             Worker worker = userById(workerJPA, c.getWorkerId());
-//                    lowerWorkerService.getById(c.getWorkerId());
             worker.setExperiencePoint(worker.getExperiencePoint() + individalReward);
             worker.setCredit(worker.getCredit() + individalReward);
-//            lowerWorkerService.update(worker);
             workerJPA.save(worker);
 
             messageJPA.save(Message.createMessage(worker.getEmailAddress(), MessageType.GET_REWARD, new String[]{
                     task.getTaskName(),
                     String.format("%.2f", individalReward)
-            }));
-        });
-
-        unfinishedContracts.forEach(c -> {
-            c.setContractStatus(ContractStatus.ABORT);
-            c.setLastEditTime(LocalDateTime.now());
-//            lowerContractService.update(c);
-            contractJPA.save(c);
-
-            Worker worker = userById(workerJPA, c.getWorkerId());
-//                    lowerWorkerService.getById(c.getWorkerId());
-            messageJPA.save(Message.createMessage(worker.getEmailAddress(), MessageType.ABORT_CONTRACT, new String[]{
-                    task.getTaskName(),
-                    "任务结束"
             }));
         });
 
@@ -127,7 +129,6 @@ public class FinishTaskServiceImpl implements FinishTaskService {
         if (completedContracts.size() < task.getCapacity()) {
             double delta = task.getTotalReward() - completedContracts.size() * task.getTotalReward() / task.getCapacity();
             requester.setCredit(requester.getCredit() + delta);
-//            lowerRequesterService.update(requester);
             requesterJPA.save(requester);
 
             messageJPA.save(Message.createMessage(requester.getEmailAddress(), MessageType.REIMBURSE, new String[]{
@@ -140,15 +141,15 @@ public class FinishTaskServiceImpl implements FinishTaskService {
     @Override
     public void checkTask() {
         System.out.println("现在时间：" + dateFormat.format(new Date()));
-//        lowerTaskService
-//                .getLotBy(t -> {
-//                    return t.getTaskStatus() == TaskStatus.ONGOING
-//                            && t.getEndTime().isBefore(LocalDateTime.now());
-//                })
-            taskJPA.findByTaskStatusAndEndTimeBefore(TaskStatus.ONGOING, LocalDateTime.now())
+        taskJPA.findByTaskStatusAndEndTimeBefore(TaskStatus.UNDER_REVIEW, LocalDateTime.now())
                 .forEach((t) -> {
                     System.out.println("finish task: id: " + t.getTaskId() + "; name: " + t.getTaskName());
                     finishTask(t);
+                });
+        taskJPA.findByTaskStatusAndDdlBefore(TaskStatus.ONGOING, LocalDateTime.now())
+                .forEach(t -> {
+                    System.out.println("task(id: " + t.getTaskId() + ") enter review");
+                    enterReview(t);
                 });
     }
 

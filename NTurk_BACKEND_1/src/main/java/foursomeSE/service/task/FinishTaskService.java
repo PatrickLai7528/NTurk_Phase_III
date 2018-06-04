@@ -3,6 +3,8 @@ package foursomeSE.service.task;
 import foursomeSE.entity.task.Task;
 
 public interface FinishTaskService {
+    void enterReview(Task task);
+
     /**
      * task传入前已确认完成
      * 给所有完成任务的人发奖励
@@ -12,7 +14,7 @@ public interface FinishTaskService {
     void finishTask(Task task);
 
     /**
-     * 供schedule轮询，检查任务是否到期
+     * 供schedule轮询，检查任务是否到期，ddl和endTime
      * */
     void checkTask();
 }

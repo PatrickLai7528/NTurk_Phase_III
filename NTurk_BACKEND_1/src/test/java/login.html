@@ -121,21 +121,38 @@
      */
 
     $('#send-btn').on("click", function () {
-        let blobFile = $("#file-chooser").prop('files')[0];
-        let formData = new FormData();
-        formData.append("file", blobFile);
+//        let blobFile = $("#file-chooser").prop('files')[0];
+//        let formData = new FormData();
+//        formData.append("file", blobFile);
+//
+//        $.ajax({
+//            url: "http://localhost:8086/image",
+//            headers: {"Authorization": localStorage.getItem("jwtToken")},
+//            type: 'POST',
+//            xhr: function () {
+//                let myXhr = $.ajaxSettings.xhr();
+//                return myXhr;
+//            },
+//            data: formData,
+//            cache: false,
+//            processData: false,
+//            contentType: false,
+//            success: function (response) {
+//                console.log("ok");
+//            }
+//        });
 
         $.ajax({
-            url: "http://localhost:8086/image",
+            url: "http://localhost:8086/json/1",
             headers: {"Authorization": localStorage.getItem("jwtToken")},
-            type: 'POST',
+            type: 'GET',
             xhr: function () {
                 let myXhr = $.ajaxSettings.xhr();
                 return myXhr;
             },
-            data: formData,
+//            data: formData,
             cache: false,
-            processData: false,
+//            processData: false,
             contentType: false,
             success: function (response) {
                 console.log("ok");

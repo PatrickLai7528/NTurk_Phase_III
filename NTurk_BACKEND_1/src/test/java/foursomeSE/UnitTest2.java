@@ -3,6 +3,7 @@ package foursomeSE;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
+import foursomeSE.entity.communicate.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.inspection.Inspection;
@@ -81,7 +82,7 @@ public class UnitTest2 implements ConstsForT2 {
 
     @After
     public void doAfterClass() {
-//        // dbDataKeeper.clearAll();
+//         dbDataKeeper.clearAll();
 //        dbDataKeeper.reclaimAll();
     }
 
@@ -133,13 +134,13 @@ public class UnitTest2 implements ConstsForT2 {
         List<CTaskForInspection> w2ti = taskService.getWorkerInspectionTasks("worker2@ex.com");
         assertEquals(1, w2ti.size());
         assertEquals(3, w2ti.get(0).getMandatoryTime());
-        List<Task> newInspectionTasks1 = taskService.getNewInspectionTasks("worker2@ex.com");
+        List<CTask> newInspectionTasks1 = taskService.getNewInspectionTasks("worker2@ex.com");
         assertEquals(1, newInspectionTasks1.size());
         assertEquals("task2", newInspectionTasks1.get(0).getTaskName());
 
         assertEquals(0, taskJPA.findWorkerInspectionTasks("worker1@ex.com").size());
         assertEquals(2, taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal()).size());
-        List<Task> newInspectionTasks2 = taskService.getNewInspectionTasks("worker1@ex.com");
+        List<CTask> newInspectionTasks2 = taskService.getNewInspectionTasks("worker1@ex.com");
         assertEquals(2, newInspectionTasks2.size());
         ArrayList<String> names = newInspectionTasks2.stream().map(Task::getTaskName).collect(Collectors.toCollection(ArrayList::new));
         assertTrue(names.contains("task1"));
@@ -148,7 +149,6 @@ public class UnitTest2 implements ConstsForT2 {
         // 测GetTaskByIdForInspection;
 //        contractService.getByTaskIdForInspection(t1id, "worker2@ex.com");
         List<Contract> w2ci = contractJPA.findByTaskIdForInspection(t1id, wid[2]);
-        assertEquals(1, w2ci.size());
         assertEquals(cid[5], w2ci.get(0).getContractId());
         List<Contract> qaz = contractJPA.findByTaskIdForInspection(t1id, wid[1]);
         assertEquals(2, qaz.size());
@@ -189,6 +189,8 @@ public class UnitTest2 implements ConstsForT2 {
                 new CInspection(aid[3], 1.5),
                 new CInspection(aid[5], 1.4)
         ));
+        System.out.println("pre print");
+        System.out.println(bestKth);
         assertTrue(target.containsAll(bestKth) && bestKth.containsAll(target));
 
         // 再测mandatoryTime

@@ -4,10 +4,10 @@ import foursomeSE.entity.task.Task;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
-public class CTaskForInspection extends Task {
+public class CTaskForInspection extends CTask {
     private int mandatoryTime; // 表示有几次是必须参加的。
 
-    public CTaskForInspection(Task task) {
+    public CTaskForInspection(CTask task) {
         setSameFields(this, task);
     }
 

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 // draft
 // annotation_id 5035， => 5028 => 5011 是worker3的
@@ -24,7 +25,7 @@ import java.util.List;
 // 对应的人是5013, 5009，5013是worker5（问题就在这），
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
-/**
+/** taskid 7623 workerid 7610
  * 有些假数据写到UnitTest2这个类里了
  * <p>
  * 有task1一个任务（其中包括三个小任务），12个workers
@@ -101,6 +102,7 @@ public class DataSupplierForT2 implements ConstsForT2 {
         t1.setTaskName("task1");
         t1.setTaskDescription("task1-巡址寻址: 请在图中框出你认为有价值的物体，并作出描述");
         t1.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
+//        t1.setTaskTags(new HashSet<>(Arrays.asList(new Tag("f"), new Tag("f"))));
 
         t1.setCreateTime(LocalDateTime.now().minusDays(10));
         t1.setEndTime(LocalDateTime.now().plusDays(10));
@@ -121,6 +123,7 @@ public class DataSupplierForT2 implements ConstsForT2 {
         t2.setTaskName("task2");
         t2.setTaskDescription("task2-相面: 请框出你认识的名人脸");
         t2.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
+//        t2.setTaskTags(new HashSet<>(Arrays.asList(new Tag("a"), new Tag("f"))));
 
         t2.setCreateTime(LocalDateTime.now().minusDays(20));
         t2.setEndTime(LocalDateTime.now().plusDays(3));

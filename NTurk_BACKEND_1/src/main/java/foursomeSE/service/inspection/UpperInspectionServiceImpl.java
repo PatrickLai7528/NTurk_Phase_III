@@ -8,6 +8,7 @@ import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.inspection.InspectionJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.util.MyConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
 @Service
-public class UpperInspectionServiceImpl implements UpperInspectionService {
+public class UpperInspectionServiceImpl implements UpperInspectionService, MyConstants {
     private InspectionJPA inspectionJPA;
     private InspectionContractJPA inspectionContractJPA;
     private WorkerJPA workerJPA;
@@ -58,6 +59,6 @@ public class UpperInspectionServiceImpl implements UpperInspectionService {
 
             result.add(e);
         });
-        return result;
+        return result.subList(0, K);
     }
 }

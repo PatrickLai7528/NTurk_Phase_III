@@ -57,8 +57,6 @@ public class UpperContractServiceImpl implements UpperContractService {
 
     @Override
     public Contract getByTaskIdByWorkerUsername(long taskId, String username) {
-//        return service.getOneBy(c -> c.getTaskId() == taskId
-//                && c.getWorkerId() == workerService.usernameToId(username));
         return contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username);
     }
 
@@ -66,7 +64,6 @@ public class UpperContractServiceImpl implements UpperContractService {
     public List<Contract> getByTaskIdByRequesterUsername(long taskId, String username) {
         long requesterId = userByUsername(requesterJPA, username).getId();
         if (taskById(taskJPA, taskId).getRequesterId() == requesterId) {
-//        if (taskService.isTaskBelongTo(taskId, requesterId)) {
             return contractJPA.findByTaskId(taskId);
         }
         throw new MyAccessDeniedException();
@@ -93,14 +90,11 @@ public class UpperContractServiceImpl implements UpperContractService {
         contractJPA.save(toBeCompleted);
 
         Task task = taskById(taskJPA, taskId);
-//        List<Contract> contracts =
-//                service.getLotBy(c -> c.getTaskId() == taskId
-//                        && c.getContractStatus() == ContractStatus.COMPLETED);
 
         long size = contractJPA.countByTaskIdAndContractStatus(taskId, ContractStatus.COMPLETED);
 
         if (task.getCapacity() <= size) {
-            finishTaskService.finishTask(task);
+            finishTaskService.enterReview(task);
         }
         messageJPA.save(Message.createMessage(username, MessageType.FULFIL_CONTRACT, new String[]{task.getTaskName()}));
     }

@@ -21,7 +21,7 @@ import foursomeSE.jpa.message.MessageJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
-import foursomeSE.util.InspectionConstants;
+import foursomeSE.util.MyConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,7 @@ import static foursomeSE.util.ConvenientFunctions.listConvert;
 
 @Service
 @Qualifier("i2TaskServiceImpl")
-public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstants {
+public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private WorkerJPA workerJPA;
     private RequesterJPA requesterJPA;
     //    private LowerContractService lowerContractService;
@@ -111,7 +111,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
 //            if (t.getCapacity() <= haveFinished) {
 //                return false;
 //            }
-            if (t.getTaskStatus() == TaskStatus.FINISHED) {
+            if (t.getTaskStatus() != TaskStatus.ONGOING) {
                 return false;
             }
 
@@ -151,13 +151,13 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
      * inspection
      */
     @Override
-    public List<Task> getNewInspectionTasks(String username) {
+    public List<CTask> getNewInspectionTasks(String username) {
         this.username = username;
 
         List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal());
         result.removeAll(getWorkerInspectionTasks(username));
 
-        return result;
+        return listConvert(result, this::sToD);
     }
 
     @Override
@@ -353,13 +353,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, InspectionConstan
 
 
     private CTaskForInspection sToD2(Task task) {
-        CTaskForInspection result = new CTaskForInspection(task);
+        CTaskForInspection result = new CTaskForInspection(sToD(task));
         // 所有这个worker做过的关于这个task的inspection
         int alreadyDone = (int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId());
-        if (alreadyDone >= 3) {
+        if (alreadyDone >= MANDATORY_TIME) {
             result.setMandatoryTime(0);
-        } else {
-            result.setMandatoryTime(3 - alreadyDone);
+        } else { // 还要要求mandatoryTime不能大于目前他还可以做的inpection数量。
+            int maxCanDo = contractJPA.findByTaskIdForInspection(task.getTaskId(), userByUsername(workerJPA, username).getId()).size();
+            result.setMandatoryTime(Math.min(MANDATORY_TIME - alreadyDone, maxCanDo));
         }
 
         return result;

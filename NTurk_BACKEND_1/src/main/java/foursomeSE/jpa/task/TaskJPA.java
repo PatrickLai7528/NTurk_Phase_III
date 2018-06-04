@@ -21,8 +21,8 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
     // 但是这个还需要localDateTimeNow，这个有点怪
 
     List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
+    List<Task> findByTaskStatusAndDdlBefore(TaskStatus taskStatus, LocalDateTime now);
 
-    // TODO 突然发现上面那个endTimeBefore好像不需要，反正有轮询endTime来改taskStatus
     @Query(value = "select * from tasks where task_status = ?1", nativeQuery = true)
     List<Task> findByTaskStatus(int taskStatus);
 
