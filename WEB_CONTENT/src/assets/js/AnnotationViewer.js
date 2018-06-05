@@ -338,17 +338,6 @@ class AnnotationViewer {
 		return privateVariables.isCurrentAnnotationNew;
 	}
 
-	shareHttp() {
-		// let submit;
-		// if (privateVariables.isCurrentAnnotationNew) {
-		// 	submit = privateVariables.http.post;
-		// } else {
-		// 	submit = privateVariables.http.put;
-		// }
-		// return {submit: submit};
-		return privateVariables.http;
-	}
-
 	forceUpdate(imageName) {
 		privateVariables.isForceUpdate.set(imageName, true);
 	}
