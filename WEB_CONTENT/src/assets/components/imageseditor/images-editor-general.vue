@@ -29,7 +29,7 @@
                                 <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
                             </el-col>
                             <el-col :span="8">
-                                <el-button @click="handleCommit(nowIndex)" style="font-family:Microsoft YaHei; ">提交
+                                <el-button @click="submit()" style="font-family:Microsoft YaHei; ">提交
                                 </el-button>
                             </el-col>
                             <el-col :span="8">
@@ -251,6 +251,28 @@
 			deleteTag(index) {
 				// this.viewer.forceUpdate(this.tagText);
 				this.viewer.deleteTag(index);
+			},
+			submit() {
+				try {
+					this.viewer.setAnswerPairs(this.answerPairs);
+					this.viewer.submitCurrent(this.imageLength);
+					this.showMessage("success");
+				} catch (error) {
+					this.showMessage("notDone");
+				}
+			},
+			showMessage(type) {
+				if ("success" === type) {
+					this.$message({
+						message: '任务已经提交，请安心等待结果和奖励^_^',
+						type: 'success'
+					})
+				} else if ("notDone" === type) {
+					this.$message({
+						message: '您还没有完成这个任务^_^',
+						type: 'error'
+					})
+				}
 			},
 			initQuestion(questions) {
 				let q;

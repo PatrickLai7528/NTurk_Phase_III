@@ -148,6 +148,13 @@ class SegmentDrawingStrategy {
 		return null;
 	}
 
+	isMarkingEmpty(marking) {
+		if (null === marking || undefined === marking || 0 === marking.length) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 export default SegmentDrawingStrategy;

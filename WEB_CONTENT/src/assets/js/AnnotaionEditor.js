@@ -50,6 +50,8 @@ let privateMethods = {
 		header = privateVariables.header;
 		http = privateVariables.http;
 		data = this.getSubmitData();
+		console.log("in submit current");
+		console.log(data);
 		privateVariables.isLastSubmitLoading = true;
 		if (privateVariables.viewer.isCurrentAnnotationNew()) {
 			router = privateVariables.postBaseUrl + privateVariables.id;
@@ -409,6 +411,32 @@ class AnnotationEditor {
 		annotation = privateMethods.getCurrentEditedAnnotation();
 		annotation[markingType] = answerPairs;
 		privateVariables.editedAnnotation.set(currentImageName, annotation);
+		privateMethods.submitCurrent();
+	}
+
+	submitCurrent(annotationSize) {
+		let editedAnnotations, markingType;
+		editedAnnotations = privateVariables.editedAnnotation;
+		if (annotationSize !== editedAnnotations.size) {
+			console.log("here");
+			throw new Error("Contract Not Done");
+		}
+		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
+		editedAnnotations.forEach((value, key, map) => {
+			/**
+			 *  第一個和第二個是判斷沒有annotation, 若沒有即是新的且沒有做過
+			 *  第三個是判斷是否原本是有做的, 但把marking都刪掉了
+			 */
+			if (null === value || undefined === value || null === value[markingType] || undefined === value[markingType]) {
+				throw new Error("Contract Not Done");
+			}
+			value[markingType].forEach((marking,index, array)=>{
+				if(privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)){
+					throw new Error("Contract Not Done");
+				}
+			});
+		});
+		// 全部annotation都做完了
 		privateMethods.submitCurrent();
 	}
 }
