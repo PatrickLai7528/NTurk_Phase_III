@@ -239,21 +239,29 @@
 				this.viewer.forceUpdate(this.tagText);
 				this.viewer.deleteTag(index);
 			},
-            submit(){
-				try {
+			submit() {
+				if (this.viewer.submitCurrent(this.imageLength)) {
 					this.viewer.submitCurrent(this.imageLength);
-					this.showMessage("success");
-				} catch (error) {
+					this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						// do things here;
+					}).catch(() => {
+						this.$router.push({path: '/profile'});
+					});
+				} else {
 					this.showMessage("notDone");
 				}
-            },
+			},
 			showMessage(type) {
 				if ("success" === type) {
 					this.$message({
 						message: '任务已经提交，请安心等待结果和奖励^_^',
 						type: 'success'
 					})
-				}else if("notDone" === type){
+				} else if ("notDone" === type) {
 					this.$message({
 						message: '您还没有完成这个任务^_^',
 						type: 'error'
