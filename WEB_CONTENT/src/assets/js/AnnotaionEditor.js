@@ -18,6 +18,12 @@ let privateVariables = {
 	isLastSubmitLoading: false,
 	annotation: {},
 	editedAnnotation: new Map(),
+	/*
+	 * tag.html : string,
+	 * tag.text : string,
+	 * tag.index : number
+	 */
+	tag: new Map(),
 	tagHtml: new Map(),
 	isEdited: new Map(),
 	// deletedTagCounter: 0
@@ -34,7 +40,6 @@ let privateMethods = {
 
 		// 重新一次前面的標註, 之後再畫新的標註, 放在回調函數裡是因為drawCurrent可能要輪詢等待上一次的請求結束才執行
 		privateVariables.viewer.drawCurrent(header, () => {
-			// context.strokeRect(startPoint.x, startPoint.y, endPoint.x - startPoint.x, endPoint.y - startPoint.y)
 			privateVariables.markingDrawingStrategy.drawThis(context, marking, privateVariables.config)
 		})
 		;
@@ -45,6 +50,8 @@ let privateMethods = {
 		header = privateVariables.header;
 		http = privateVariables.http;
 		data = this.getSubmitData();
+		console.log("in submit current");
+		console.log(data);
 		privateVariables.isLastSubmitLoading = true;
 		if (privateVariables.viewer.isCurrentAnnotationNew()) {
 			router = privateVariables.postBaseUrl + privateVariables.id;
@@ -96,12 +103,10 @@ let privateMethods = {
 		privateVariables.tagTextUpdateWay();
 	},
 	getSubmitData() {
-		let marking, markingType, tagTexts, i, annotation;
+		//....
+		let markingType, annotation;
 		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
-		// console.log(privateVariables.editedAnnotation);
 		annotation = this.getCurrentEditedAnnotation();
-		// console.log(annotation);
-		// this.updateTagText();
 		return annotation;
 	},
 	addOneMarking(caller, marking) {
@@ -266,15 +271,6 @@ class AnnotationEditor {
 	}
 
 	handleMouseDown(e) {
-		// let startPoint, endPoint;
-		// privateVariables.points[0] = {
-		// 	x: e.offsetX, y: e.offsetY
-		// };
-		// privateVariables.points[1] = privateVariables.points[0];
-		// privateVariables.isMouseDown = true;
-		// startPoint = privateVariables.points[0];
-		// endPoint = privateVariables.points[1];
-		// privateMethods.drawThis({p1: startPoint, p2: endPoint});
 		let marking;
 		marking = privateVariables.markingDrawingStrategy.generateMarkingAfterMouseDown(e);
 		if (null !== marking && undefined !== marking) {
@@ -283,18 +279,6 @@ class AnnotationEditor {
 	}
 
 	handleMouseUp(e) {
-		// let startPoint, endPoint, marking;
-		// privateVariables.isMouseDown = false;
-		// startPoint = privateVariables.points[0];
-		// endPoint = {x: e.offsetX, y: e.offsetY};
-		// privateVariables.points[1] = endPoint;
-		// marking = {p1: startPoint, p2: endPoint};
-		// if (startPoint.x === startPoint.x && startPoint.y === endPoint.y) {
-		// 	privateVariables.isMouseDown = false;
-		// 	return;
-		// }
-		// privateMethods.addOneMarking(this, marking);
-
 		let marking;
 		marking = privateVariables.markingDrawingStrategy.generateMarkingAfterMouseUp(e);
 		if (null !== marking && undefined !== marking) {
@@ -309,13 +293,6 @@ class AnnotationEditor {
 		if (null !== marking && undefined !== marking) {
 			privateMethods.drawThis(marking);
 		}
-		// let startPoint, currentPoint;
-		// if (privateVariables.isMouseDown) {
-		// 	currentPoint = {x: e.offsetX, y: e.offsetY};
-		// 	startPoint = privateVariables.points[0];
-		// 	privateVariables.points[1] = currentPoint;
-		// 	privateMethods.drawThis({p1: startPoint, p2: currentPoint});
-		// }
 	}
 
 	deleteTag(index) {
@@ -338,10 +315,8 @@ class AnnotationEditor {
 			privateMethods.submitCurrent(() => {
 				this.drawCurrent(privateVariables.header);
 			});
-			// console.log(annotation);
 			privateMethods.initTagHtml(annotation);
 			privateMethods.initTagText(annotation);
-			// privateVariables.viewer.forceUpdate(currentImageName);
 		}
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
@@ -354,6 +329,7 @@ class AnnotationEditor {
 			}, 50)
 		}
 	}
+
 
 	shareTag() {
 		let currentImagename;
@@ -410,11 +386,11 @@ class AnnotationEditor {
 			console.log(privateVariables.editedAnnotation);
 			console.log("forced update");
 			privateVariables.editedAnnotation.set(currentImageName, annotation);
-			privateVariables.isEdited.set(currentImageName, annotation);
-			privateMethods.submitCurrent(() => {
-				privateVariables.viewer.forceUpdate(currentImageName);
-				privateVariables.isEdited.set(currentImageName, false);
-			})
+			privateVariables.isEdited.set(currentImageName, false);
+			// privateMethods.submitCurrent(() => {
+			// 	privateVariables.viewer.forceUpdate(currentImageName);
+			// 	privateVariables.isEdited.set(currentImageName, false);
+			// })
 		}
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
@@ -436,6 +412,32 @@ class AnnotationEditor {
 		annotation[markingType] = answerPairs;
 		privateVariables.editedAnnotation.set(currentImageName, annotation);
 		privateMethods.submitCurrent();
+	}
+
+	submitCurrent(annotationSize) {
+		let editedAnnotations, markingType;
+		editedAnnotations = privateVariables.editedAnnotation;
+		if (annotationSize !== editedAnnotations.size) {
+			return false;
+		}
+		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
+		editedAnnotations.forEach((value, key, map) => {
+			/**
+			 *  第一個和第二個是判斷沒有annotation, 若沒有即是新的且沒有做過
+			 *  第三個是判斷是否原本是有做的, 但把marking都刪掉了
+			 */
+			if (null === value || undefined === value || null === value[markingType] || undefined === value[markingType]) {
+				return false;
+			}
+			value[markingType].forEach((marking, index, array) => {
+				if (privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)) {
+					return false;
+				}
+			});
+		});
+		// 全部annotation都做完了
+		privateMethods.submitCurrent();
+		return true;
 	}
 }
 

@@ -223,7 +223,7 @@
                 //在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
                 let _this = this;
                 _this.$http.get('http://localhost:8086/contract/taskId/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    _this.contractData = response.data;
+                	_this.contractData = response.data;
                     if (_this.contractData.contractStatus === 'COMPLETED') {
                         _this.messageHandler();
                     }

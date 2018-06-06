@@ -88,6 +88,13 @@ class AnswerPairsDrawingStrategy {
 		return null;
 	}
 
+	isMarkingEmpty(marking) {
+		if (null === marking.answer || undefined == marking.answer || "" === marking.answer) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 export default AnswerPairsDrawingStrategy;

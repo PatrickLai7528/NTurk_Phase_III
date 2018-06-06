@@ -1,43 +1,132 @@
 <template>
-
-    <el-container>
-        <el-main class="wrap">
-            <el-header>
-                <el-progress :text-inside="true" :stroke-width="18" v-bind:percentage=percent
-                             status="success"></el-progress>
-            </el-header>
-            <div class="block">
-                <div id="canvasDiv">
-                    <div v-html="canvasHtml">
-                        {{canvasHtml}}
+    <div class="editor-frame">
+        <el-row>
+            <el-col :span="15">
+                <el-card class="pic-area">
+                    <div slot="header" class="pic-card-header">
+                        <span>任務描述: {{taskDescription}}</span>
                     </div>
-                    <div v-html="tagHtml">{{tagHtml}}</div>
-                </div>
-                <div id="previous-button">
-                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
-                </div>
-                <div id="next-button">
-                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
-                </div>
-            </div>
-        </el-main>
-        <el-aside width="300px" style="alignment: center">
-            <ul style="list-style-type:none">
-                <li>
-                    <el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>
-                    <el-button @click="onCancel()">取消</el-button>
-                </li>
-                <li>
-                    <el-form v-for="pair in answerPairs">
-                        <el-form-item class="Q_And_A" :label="pair.question">
-                            <el-input v-model="pair.answer"></el-input>
-                        </el-form-item>
-                    </el-form>
-                </li>
-            </ul>
-        </el-aside>
-    </el-container>
+                    <el-row>
+                        <el-col :span="24">
+                            <div id="canvasDiv">
+                                <div v-html="canvasHtml">
+                                    {{canvasHtml}}
+                                </div>
+                                <div v-html="tagHtml">{{tagHtml}}</div>
+                            </div>
+                        </el-col>
+                    </el-row>
+                </el-card>
+            </el-col>
+            <el-col :span="6" :offset="1">
+                <el-card class="tag-area">
+                    <div slot="header" class="tag-card-header">
+                        <span>標註與設置</span>
+                    </div>
+                    <div class="operation">
+                        <el-row :gutter="30">
+                            <el-col :span="8">
+                                <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-button @click="submit()" style="font-family:Microsoft YaHei; ">提交
+                                </el-button>
+                            </el-col>
+                            <el-col :span="8">
+                                <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
+                            </el-col>
+                        </el-row>
+                    </div>
+                    <el-collapse>
+                        <el-collapse-item>
+                            <template slot="title">
+                                <span style="font-size: 16px">標籤</span>
+                            </template>
+                            <div>
+                                <el-tag size="small" type="info">小型标签</el-tag>
+                                <el-tag size="small" type="info">小型标签</el-tag>
+                                <el-tag size="small" type="info">小型标签</el-tag>
+                                <el-tag size="small" type="info">小型标签</el-tag>
+                            </div>
+                        </el-collapse-item>
+                        <el-collapse-item>
+                            <template slot="title">
+                                <span style="font-size: 16px">進度</span>
+                            </template>
+                            <div>
+                                <el-progress type="circle" :percentage=percent color="#8e71c7"></el-progress>
+                            </div>
+                        </el-collapse-item>
+                        <el-collapse-item>
+                            <template slot="title">
+                                <span style="font-size: 16px">問題</span>
+                            </template>
+                            <div>
+                                <div style="margin-top: 0.3em">
+                                    <el-form v-for="pair in answerPairs">
+                                        <el-form-item class="Q_And_A" :label="pair.question">
+                                            <el-input v-model="pair.answer"></el-input>
+                                        </el-form-item>
+                                    </el-form>
+                                </div>
+                            </div>
+                        </el-collapse-item>
+                    </el-collapse>
+                </el-card>
+            </el-col>
+        </el-row>
+    </div>
 </template>
+
+<style>
+    .operation {
+        margin-bottom: 0.5em;
+        text-align: center;
+    }
+
+    #canvasDiv {
+        text-align: center;
+    }
+
+    .editor-frame {
+        font-family: Microsoft YaHei;
+    }
+
+    .pic-area {
+        width: 100%;
+        height: 100%;
+        padding: 0.7em;
+        margin: 1.5em;
+        text-align: left;
+    }
+
+    .tag-card-header {
+        font-family: Microsoft YaHei;
+        padding-bottom: 0;
+        font-size: 20px;
+    }
+
+    .pic-card-header {
+        font-family: Microsoft YaHei;
+        padding-bottom: 0;
+        font-size: 20px;
+    }
+
+    .tag-area {
+        width: 100%;
+        height: 100%;
+        padding: 0.7em;
+        margin: 1.5em;
+        text-align: left;
+        font-size: 18px;
+    }
+
+    #canvas {
+        border-right: 1px #585858 solid;
+        cursor: crosshair;
+        background-color: black;
+    }
+</style>
 <script>
 	import ImageViewer from '../../js/ImageViewer.js'
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
@@ -56,7 +145,8 @@
 				contractId: this.$route.params.contractId,
 				taskId: this.$route.params.taskId,
 				imageLength: 0,
-				currentPlace: 1
+				currentPlace: 1,
+				taskDescription: ""
 			}
 		},
 		computed: {
@@ -102,6 +192,7 @@
 					.then((response) => {
 						console.log(response);
 						this.questions = response.data.questions;
+						this.taskDescription = response.data.taskDescription;
 						console.log(this.questions)
 						this.initQuestion(this.questions);
 						let viewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
@@ -126,21 +217,8 @@
 				this.answerPairs = this.answerPairsDrawingStrategy.interpretTag(temp);
 			},
 			updateTagText() {
-				// let temp = this.viewer.shareTag();
-				// console.log(this.tagHtml);
-				// this.answerPairs = this.answerPairsDrawingStrategy.interpretTag(temp);
-				// let temp = this.viewer.shareTagText();
-				// if (temp.length !== 0) {
-				// 	this.answerPairs = temp;
-				// }
-				// console.log(this.answerPairs)
 			},
 			getTagText() {
-				// let temp;
-				// this.answerPairs.forEach((value, index, array) => {
-				// 	temp += this.answerPairsDrawingStrategy.addTag({}, value, index);
-				// });
-				// return temp;
 			},
 			next() {
 				this.viewer.setAnswerPairs(this.answerPairs);
@@ -174,6 +252,35 @@
 				// this.viewer.forceUpdate(this.tagText);
 				this.viewer.deleteTag(index);
 			},
+			submit() {
+				if (this.viewer.submitCurrent(this.imageLength)) {
+					this.viewer.submitCurrent(this.imageLength);
+					this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						// do things here;
+					}).catch(() => {
+						this.$router.push({path: '/profile'});
+					});
+				} else {
+					this.showMessage("notDone");
+				}
+			},
+			showMessage(type) {
+				if ("success" === type) {
+					this.$message({
+						message: '任务已经提交，请安心等待结果和奖励^_^',
+						type: 'success'
+					})
+				} else if ("notDone" === type) {
+					this.$message({
+						message: '您还没有完成这个任务^_^',
+						type: 'error'
+					})
+				}
+			},
 			initQuestion(questions) {
 				let q;
 				this.answerPairs = [];
@@ -184,40 +291,3 @@
 		}
 	}
 </script>
-
-<style scoped>
-    .el-carousel__item h3 {
-        color: #475669;
-        font-size: 14px;
-        opacity: 0.75;
-        line-height: 150px;
-        margin: 0;
-    }
-
-    .el-carousel__item:nth-child(2n) {
-        background-color: #99a9bf;
-    }
-
-    .el-carousel__item:nth-child(2n+1) {
-        background-color: #d3dce6;
-    }
-
-    .Q_And_A {
-        font-size: 18px;
-        line-height: 40px;
-        margin: 30px;
-    }
-
-    .pic {
-        height: 100%;
-    }
-
-    .el-form-item {
-        margin: 20px;
-    }
-
-    .el-button {
-        width: 100px;
-        margin: 10px;
-    }
-</style>

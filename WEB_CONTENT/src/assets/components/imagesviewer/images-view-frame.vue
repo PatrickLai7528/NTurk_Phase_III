@@ -3,33 +3,31 @@
     <el-container>
         <el-main class="wrap">
             <div class="block">
-                <!--<el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"-->
-                <!--v-on:change="onIndexChange">-->
-                <!--<el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">-->
-                <div id="canvasDiv">
-                    <div v-html="canvasHtml">
-                        {{canvasHtml}}
-                    </div>
-                    <div v-html="tagHtml">{{tagHtml}}</div>
-                </div>
-                <!--<div v-html="allEditAreaHtml">-->
-                <!--<div>{{allEditAreaHtml}}</div>-->
-                <!--</div>-->
-                <div id="previous-button">
-                    <el-button icon="el-icon-arrow-left" circle @click="previous()"></el-button>
-                </div>
-                <div id="next-button">
-                    <el-button icon="el-icon-arrow-right" circle @click="next()"></el-button>
-                </div>
-                <!--</el-carousel-item>-->
-                <!--</el-carousel>-->
+                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
+                             v-on:change="onIndexChange">
+                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
+                        <div id="canvasDiv">
+                            <canvas
+                                    id="canvas"
+                                    class="fl"
+                            >
+                            </canvas>
+                        </div>
+                    </el-carousel-item>
+                </el-carousel>
             </div>
         </el-main>
         <el-aside width="300px" style="alignment: center">
+            <!--<el-button @click="updateThisAnnotation()">更新</el-button>-->
+            <!--<el-button @click="previousPictureAndUpdateThisAnnotation()">上一個</el-button>-->
+            <!--<el-button @click="nextPictureAndUpdateThisAnnotation()">下一個</el-button>-->
+            <!--<el-button @click="clearThisAnnotation()">清除</el-button>-->
+            <!--<el-button @click="undoThisAnnotation()">UNDO</el-button>-->
             <ul style="list-style-type:none">
                 <li>
+                    <!--<el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>-->
                 </li>
-                <li v-for="(val,index) in tagText">
+                <li v-for="(val,index) in frames">
                     <el-popover
                             placement="right"
                             width="150"
@@ -38,7 +36,7 @@
                         <el-input
                                 type="textarea"
                                 :rows="2"
-                                v-model="val.text"
+                                v-model="val.tag"
                                 :disabled="true"
                         >
                         </el-input>
@@ -56,8 +54,7 @@
                         v-on:change="ratingChange"
                 >
                 </el-rate>
-                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i
-                        class="el-icon-upload el-icon--right"></i></el-button>
+                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
     </el-container>
@@ -222,14 +219,14 @@
                 this.$http.post('http://localhost:8086/inspect',
                     JSON.stringify(InspectionContract),
                     {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                        _this.mandatoryTime = _this.mandatoryTime - 1;   //将必做次数递减
-                        if(_this.mandatoryTime >= 1){
-                            _this.showMessage();    //显示提示，要接着做
-                        }
-                        else{       //完成了，显示提示消息，返回上一级
-                            _this.successMessage();
-                            _this.$router.push({path:'/profile'});
-                        }
+                    _this.mandatoryTime = _this.mandatoryTime - 1;   //将必做次数递减
+                    if(_this.mandatoryTime >= 1){
+                        _this.showMessage();    //显示提示，要接着做
+                    }
+                    else{       //完成了，显示提示消息，返回上一级
+                        _this.successMessage();
+                        _this.$router.push({path:'/profile'});
+                    }
                 }).catch(function (error) {
                     console.log(error);
                 });

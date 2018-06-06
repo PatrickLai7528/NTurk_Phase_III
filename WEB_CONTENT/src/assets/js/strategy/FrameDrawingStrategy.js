@@ -129,6 +129,14 @@ class FrameDrawingStrategy {
 		}
 		return frame;
 	}
+
+	isMarkingEmpty(marking) {
+		if (null === marking || undefined === marking || 0 === marking.length) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
 
 export default FrameDrawingStrategy;

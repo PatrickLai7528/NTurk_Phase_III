@@ -14,8 +14,8 @@ let privateVariables = {
 		isLastImageLoading: false, /* 表示當前上一張圖片是加載完成, drawPrevious/NextImage要等到下一張圖片加載完成再執行 */
 		config: {
 			/* 應該提供接口, 可以被設置 */
-			defaultHeight: 400, /* 單位px */
-			defaultWidth: 600,
+			defaultHeight: 580, /* 單位px */
+			defaultWidth: 780,
 		}
 	}
 ;
