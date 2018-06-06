@@ -253,11 +253,18 @@
 				this.viewer.deleteTag(index);
 			},
 			submit() {
-				try {
-					this.viewer.setAnswerPairs(this.answerPairs);
+				if (this.viewer.submitCurrent(this.imageLength)) {
 					this.viewer.submitCurrent(this.imageLength);
-					this.showMessage("success");
-				} catch (error) {
+					this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						// do things here;
+					}).catch(() => {
+						this.$router.push({path: '/profile'});
+					});
+				} else {
 					this.showMessage("notDone");
 				}
 			},

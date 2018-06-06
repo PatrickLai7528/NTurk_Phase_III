@@ -418,8 +418,7 @@ class AnnotationEditor {
 		let editedAnnotations, markingType;
 		editedAnnotations = privateVariables.editedAnnotation;
 		if (annotationSize !== editedAnnotations.size) {
-			console.log("here");
-			throw new Error("Contract Not Done");
+			return false;
 		}
 		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
 		editedAnnotations.forEach((value, key, map) => {
@@ -428,16 +427,17 @@ class AnnotationEditor {
 			 *  第三個是判斷是否原本是有做的, 但把marking都刪掉了
 			 */
 			if (null === value || undefined === value || null === value[markingType] || undefined === value[markingType]) {
-				throw new Error("Contract Not Done");
+				return false;
 			}
-			value[markingType].forEach((marking,index, array)=>{
-				if(privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)){
-					throw new Error("Contract Not Done");
+			value[markingType].forEach((marking, index, array) => {
+				if (privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)) {
+					return false;
 				}
 			});
 		});
 		// 全部annotation都做完了
 		privateMethods.submitCurrent();
+		return true;
 	}
 }
 
