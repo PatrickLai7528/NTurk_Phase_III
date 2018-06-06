@@ -93,16 +93,16 @@ public class TaskController {
         }
     }
 
-    @RequestMapping(value = "/tasks/id/{id}",
-            method = RequestMethod.GET)
-    public ResponseEntity<?> getById(@PathVariable("id") long id) {
-        Task task = taskService.getById(id);
-        if (task == null) {
-            return new ResponseEntity<>(new MyErrorType("task with id " + id + " not found"),
-                    HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(task, HttpStatus.OK);
-    }
+//    @RequestMapping(value = "/tasks/id/{id}",
+//            method = RequestMethod.GET)
+//    public ResponseEntity<?> getById(@PathVariable("id") long id) {
+//        Task task = taskService.getById(id);
+//        if (task == null) {
+//            return new ResponseEntity<>(new MyErrorType("task with id " + id + " not found"),
+//                    HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(task, HttpStatus.OK);
+//    }
 
     @RequestMapping(value = "/task/{taskId}",
             method = RequestMethod.GET)
@@ -120,19 +120,19 @@ public class TaskController {
      * inspection
      */
 
-    @RequestMapping(value = "/tasks/newInspectionTasks",
-            method = RequestMethod.GET)
-    public ResponseEntity<?> getNewInspectionTasks(@RequestHeader("Authorization") String token) {
-        String username = JwtUtil.getUsernameFromToken(token);
-        return new ResponseEntity<>(taskService.getNewInspectionTasks(username), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/tasks/workerInspectionTasks",
-            method = RequestMethod.GET)
-    public ResponseEntity<?> getWorkerInspectionTasks(@RequestHeader("Authorization") String token) {
-        String username = JwtUtil.getUsernameFromToken(token);
-        return new ResponseEntity<>(taskService.getWorkerInspectionTasks(username), HttpStatus.OK);
-    }
+//    @RequestMapping(value = "/tasks/newInspectionTasks",
+//            method = RequestMethod.GET)
+//    public ResponseEntity<?> getNewInspectionTasks(@RequestHeader("Authorization") String token) {
+//        String username = JwtUtil.getUsernameFromToken(token);
+//        return new ResponseEntity<>(taskService.getNewInspectionTasks(username), HttpStatus.OK);
+//    }
+//
+//    @RequestMapping(value = "/tasks/workerInspectionTasks",
+//            method = RequestMethod.GET)
+//    public ResponseEntity<?> getWorkerInspectionTasks(@RequestHeader("Authorization") String token) {
+//        String username = JwtUtil.getUsernameFromToken(token);
+//        return new ResponseEntity<>(taskService.getWorkerInspectionTasks(username), HttpStatus.OK);
+//    }
 
     /**
      * statistics

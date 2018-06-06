@@ -10,12 +10,14 @@ import foursomeSE.entity.inspection.InspectionContract;
 import foursomeSE.entity.inspection.RInspections;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
+import foursomeSE.entity.task.Task;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.inspection.InspectionJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
+import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
@@ -27,6 +29,7 @@ import java.util.List;
 
 import static foursomeSE.service.annotation.AnnotationUtils.anttById;
 import static foursomeSE.service.task.TaskUtils.mtById;
+import static foursomeSE.service.task.TaskUtils.taskById;
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
 @Service
@@ -36,17 +39,20 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
     private WorkerJPA workerJPA;
     private AnnotationJPA annotationJPA;
     private MicrotaskJPA microtaskJPA;
+    private TaskJPA taskJPA;
 
     public UpperInspectionServiceImpl(InspectionJPA inspectionJPA,
                                       InspectionContractJPA inspectionContractJPA,
                                       WorkerJPA workerJPA,
                                       AnnotationJPA annotationJPA,
-                                      MicrotaskJPA microtaskJPA) {
+                                      MicrotaskJPA microtaskJPA,
+                                      TaskJPA taskJPA) {
         this.inspectionJPA = inspectionJPA;
         this.inspectionContractJPA = inspectionContractJPA;
         this.workerJPA = workerJPA;
         this.annotationJPA = annotationJPA;
         this.microtaskJPA = microtaskJPA;
+        this.taskJPA = taskJPA;
     }
 
     @Override
@@ -134,11 +140,20 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
                      Microtask microtask = mtById(microtaskJPA, annotation.getMicrotaskId());
                      if (rateSum >= ACCEPTED_SUM) {
                          annotation.setAnnotationStatus(AnnotationStatus.PASSED);
+                         annotationJPA.save(annotation);
                          microtask.setMicrotaskStatus(MicrotaskStatus.PASSED);
+                         microtaskJPA.save(microtask);
 
+                         List<Microtask> np = microtaskJPA.findByTaskIdNotPassed(microtask.getTaskId());
+                         if (np.isEmpty()) {
+                             Task task = taskById(taskJPA, microtask.getTaskId());
+
+                         }
                      } else {
                          annotation.setAnnotationStatus(AnnotationStatus.FAILED);
+                         annotationJPA.save(annotation);
                          microtask.setMicrotaskStatus(MicrotaskStatus.FAILED);
+                         microtaskJPA.save(microtask);
                      }
                  }
              });

@@ -16,50 +16,51 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
 
     public abstract void setAnnotationService(UpperAnnotationService<T> annotationService);
 
-//    @RequestMapping(value = "/id/{id}",
+    @RequestMapping(value = "/id/{id}",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getAnnotationById(@PathVariable("id") long id) {
+        try {
+            T annotation = annotationService.getById(id);
+            return new ResponseEntity<>(annotation, HttpStatus.OK);
+        } catch (MyObjectNotFoundException e) {
+            return new ResponseEntity<>(new MyErrorType("xxx Annotation with id " + id + " not found"),
+                    HttpStatus.NOT_FOUND);
+        }
+    }
+
+//    @RequestMapping(value = "/taskId/{taskId}/imgName/{imgName}",
 //            method = RequestMethod.GET)
-//    public ResponseEntity<?> getAnnotationById(@PathVariable("id") long id) {
+//    @PreAuthorize("hasRole('WORKER')")
+//    public ResponseEntity<?> getAnnotation(@RequestHeader("Authorization") String token,
+//                                           @PathVariable("taskId") long taskId,
+//                                           @PathVariable("imgName") String imgName) {
+//        String username = JwtUtil.getUsernameFromToken(token);
+//
 //        try {
-//            T annotation = annotationService.getById(id);
+//            T annotation = annotationService.getOneBy(taskId, username, imgName);
 //            return new ResponseEntity<>(annotation, HttpStatus.OK);
 //        } catch (MyObjectNotFoundException e) {
-//            return new ResponseEntity<>(new MyErrorType("xxx Annotation with id " + id + " not found"),
+//            return new ResponseEntity<>(new MyErrorType("Annotation not found"),
 //                    HttpStatus.NOT_FOUND);
 //        }
 //    }
 
-    @RequestMapping(value = "/taskId/{taskId}/imgName/{imgName}",
-            method = RequestMethod.GET)
-    @PreAuthorize("hasRole('WORKER')")
-    public ResponseEntity<?> getAnnotation(@RequestHeader("Authorization") String token,
-                                           @PathVariable("taskId") long taskId,
-                                           @PathVariable("imgName") String imgName) {
-        String username = JwtUtil.getUsernameFromToken(token);
+//    @RequestMapping(value = "/contractId/{contractId}/imgName/{imgName}",
+//            method = RequestMethod.GET)
+//    //@PreAuthorize("hasRole('REQUESTER')")
+//    public ResponseEntity<?> getAnnotationByRequester(@PathVariable("contractId") long contractId, @PathVariable("imgName") String imgName) {
+//        try {
+//            T annotation = annotationService.getOneBy(contractId, imgName);
+//            return new ResponseEntity<>(annotation, HttpStatus.OK);
+//        } catch (MyObjectNotFoundException e) {
+//            return new ResponseEntity<>(new MyErrorType("Annotation not found"),
+//                    HttpStatus.NOT_FOUND);
+//        }
+//    }
 
-        try {
-            T annotation = annotationService.getOneBy(taskId, username, imgName);
-            return new ResponseEntity<>(annotation, HttpStatus.OK);
-        } catch (MyObjectNotFoundException e) {
-            return new ResponseEntity<>(new MyErrorType("Annotation not found"),
-                    HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @RequestMapping(value = "/contractId/{contractId}/imgName/{imgName}",
-            method = RequestMethod.GET)
-    //@PreAuthorize("hasRole('REQUESTER')")
-    public ResponseEntity<?> getAnnotationByRequester(@PathVariable("contractId") long contractId, @PathVariable("imgName") String imgName) {
-        try {
-            T annotation = annotationService.getOneBy(contractId, imgName);
-            return new ResponseEntity<>(annotation, HttpStatus.OK);
-        } catch (MyObjectNotFoundException e) {
-            return new ResponseEntity<>(new MyErrorType("Annotation not found"),
-                    HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @RequestMapping(value = "/contracts/saveContracts",
+    @RequestMapping(value = "/saveAnnotations",
             method = RequestMethod.POST)
+    @PreAuthorize("hasRole('WORKER')")
     public ResponseEntity<?> saveAnnotations(@RequestHeader("Authorization") String token,
                                              @RequestBody RAnnotations<T> rAnnotations) {
         String username = JwtUtil.getUsernameFromToken(token);

@@ -2,6 +2,7 @@ package foursomeSE.controller;
 
 import foursomeSE.entity.communicate.CInspectionContract;
 import foursomeSE.entity.communicate.EnterInspectionResponse;
+import foursomeSE.entity.inspection.RInspections;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.security.JwtUtil;
 import foursomeSE.service.inspection.UpperInspectionService;
@@ -19,25 +20,25 @@ public class InspectionController {
         this.inspectionService = inspectionService;
     }
 
-    @RequestMapping(value = "/inspect",
-            method = RequestMethod.POST)
-    @PreAuthorize("hasRole('WORKER')")
-    public ResponseEntity<?> addInspections(@RequestHeader("Authorization") String token,
-                                            @RequestBody CInspectionContract cInspectionContract) {
-        String username = JwtUtil.getUsernameFromToken(token);
-        inspectionService.add(cInspectionContract, username);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/inspect/imgName/{imgName}",
-            method = RequestMethod.GET)
-    @PreAuthorize("hasRole('REQUESTER')")
-    public ResponseEntity<?> getBestKth(@RequestHeader("Authorization") String token,
-                                        @PathVariable("imgName") String imgName) {
-        String username = JwtUtil.getUsernameFromToken(token);
-        return new ResponseEntity<>(inspectionService.getBestKth(imgName, username), HttpStatus.OK);
-    }
+//    @RequestMapping(value = "/inspect",
+//            method = RequestMethod.POST)
+//    @PreAuthorize("hasRole('WORKER')")
+//    public ResponseEntity<?> addInspections(@RequestHeader("Authorization") String token,
+//                                            @RequestBody CInspectionContract cInspectionContract) {
+//        String username = JwtUtil.getUsernameFromToken(token);
+//        inspectionService.add(cInspectionContract, username);
+//
+//        return new ResponseEntity<>(HttpStatus.OK);
+//    }
+//
+//    @RequestMapping(value = "/inspect/imgName/{imgName}",
+//            method = RequestMethod.GET)
+//    @PreAuthorize("hasRole('REQUESTER')")
+//    public ResponseEntity<?> getBestKth(@RequestHeader("Authorization") String token,
+//                                        @PathVariable("imgName") String imgName) {
+//        String username = JwtUtil.getUsernameFromToken(token);
+//        return new ResponseEntity<>(inspectionService.getBestKth(imgName, username), HttpStatus.OK);
+//    }
 
     @RequestMapping(value = "/inspect/enterInspection/{taskId}",
             method = RequestMethod.GET)
@@ -55,5 +56,17 @@ public class InspectionController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/inspect/saveInspections",
+            method = RequestMethod.POST)
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<?> saveInspections(@RequestHeader("Authorization") String token,
+                                             @RequestBody RInspections rInspections) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        inspectionService.saveInspections(rInspections, token);
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 }
