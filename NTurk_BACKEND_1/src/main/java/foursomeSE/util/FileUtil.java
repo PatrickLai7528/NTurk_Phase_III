@@ -78,7 +78,7 @@ public class FileUtil {
     }
 
     private static String getFileName(String tableName) {
-        // TODO 感觉这样写很垃圾
+        // 感觉这样写很垃圾
         if (FileUtil.class.getResource("/data/jsons/").toString().startsWith("jar:")) {
 //            return "./data/jsons/" + tableName + ".json";
             return "./" + tableName + ".json";

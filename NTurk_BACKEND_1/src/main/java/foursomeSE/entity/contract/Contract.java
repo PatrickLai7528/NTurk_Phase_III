@@ -20,8 +20,8 @@ public class Contract {
     @NotNull
     private long workerId;
 
-    @NotNull
-    private ContractStatus contractStatus;
+//    @NotNull
+//    private ContractStatus contractStatus;
 
     @NotNull
     private LocalDateTime lastEditTime;
@@ -53,14 +53,6 @@ public class Contract {
         this.workerId = workerId;
     }
 
-    public ContractStatus getContractStatus() {
-        return contractStatus;
-    }
-
-    public void setContractStatus(ContractStatus contractStatus) {
-        this.contractStatus = contractStatus;
-    }
-
     public LocalDateTime getLastEditTime() {
         return lastEditTime;
     }
@@ -75,7 +67,6 @@ public class Contract {
                 "contractId=" + contractId +
                 ", taskId=" + taskId +
                 ", workerId=" + workerId +
-                ", contractStatus=" + contractStatus +
                 ", lastEditTime=" + lastEditTime +
                 '}';
     }

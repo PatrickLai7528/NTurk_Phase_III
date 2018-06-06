@@ -10,5 +10,5 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface AbstractAnnotationJPA<T extends Annotation> extends CrudRepository<T, Long> {
-    Optional<T> findByContractIdAndImgName(long contractId, String imgName);
+//    Optional<T> findByContractIdAndImgName(long contractId, String imgName);
 }

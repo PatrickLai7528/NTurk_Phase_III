@@ -20,8 +20,8 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
 //    List<Task> findJustFinishedTasks(TaskStatus taskStatus, LocalDateTime now);
     // 但是这个还需要localDateTimeNow，这个有点怪
 
-    List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
-    List<Task> findByTaskStatusAndDdlBefore(TaskStatus taskStatus, LocalDateTime now);
+//    List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
+//    List<Task> findByTaskStatusAndDdlBefore(TaskStatus taskStatus, LocalDateTime now);
 
     @Query(value = "select * from tasks where task_status = ?1", nativeQuery = true)
     List<Task> findByTaskStatus(int taskStatus);
@@ -38,6 +38,12 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
             ")",
             nativeQuery = true)
     List<Task> findWorkerInspectionTasks(String username);
+
+    /**
+     * 这个主要是创建时用，先存，然后再根据createTime拿，这样才知道id，也只有创建时才知道createTime
+     * 其他Entity类似情形下也可能采用这个方法
+     * */
+    Task findByCreateTime(LocalDateTime createTime);
 
 
     /**

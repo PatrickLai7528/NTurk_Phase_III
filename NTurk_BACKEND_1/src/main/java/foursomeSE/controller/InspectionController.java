@@ -1,11 +1,14 @@
 package foursomeSE.controller;
 
 import foursomeSE.entity.communicate.CInspectionContract;
+import foursomeSE.entity.communicate.EnterInspectionResponse;
+import foursomeSE.error.MyNotValidException;
 import foursomeSE.security.JwtUtil;
 import foursomeSE.service.inspection.UpperInspectionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,8 +34,26 @@ public class InspectionController {
             method = RequestMethod.GET)
     @PreAuthorize("hasRole('REQUESTER')")
     public ResponseEntity<?> getBestKth(@RequestHeader("Authorization") String token,
-                                           @PathVariable("imgName") String imgName) {
+                                        @PathVariable("imgName") String imgName) {
         String username = JwtUtil.getUsernameFromToken(token);
         return new ResponseEntity<>(inspectionService.getBestKth(imgName, username), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/inspect/enterInspection/{taskId}",
+            method = RequestMethod.GET)
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<?> enterInspection(@RequestHeader("Authorization") String token,
+                                             @PathVariable("taskId") int taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+        EnterInspectionResponse result;
+        try {
+            result = inspectionService.enterInspection(taskId, username);
+        } catch (MyNotValidException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        if (result.getAnnotationIds().isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

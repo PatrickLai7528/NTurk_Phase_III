@@ -1,12 +1,13 @@
 package foursomeSE.service.task;
 
-import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
+import foursomeSE.entity.communicate.EnterTaskResponse;
+import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
 import foursomeSE.entity.statistics.TaskStatusData;
-import foursomeSE.entity.task.Task;
 
 import java.util.List;
 
@@ -19,18 +20,18 @@ public interface UpperTaskService {
     CTask getById(long id);
 
     /**
-     * TODO 其实这个不应该是CTask
      * task的要求:（没做）
-     *  taskName，taskDescription(可以空)
-     *  requesterId set成和username一致的
-     *  createTime自己设，endTime必须有
+     *  taskName，taskDescription前端来
+     *  requesterId 后端设成username一致的就好
+     *  createTime后端设
      *  workerRequirement必须有，据此判断requiredExperience和nominees(必须是存在的id)。
-     *  taskCategory必须有，据此判断question
-     *  rewardStrategy必须有。如果是指定模式：必须是INDIVIDUAL(虽然好像也没有关系)，必须有capacity。
-     *
+     *  taskCategory必须有，据此判断question或tagsForAnnotation
+     *  rewardPerMicrotask必须有
+     *  taskStatus后端设
+     *  imgNames必须有
      * 扣钱，不够报错。
      * */
-    void add(CTask task, String username);
+    void add(RTask task, String username);
 
     /**
      * 返回当前在进行中的，且worker没有领取的任务
@@ -46,6 +47,11 @@ public interface UpperTaskService {
      * 返回requester所有的任务
      * */
     List<CTask> getRequesterTasks(String username);
+
+    /**
+     *
+     * */
+    EnterTaskResponse enterTask(long taskId, String username);
 
 
     /**

@@ -73,7 +73,7 @@ public class UpperContractServiceImpl implements UpperContractService {
     @Override
     public void add(Contract contract, String username) {
         contract.setWorkerId(userByUsername(workerJPA, username).getId());
-        contract.setContractStatus(ContractStatus.IN_PROGRESS);
+//        contract.setContractStatus(ContractStatus.IN_PROGRESS);
         contract.setLastEditTime(LocalDateTime.now());
         contractJPA.save(contract);
 
@@ -85,18 +85,18 @@ public class UpperContractServiceImpl implements UpperContractService {
     public void fulfilContract(long taskId, String username) {
         Contract toBeCompleted = contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username);
 
-        toBeCompleted.setContractStatus(ContractStatus.COMPLETED);
+//        toBeCompleted.setContractStatus(ContractStatus.COMPLETED);
         toBeCompleted.setLastEditTime(LocalDateTime.now());
         contractJPA.save(toBeCompleted);
 
         Task task = taskById(taskJPA, taskId);
 
-        long size = contractJPA.countByTaskIdAndContractStatus(taskId, ContractStatus.COMPLETED);
+//        long size = contractJPA.countByTaskIdAndContractStatus(taskId, ContractStatus.COMPLETED);
 
-        if (task.getCapacity() <= size) {
-            finishTaskService.enterReview(task);
-        }
-        messageJPA.save(Message.createMessage(username, MessageType.FULFIL_CONTRACT, new String[]{task.getTaskName()}));
+//        if (task.getCapacity() <= size) {
+//            finishTaskService.enterReview(task);
+//        }
+//        messageJPA.save(Message.createMessage(username, MessageType.FULFIL_CONTRACT, new String[]{task.getTaskName()}));
     }
 
     @Override

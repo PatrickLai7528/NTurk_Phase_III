@@ -1,6 +1,7 @@
 package foursomeSE.service.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
+import foursomeSE.entity.annotation.RAnnotations;
 
 public interface UpperAnnotationService<T extends Annotation> {
     /**
@@ -19,10 +20,10 @@ public interface UpperAnnotationService<T extends Annotation> {
      * 需要确认contract存在（因为在add过程中需要setContractId，所以不存在一定会报错）
      * 需要确认不存在同样taskId和imageName的contract。 (没做)
      */
-    void addOneBy(long taskId, String username, T annotation);
+//    void addOneBy(long taskId, String username, T annotation);
 
     /**
-     * @deprecated
+     * getById，这个是为了
      * */
     T getById(long id);
 
@@ -31,5 +32,10 @@ public interface UpperAnnotationService<T extends Annotation> {
      * 需要这个任务还没有结束（没做）
      * 只修改concrete annotation类里的具体信息，id什么的不动（没做）
      * */
-    void update(T annotation);
+//    void update(T annotation);
+
+
+    // 感觉上面那些以前写的方法，现在都想删了。。。
+
+    void saveAnnotations(RAnnotations<T> rAnnotations, String username);
 }

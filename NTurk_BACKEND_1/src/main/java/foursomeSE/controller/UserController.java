@@ -29,7 +29,7 @@ import static foursomeSE.util.ConvenientFunctions.listConvert;
 
 @RestController
 public class UserController {
-    // TODO 这里三个Service感觉怪怪的，别的地方好像也有这种情况
+    //  这里三个Service感觉怪怪的，别的地方好像也有这种情况
     private UpperWorkerService workerService;
     private UpperRequesterService requesterService;
     private HybridUserService userUtilService;

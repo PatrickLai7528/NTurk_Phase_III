@@ -2,8 +2,10 @@ package foursomeSE.service.inspection;
 
 import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
+import foursomeSE.entity.communicate.EnterInspectionResponse;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
+import foursomeSE.entity.inspection.RInspections;
 
 import java.util.List;
 
@@ -19,4 +21,9 @@ public interface UpperInspectionService {
      */
     List<CInspection> getBestKth(String imgName, String username);
 
+
+    // 又是感觉上面的都不需要了
+    EnterInspectionResponse enterInspection(long taskId, String username);
+
+    void saveInspections(RInspections rInspections, String username);
 }

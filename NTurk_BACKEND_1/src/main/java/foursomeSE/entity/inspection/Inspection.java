@@ -14,8 +14,9 @@ public class Inspection implements Serializable {
     @GeneratedValue
     private long inspectionId;
 
-    @NotNull
-    private long inspectionContractId;
+//    @NotNull
+//    private long inspectionContractId;
+    private String username;
 
     @NotNull
     private long annotationId;
@@ -31,13 +32,6 @@ public class Inspection implements Serializable {
         this.inspectionId = inspectionId;
     }
 
-    public long getInspectionContractId() {
-        return inspectionContractId;
-    }
-
-    public void setInspectionContractId(long inspectionContractId) {
-        this.inspectionContractId = inspectionContractId;
-    }
 
     public long getAnnotationId() {
         return annotationId;
@@ -53,5 +47,14 @@ public class Inspection implements Serializable {
 
     public void setRate(double rate) {
         this.rate = rate;
+    }
+
+    public String getUsername() {
+
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

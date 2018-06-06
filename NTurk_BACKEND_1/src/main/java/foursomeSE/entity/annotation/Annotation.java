@@ -10,10 +10,21 @@ public abstract class Annotation {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long annotationId;
 
+//    @NotNull
+//    private long contractId;
     @NotNull
-    private long contractId;
+    private String username;
 
     @NotNull
+    private long microtaskId;
+
+    @NotNull
+    private AnnotationStatus annotationStatus;
+
+    @NotNull
+    private int parallel;
+
+    @Transient
     private String imgName;
 
     public Annotation() {
@@ -27,12 +38,12 @@ public abstract class Annotation {
         this.annotationId = annotationId;
     }
 
-    public long getContractId() {
-        return contractId;
+    public long getMicrotaskId() {
+        return microtaskId;
     }
 
-    public void setContractId(long contractId) {
-        this.contractId = contractId;
+    public void setMicrotaskId(long microtaskId) {
+        this.microtaskId = microtaskId;
     }
 
     public String getImgName() {
@@ -41,5 +52,29 @@ public abstract class Annotation {
 
     public void setImgName(String imgName) {
         this.imgName = imgName;
+    }
+
+    public AnnotationStatus getAnnotationStatus() {
+        return annotationStatus;
+    }
+
+    public void setAnnotationStatus(AnnotationStatus annotationStatus) {
+        this.annotationStatus = annotationStatus;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getParallel() {
+        return parallel;
+    }
+
+    public void setParallel(int parallel) {
+        this.parallel = parallel;
     }
 }

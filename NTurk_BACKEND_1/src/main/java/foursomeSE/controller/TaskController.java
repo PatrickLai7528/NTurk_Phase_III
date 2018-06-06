@@ -1,12 +1,13 @@
 package foursomeSE.controller;
 
+import foursomeSE.entity.communicate.EnterTaskResponse;
+import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskParticipation;
 import foursomeSE.entity.statistics.TaskStatusData;
 import foursomeSE.entity.task.Task;
-import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.statistics.TaskNum;
-import foursomeSE.entity.task.TaskStatus;
 import foursomeSE.error.MyErrorType;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.security.JwtUtil;
@@ -82,7 +83,7 @@ public class TaskController {
             method = RequestMethod.POST)
     @PreAuthorize("hasRole('REQUESTER')")
     public ResponseEntity<?> addTask(@RequestHeader("Authorization") String token,
-                                     @RequestBody CTask task) {
+                                     @RequestBody RTask task) {
         String username = JwtUtil.getUsernameFromToken(token);
         try {
             taskService.add(task, username);
@@ -103,9 +104,21 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/task/{taskId}",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> enterTask(@RequestHeader("Authorization") String token, @PathVariable("taskId") long taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        EnterTaskResponse enterTaskResponse = taskService.enterTask(taskId, username);
+        if (enterTaskResponse.getImgNames().isEmpty()) {
+            return new ResponseEntity<>(new MyErrorType("no microtasks to return"), HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(enterTaskResponse, HttpStatus.OK);
+    }
+
     /**
      * inspection
-     * */
+     */
 
     @RequestMapping(value = "/tasks/newInspectionTasks",
             method = RequestMethod.GET)
@@ -123,7 +136,7 @@ public class TaskController {
 
     /**
      * statistics
-     * */
+     */
 
     @RequestMapping(value = "/admin/overview/taskNum",
             method = RequestMethod.GET)

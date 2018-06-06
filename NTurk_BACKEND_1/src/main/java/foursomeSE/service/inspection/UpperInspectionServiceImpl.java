@@ -1,19 +1,32 @@
 package foursomeSE.service.inspection;
 
+import foursomeSE.entity.annotation.Annotation;
+import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
+import foursomeSE.entity.communicate.EnterInspectionResponse;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
+import foursomeSE.entity.inspection.RInspections;
+import foursomeSE.entity.task.Microtask;
+import foursomeSE.entity.task.MicrotaskStatus;
+import foursomeSE.error.MyNotValidException;
 import foursomeSE.error.MyObjectNotFoundException;
+import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.inspection.InspectionJPA;
+import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static foursomeSE.service.annotation.AnnotationUtils.anttById;
+import static foursomeSE.service.task.TaskUtils.mtById;
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
 @Service
@@ -21,30 +34,36 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
     private InspectionJPA inspectionJPA;
     private InspectionContractJPA inspectionContractJPA;
     private WorkerJPA workerJPA;
+    private AnnotationJPA annotationJPA;
+    private MicrotaskJPA microtaskJPA;
 
     public UpperInspectionServiceImpl(InspectionJPA inspectionJPA,
                                       InspectionContractJPA inspectionContractJPA,
-                                      WorkerJPA workerJPA) {
+                                      WorkerJPA workerJPA,
+                                      AnnotationJPA annotationJPA,
+                                      MicrotaskJPA microtaskJPA) {
         this.inspectionJPA = inspectionJPA;
         this.inspectionContractJPA = inspectionContractJPA;
         this.workerJPA = workerJPA;
+        this.annotationJPA = annotationJPA;
+        this.microtaskJPA = microtaskJPA;
     }
 
     @Override
     public void add(CInspectionContract cInspectionContract, String username) {
-        InspectionContract toBeAdded = new InspectionContract();
-        toBeAdded.setContractId(cInspectionContract.getContractId());
-        toBeAdded.setWorkerId(userByUsername(workerJPA, username).getId());
-        inspectionContractJPA.save(toBeAdded);
-
-        InspectionContract withId = inspectionContractJPA
-                .findByContractIdAndWorkerId(toBeAdded.getContractId(), toBeAdded.getWorkerId())
-                .orElseThrow(() -> new MyObjectNotFoundException("not possible?"));
-
-        cInspectionContract.getInspections().forEach(i -> {
-            i.setInspectionContractId(withId.getInspectionContractId());
-        });
-        inspectionJPA.saveAll(cInspectionContract.getInspections());
+//        InspectionContract toBeAdded = new InspectionContract();
+//        toBeAdded.setContractId(cInspectionContract.getContractId());
+//        toBeAdded.setWorkerId(userByUsername(workerJPA, username).getId());
+//        inspectionContractJPA.save(toBeAdded);
+//
+//        InspectionContract withId = inspectionContractJPA
+//                .findByContractIdAndWorkerId(toBeAdded.getContractId(), toBeAdded.getWorkerId())
+//                .orElseThrow(() -> new MyObjectNotFoundException("not possible?"));
+//
+//        cInspectionContract.getInspections().forEach(i -> {
+//            i.setInspectionContractId(withId.getInspectionContractId());
+//        });
+//        inspectionJPA.saveAll(cInspectionContract.getInspections());
     }
 
     @Override
@@ -60,5 +79,72 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
             result.add(e);
         });
         return result.subList(0, K);
+    }
+
+    @Override
+    public EnterInspectionResponse enterInspection(long taskId, String username) {
+        long haveDone = annotationJPA.countByTaskIdAndUsername(taskId, username);
+        long haveInspected = inspectionJPA.countByTaskIdAndUsername(taskId, username);
+        if (haveInspected + NUM_OF_INSPECTION_PER_REQUEST > 2 * haveDone) {
+            throw new MyNotValidException();
+        }
+
+        List<Long> ids = annotationJPA.getIdsByTaskId(taskId, username);
+        ids = ids.subList(0, NUM_OF_INSPECTION_PER_REQUEST);
+
+        ids.forEach(l -> {
+            Annotation a = annotationJPA.findById(l).get();// 这是肯定的，所以故意没用，故意让他如果出错就报null pointer吧，但应该是不可能的
+            a.setParallel(a.getParallel() + 1);
+            annotationJPA.save(a);
+
+            CriticalSection.Item item = new CriticalSection.Item();
+            item.requestTime = LocalDateTime.now();
+            item.username = username;
+            item.annotationId = l;
+            CriticalSection.inspectRecords.add(item);
+        });
+
+
+        EnterInspectionResponse result = new EnterInspectionResponse();
+        result.setAnnotationIds(ids);
+        return result;
+    }
+
+    @Override
+    public void saveInspections(RInspections rInspections, String username) {
+        if (rInspections.getInspections().isEmpty()) {
+            throw new MyNotValidException();
+        }
+
+        Inspection ispt = rInspections.getInspections().get(0);
+        if (CriticalSection.inspectRecords.stream()
+                .anyMatch(i -> i.username.equals(username)
+                        && i.annotationId == ispt.getAnnotationId())) {
+             rInspections.getInspections().forEach(i -> {
+                 i.setUsername(username);
+                 inspectionJPA.save(i);
+
+                 CriticalSection.inspectRecords.removeIf(ii -> ii.username.equals(username)
+                         && ii.annotationId == ispt.getAnnotationId());
+
+                 List<Inspection> haveInspected = inspectionJPA.findByAnnotationIdAndUsername(i.getAnnotationId(), username);
+                 if (haveInspected.size() == INSPECTION_PER_CONTRACT) {
+                     double rateSum = haveInspected.stream().mapToDouble(Inspection::getRate).sum();
+                     Annotation annotation = anttById(annotationJPA, i.getAnnotationId());
+                     Microtask microtask = mtById(microtaskJPA, annotation.getMicrotaskId());
+                     if (rateSum >= ACCEPTED_SUM) {
+                         annotation.setAnnotationStatus(AnnotationStatus.PASSED);
+                         microtask.setMicrotaskStatus(MicrotaskStatus.PASSED);
+
+                     } else {
+                         annotation.setAnnotationStatus(AnnotationStatus.FAILED);
+                         microtask.setMicrotaskStatus(MicrotaskStatus.FAILED);
+                     }
+                 }
+             });
+        } else {
+            throw new MyNotValidException();
+        }
+
     }
 }

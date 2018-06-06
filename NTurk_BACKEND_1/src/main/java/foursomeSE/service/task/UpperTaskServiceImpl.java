@@ -1,11 +1,11 @@
 package foursomeSE.service.task;
 
-import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
+import foursomeSE.entity.communicate.EnterTaskResponse;
+import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.contract.ContractStatus;
-import foursomeSE.entity.message.Message;
-import foursomeSE.entity.message.MessageType;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
@@ -14,10 +14,10 @@ import foursomeSE.entity.task.*;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
-import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
@@ -27,13 +27,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
 import static foursomeSE.service.task.TaskUtils.taskById;
 import static foursomeSE.service.user.UserUtils.userById;
 import static foursomeSE.service.user.UserUtils.userByUsername;
@@ -52,6 +48,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private MessageJPA messageJPA;
     private InspectionContractJPA inspectionContractJPA;
 
+    private MicrotaskJPA microtaskJPA;
+
     private String username;
 
     public UpperTaskServiceImpl(WorkerJPA workerJPA,
@@ -59,13 +57,15 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
                                 ContractJPA contractJPA,
                                 TaskJPA taskJPA,
                                 MessageJPA messageJPA,
-                                InspectionContractJPA inspectionContractJPA) {
+                                InspectionContractJPA inspectionContractJPA,
+                                MicrotaskJPA microtaskJPA) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
         this.messageJPA = messageJPA;
         this.inspectionContractJPA = inspectionContractJPA;
+        this.microtaskJPA = microtaskJPA;
     }
 
     @Override
@@ -74,26 +74,35 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     }
 
     @Override
-    public void add(CTask task, String username) {
+    public void add(RTask task, String username) {
         Requester requester = userByUsername(requesterJPA, username);
-        if (requester.getCredit() - task.getTotalReward() < 0) {
+        double totalCost = task.getRewardPerMicrotask() * task.getImgNames().size();
+        if (requester.getCredit() - totalCost < 0) {
             throw new MyNotValidException();
         }
-        requester.setCredit(requester.getCredit() - task.getTotalReward());
+        requester.setCredit(requester.getCredit() - totalCost);
 
-        if (task.getWorkerRequirement() == WorkerRequirement.APPOINT) {
-            task.setCapacity(task.getNominees().size());
-            task.setRewardStrategy(RewardStrategy.INDIVIDUAL);
-        }
         task.setTaskStatus(TaskStatus.ONGOING);
-        task.setCreateTime(LocalDateTime.now());
+        LocalDateTime createTime = LocalDateTime.now();
+        task.setCreateTime(createTime);
         taskJPA.save(new Task(task));
+
+        Task savedTask = taskJPA.findByCreateTime(createTime);
+        task.getImgNames().forEach(s -> {
+            Microtask m = new Microtask();
+            m.setTaskId(savedTask.getTaskId());
+            m.setImgName(s);
+            m.setMicrotaskStatus(MicrotaskStatus.VIRGIN);
+
+            microtaskJPA.save(m);
+        });
+
         requesterJPA.save(requester);
 
-        messageJPA.save(Message.createMessage(username, MessageType.ISSUE_TASK, new String[]{
-                task.getTaskName(),
-                String.format("%.2f", task.getTotalReward())
-        }));
+//        messageJPA.save(Message.createMessage(username, MessageType.ISSUE_TASK, new String[]{
+//                task.getTaskName(),
+//                String.format("%.2f", task.getTotalReward())
+//        }));
     }
 
     @Override
@@ -101,7 +110,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         this.username = username;
         Worker worker = userByUsername(workerJPA, username);
 
-        // TODO
+        // TODO 不想用findAll
         List<Task> result = iterableToStream(taskJPA.findAll()).filter(t -> {
 //            if (t.getEndTime().isBefore(LocalDateTime.now())) {
 //                return false;
@@ -145,6 +154,23 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
         long id = userByUsername(requesterJPA, username).getId();
         return listConvert(taskJPA.findByRequesterId(id), this::sToD);
+    }
+
+
+    @Override
+    public EnterTaskResponse enterTask(long taskId, String username) {
+        List<Microtask> results = microtaskJPA.getMicroTasks(taskId).subList(0, NUM_OF_MICROTASK_PER_REQUEST);
+        results.forEach(r -> {
+            r.setMicrotaskStatus(MicrotaskStatus.UNFINISHED);
+            r.setLastRequestTime(LocalDateTime.now());
+            microtaskJPA.save(r);
+        });
+
+        EnterTaskResponse result = new EnterTaskResponse();
+        result.setImgNames(
+                results.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new))
+        );
+        return result;
     }
 
     /**
@@ -324,7 +350,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
      * private
      */
     private CTask sToD(Task task) {
-        int attendance = (int) contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
+//        int attendance = (int) contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
 //                lowerContractService.getLotBy(
 //                        c -> c.getTaskId() == task.getTaskId()
 //                                && c.getContractStatus() == ContractStatus.COMPLETED
@@ -332,19 +358,22 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
         String requesterName = userById(requesterJPA, task.getRequesterId()).getNickname();
 
-        if (username == null) {
-            return new CTask(task, attendance, requesterName);
-        }
-        try {
-            ContractStatus contractStatus = contractByTaskIdAndUsername(contractJPA, workerJPA, task.getTaskId(), username).getContractStatus();
-//                    lowerContractService
-//                    .getOneBy(c -> c.getTaskId() == task.getTaskId()
-//                            && c.getWorkerId() == userByUsername(workerJPA, username).getId())
-//                    .getContractStatus(); // 这里用到了getByTaskIdByUsername，用软件工程我解决不了，
-            return new CTask(task, attendance, requesterName, contractStatus);
-        } catch (MyObjectNotFoundException e) {
-            return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);
-        }
+        CTask result = new CTask(task);
+        result.setRequesterName(requesterName);
+        return result;
+//        if (username == null) {
+//            return new CTask(task, attendance, requesterName);
+//        }
+//        try {
+//            ContractStatus contractStatus = contractByTaskIdAndUsername(contractJPA, workerJPA, task.getTaskId(), username).getContractStatus();
+////                    lowerContractService
+////                    .getOneBy(c -> c.getTaskId() == task.getTaskId()
+////                            && c.getWorkerId() == userByUsername(workerJPA, username).getId())
+////                    .getContractStatus(); // 这里用到了getByTaskIdByUsername，用软件工程我解决不了，
+//            return new CTask(task, attendance, requesterName, contractStatus);
+//        } catch (MyObjectNotFoundException e) {
+//            return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);
+//        }
     }
 
     private Task dToS(CTask cTask) {

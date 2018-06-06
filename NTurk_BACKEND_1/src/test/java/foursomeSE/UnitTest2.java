@@ -3,7 +3,7 @@ package foursomeSE;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
-import foursomeSE.entity.communicate.CTask;
+import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.inspection.Inspection;
@@ -126,7 +126,7 @@ public class UnitTest2 implements ConstsForT2 {
 
         long[] aid = new long[7];
         for (int i = 2; i <= 5; i++) {
-            aid[i] = frameAnnotationJPA.findByContractIdAndImgName(cid[i], task1ImageName[0]).get().getAnnotationId();
+//            aid[i] = frameAnnotationJPA.findByContractIdAndImgName(cid[i], task1ImageName[0]).get().getAnnotationId();
         }
 
 

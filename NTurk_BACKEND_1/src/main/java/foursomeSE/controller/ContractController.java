@@ -21,7 +21,7 @@ public class ContractController {
         this.service = service;
     }
 
-    // TODO 其实感觉不应该有这个方法的，前端所有时候都不应传contract相关，而应该是task
+    // 其实感觉不应该有这个方法的，前端所有时候都不应传contract相关，而应该是task
     @RequestMapping(value = "/contract",
             method = RequestMethod.POST)
     @PreAuthorize("hasRole('WORKER')")

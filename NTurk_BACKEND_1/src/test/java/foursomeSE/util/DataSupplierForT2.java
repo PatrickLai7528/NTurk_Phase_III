@@ -98,86 +98,86 @@ public class DataSupplierForT2 implements ConstsForT2 {
     public List<Task> mockTasks() {
         ArrayList<Task> result = new ArrayList<>();
 
-        Task t1 = new Task();
-        t1.setTaskName("task1");
-        t1.setTaskDescription("task1-巡址寻址: 请在图中框出你认为有价值的物体，并作出描述");
-        t1.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
-//        t1.setTaskTags(new HashSet<>(Arrays.asList(new Tag("f"), new Tag("f"))));
-
-        t1.setCreateTime(LocalDateTime.now().minusDays(10));
-        t1.setEndTime(LocalDateTime.now().plusDays(10));
-        t1.setDdl(LocalDateTime.now().plusDays(8));
-
-        t1.setWorkerRequirement(WorkerRequirement.NONE);
-
-        t1.setTaskCategory(TaskCategory.FRAME);
-
-        t1.setRewardStrategy(RewardStrategy.INDIVIDUAL);
-        t1.setTotalReward(200);
-        t1.setCapacity(20);
-        t1.setImgNames(new ArrayList<>(Arrays.asList(task1ImageName)));
-        t1.setTaskStatus(TaskStatus.UNDER_REVIEW);
-
-
-        Task t2 = new Task();
-        t2.setTaskName("task2");
-        t2.setTaskDescription("task2-相面: 请框出你认识的名人脸");
-        t2.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
-//        t2.setTaskTags(new HashSet<>(Arrays.asList(new Tag("a"), new Tag("f"))));
-
-        t2.setCreateTime(LocalDateTime.now().minusDays(20));
-        t2.setEndTime(LocalDateTime.now().plusDays(3));
-        t2.setDdl(LocalDateTime.now().plusDays(2));
-
-        t2.setWorkerRequirement(WorkerRequirement.APPOINT);
-        // 呃
-        t2.setNominees(new ArrayList<>(Arrays.asList(
-                userByUsername(workerJPA, "worker1@ex.com").getId(),
-                userByUsername(workerJPA, "worker3@ex.com").getId()
-        )));
-
-        t2.setTaskCategory(TaskCategory.FRAME);
-
-        t2.setRewardStrategy(RewardStrategy.INDIVIDUAL);
-        t2.setTotalReward(90);
-
-        t2.setImgNames(new ArrayList<>(Arrays.asList(
-                "COCO_train2014_000000000034.jpg",
-                "COCO_train2014_000000000036.jpg",
-                "COCO_train2014_000000000049.jpg"
-        )));
-        t2.setTaskStatus(TaskStatus.UNDER_REVIEW);
-
-
-        Task t3 = new Task();
-        t3.setTaskName("task3");
-        t3.setTaskDescription("task3-伤痕累累: 请根据图中隐秘的情感，回答下列隐秘的问题");
-        t3.setRequesterId(userByUsername(requesterJPA, "requester2@ex.com").getId());
-
-        t3.setCreateTime(LocalDateTime.now().minusDays(10).minusMinutes(3));
-        t3.setEndTime(LocalDateTime.now().plusDays(8));
-        t3.setDdl(LocalDateTime.now().plusDays(4));
-
-        t3.setWorkerRequirement(WorkerRequirement.EXPERIENCE);
-        t3.setRequiredExperience(20);
-
-        t3.setTaskCategory(TaskCategory.GENERAL);
-        t3.setQuestions(new ArrayList<>(Arrays.asList("红袖添香夜读书", "那时年少春衫冷", "梦里不知身是客", "笑渐不闻声渐悄")));
-
-        t3.setRewardStrategy(RewardStrategy.TOTAL);
-        t3.setTotalReward(300);
-
-        t3.setImgNames(new ArrayList<>(Arrays.asList(
-                "COCO_train2014_000000000061.jpg",
-                "COCO_train2014_000000000064.jpg",
-                "COCO_train2014_000000000071.jpg"
-        )));
-        t3.setTaskStatus(TaskStatus.ONGOING);
-
-
-        result.add(t1);
-        result.add(t2);
-        result.add(t3);
+//        Task t1 = new Task();
+//        t1.setTaskName("task1");
+//        t1.setTaskDescription("task1-巡址寻址: 请在图中框出你认为有价值的物体，并作出描述");
+//        t1.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
+////        t1.setTaskTags(new HashSet<>(Arrays.asList(new Tag("f"), new Tag("f"))));
+//
+//        t1.setCreateTime(LocalDateTime.now().minusDays(10));
+//        t1.setEndTime(LocalDateTime.now().plusDays(10));
+//        t1.setDdl(LocalDateTime.now().plusDays(8));
+//
+//        t1.setWorkerRequirement(WorkerRequirement.NONE);
+//
+//        t1.setTaskCategory(TaskCategory.FRAME);
+//
+//        t1.setRewardStrategy(RewardStrategy.INDIVIDUAL);
+//        t1.setTotalReward(200);
+//        t1.setCapacity(20);
+//        t1.setImgNames(new ArrayList<>(Arrays.asList(task1ImageName)));
+//        t1.setTaskStatus(TaskStatus.UNDER_REVIEW);
+//
+//
+//        Task t2 = new Task();
+//        t2.setTaskName("task2");
+//        t2.setTaskDescription("task2-相面: 请框出你认识的名人脸");
+//        t2.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
+////        t2.setTaskTags(new HashSet<>(Arrays.asList(new Tag("a"), new Tag("f"))));
+//
+//        t2.setCreateTime(LocalDateTime.now().minusDays(20));
+//        t2.setEndTime(LocalDateTime.now().plusDays(3));
+//        t2.setDdl(LocalDateTime.now().plusDays(2));
+//
+//        t2.setWorkerRequirement(WorkerRequirement.APPOINT);
+//        // 呃
+//        t2.setNominees(new ArrayList<>(Arrays.asList(
+//                userByUsername(workerJPA, "worker1@ex.com").getId(),
+//                userByUsername(workerJPA, "worker3@ex.com").getId()
+//        )));
+//
+//        t2.setTaskCategory(TaskCategory.FRAME);
+//
+//        t2.setRewardStrategy(RewardStrategy.INDIVIDUAL);
+//        t2.setTotalReward(90);
+//
+//        t2.setImgNames(new ArrayList<>(Arrays.asList(
+//                "COCO_train2014_000000000034.jpg",
+//                "COCO_train2014_000000000036.jpg",
+//                "COCO_train2014_000000000049.jpg"
+//        )));
+//        t2.setTaskStatus(TaskStatus.UNDER_REVIEW);
+//
+//
+//        Task t3 = new Task();
+//        t3.setTaskName("task3");
+//        t3.setTaskDescription("task3-伤痕累累: 请根据图中隐秘的情感，回答下列隐秘的问题");
+//        t3.setRequesterId(userByUsername(requesterJPA, "requester2@ex.com").getId());
+//
+//        t3.setCreateTime(LocalDateTime.now().minusDays(10).minusMinutes(3));
+//        t3.setEndTime(LocalDateTime.now().plusDays(8));
+//        t3.setDdl(LocalDateTime.now().plusDays(4));
+//
+//        t3.setWorkerRequirement(WorkerRequirement.EXPERIENCE);
+//        t3.setRequiredExperience(20);
+//
+//        t3.setTaskCategory(TaskCategory.GENERAL);
+//        t3.setQuestions(new ArrayList<>(Arrays.asList("红袖添香夜读书", "那时年少春衫冷", "梦里不知身是客", "笑渐不闻声渐悄")));
+//
+//        t3.setRewardStrategy(RewardStrategy.TOTAL);
+//        t3.setTotalReward(300);
+//
+//        t3.setImgNames(new ArrayList<>(Arrays.asList(
+//                "COCO_train2014_000000000061.jpg",
+//                "COCO_train2014_000000000064.jpg",
+//                "COCO_train2014_000000000071.jpg"
+//        )));
+//        t3.setTaskStatus(TaskStatus.ONGOING);
+//
+//
+//        result.add(t1);
+//        result.add(t2);
+//        result.add(t3);
         return result;
     }
 
@@ -200,7 +200,7 @@ public class DataSupplierForT2 implements ConstsForT2 {
 //            System.out.println("pre print");
 //            System.out.println("id:" + taskJPA.findByTaskName("task1").getTaskId());
             c.setWorkerId(userByUsername(workerJPA, "worker" + i + "@ex.com").getId());
-            c.setContractStatus(cs[i]);
+//            c.setContractStatus(cs[i]);
             c.setLastEditTime(LocalDateTime.now());
 
             result.add(c);
@@ -219,7 +219,7 @@ public class DataSupplierForT2 implements ConstsForT2 {
 
             for (String imgname : task1ImageName) {
                 FrameAnnotation fa = new FrameAnnotation();
-                fa.setContractId(cid);
+//                fa.setContractId(cid);
                 fa.setImgName(imgname);
 
                 result.add(fa);

@@ -16,6 +16,10 @@ public class GeneralAnnotation extends Annotation {
     @Column(length = 100000)
     private ArrayList<AnswerPair> answerPairs;
 
+
+    public GeneralAnnotation() {
+    }
+
     public ArrayList<AnswerPair> getAnswerPairs() {
         return answerPairs;
     }

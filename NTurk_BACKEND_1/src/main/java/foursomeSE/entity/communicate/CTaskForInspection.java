@@ -1,6 +1,6 @@
 package foursomeSE.entity.communicate;
 
-import foursomeSE.entity.task.Task;
+import foursomeSE.entity.task.CTask;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
