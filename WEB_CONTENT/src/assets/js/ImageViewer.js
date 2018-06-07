@@ -33,12 +33,12 @@ let privateMethods = {
 	 * @param callback : function 圖片加載完成後調用的回調函數
 	 */
 	loadCurrentImage: function (caller, callback) {
+		let tempImage = new Image();
 		/* 檢查參數 */
 		if (!caller['shareCurrentImageName'])
 			throw new Error("loadCurrentImage in ImageViewer: the caller has no method called shareCurrentImageName");
 		if (typeof callback !== "function")
 			throw new Error("loadCurrentImage in ImageViewer: " + "callback = " + callback + "is not a function");
-		let tempImage = new Image();
 		/* 設圖片的路由, baseUrl 需有最後一個的/  */
 		tempImage.src = privateVariables.baseUrl + caller.shareCurrentImageName();
 		privateVariables.isLastImageLoading = true; // 標記位, 開始加載圖片

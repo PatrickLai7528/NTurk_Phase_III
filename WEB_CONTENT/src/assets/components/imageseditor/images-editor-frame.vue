@@ -4,7 +4,14 @@
             <el-col :span="15">
                 <el-card class="pic-area">
                     <div slot="header" class="pic-card-header">
-                        <span>任務描述: {{taskDescription}}</span>
+                        <el-row>
+                        <el-col :span="16">
+                            <span>任務描述: {{taskDescription}}</span>
+                        </el-col>
+                        <el-col :span="8" style="text-align: right">
+                            <div v-html="countDown">{{countDown}}</div>
+                        </el-col>
+                    </el-row>
                     </div>
                     <el-row>
                         <el-col :span="24">
@@ -132,10 +139,12 @@
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
 	import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
 	import AnnotationEditor from '../../js/AnnotaionEditor.js'
+	import countdown from 'light-countdown'
 
 	export default {
 		data: function () {
 			return {
+				countDown: "<div id='countDown'></div>",
 				isTagShow: false,
 				tagHtml: '',
 				tagText: [],
@@ -150,10 +159,11 @@
 				taskDescription: "",
                 imgNames: this.$store.getters.imgNames,
 			}
-		},
+		}
+
+		,
 		computed: {
 			percent() {
-				console.log(this.currentPlace);
 				let result, lowerLimit;
 				lowerLimit = 1 / this.imageLength * 100;
 				result = this.currentPlace / this.imageLength * 100;
@@ -164,8 +174,9 @@
 				if (result != 100 && result < lowerLimit)
 					return parseFloat(lowerLimit);
 				return parseFloat(result);
-			},
-		},
+			}
+		}
+		,
 		mounted() {
 			this.$nextTick(() => {
 				this.canvas = document.getElementById("canvas");
@@ -176,9 +187,23 @@
 				console.log(this.canvas);
 				console.log(this.$store.getters.getImgNames);
 				this.getImgNames();
+				this.setCountDown();
 			})
-		},
+		}
+		,
 		methods: {
+			setCountDown() {
+				let _this = this;
+				countdown({
+					timeEnd: (new Date().getTime() + 900000),
+					selector: '#countDown',
+					msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
+					afterCount() {
+						_this.showMessage("timeOut");
+						_this.$router.push({path: '/profile'});
+					}
+				});
+			},
 			getImgNames() {
                 let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
                 let header = {headers: {Authorization: this.$store.getters.getToken}};
@@ -213,45 +238,55 @@
 			},
 			updateTagHtml() {
 				this.tagHtml = this.viewer.shareTag();
-			},
+			}
+			,
 			updateTagText() {
 				if (this.isTagShow === false)
 					this.isTagShow = true;
 				this.tagText = this.viewer.shareTagText();
-			},
+			}
+			,
 			getTagText() {
 				return this.tagText;
-			},
+			}
+			,
 			next() {
 				this.viewer.forceUpdate(this.tagText);
 				this.viewer.drawNext(() => {
 					if (this.currentPlace < this.imageLength)
 						this.currentPlace++;
 				});
-			},
+			}
+			,
 			previous() {
 				this.viewer.forceUpdate(this.tagText);
 				this.viewer.drawPrevious(() => {
 					if (this.currentPlace > 1)
 						this.currentPlace--;
 				});
-			},
+			}
+			,
 			canvasDown(e) {
 				this.viewer.handleMouseDown(e);
-			},
+			}
+			,
 			canvasUp(e) {
 				this.viewer.handleMouseUp(e);
-			},
+			}
+			,
 			canvasMove(e) {
 				this.viewer.handleMouseMove(e);
-			},
+			}
+			,
 			forceUpdate() {
 				this.viewer.forceUpdate(this.tagText);
-			},
+			}
+			,
 			deleteTag(index) {
 				this.viewer.forceUpdate(this.tagText);
 				this.viewer.deleteTag(index);
-			},
+			}
+			,
 			submit() {
 				if (this.viewer.submitCurrent(this.imageLength)) {
 					this.viewer.submitCurrent(this.imageLength);
@@ -267,18 +302,33 @@
 				} else {
 					this.showMessage("notDone");
 				}
-			},
+			}
+			,
 			showMessage(type) {
 				if ("success" === type) {
+					const h = this.$createElement;
 					this.$message({
-						message: '任务已经提交，请安心等待结果和奖励^_^',
+						message: h('p', null, [
+							h('i', {style: 'font-family: Microsoft YaHei;'}, '任务已经提交，请安心等待结果和奖励^_^')
+						]),
 						type: 'success'
-					})
+					});
 				} else if ("notDone" === type) {
+					const h = this.$createElement;
 					this.$message({
-						message: '您还没有完成这个任务^_^',
+						message: h('p', null, [
+							h('i', {style: 'font-family: Microsoft YaHei;'}, '您还没有完成这个任务^_^')
+						]),
 						type: 'error'
-					})
+					});
+				} else if ("timeOut" === type) {
+					const h = this.$createElement;
+					this.$message({
+						message: h('p', null, [
+							h('i', {style: 'font-family: Microsoft YaHei;'}, '任務已超時^_^')
+						]),
+						type: 'error'
+					});
 				}
 			}
 		}

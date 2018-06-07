@@ -174,11 +174,16 @@ class AnnotationEditor {
 	}) {
 		let id, doIt, currentAnnotation, currentImageName;
 		doIt = () => {
+			// currentAnnotation = privateMethods.getCurrentEditedAnnotation();
+			// if(null !== currentAnnotation && undefined !== currentAnnotation){
+			// 	直接畫這個, editor自己畫
+			// }else{
+			// 	annotation viewer先從後端讀, viewer再畫, 取得annotation, 保存在editor
+			// }
 			// 先畫圖, 再畫標註, 畫完標註取得現在的標註
 			privateVariables.viewer.drawCurrent(header, () => {
 				currentAnnotation = privateVariables.viewer.shareCurrentAnnotation();
 				currentImageName = privateVariables.viewer.shareCurrentImageName();
-				console.log(currentAnnotation)
 				// console.log(currentAnnotation);
 				// console.log(currentImageName);
 				privateVariables.editedAnnotation.set(currentImageName, currentAnnotation);

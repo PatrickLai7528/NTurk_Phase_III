@@ -4,7 +4,14 @@
             <el-col :span="15">
                 <el-card class="pic-area">
                     <div slot="header" class="pic-card-header">
-                        <span>任務描述: {{taskDescription}}</span>
+                        <el-row>
+                            <el-col :span="16">
+                                <span>任務描述: {{taskDescription}}</span>
+                            </el-col>
+                            <el-col :span="8" style="text-align: right">
+                                <div v-html="countDown">{{countDown}}</div>
+                            </el-col>
+                        </el-row>
                     </div>
                     <el-row>
                         <el-col :span="24">
@@ -137,6 +144,7 @@
 	export default {
 		data() {
 			return {
+				countDown: "<div id='countDown'></div>",
 				isTagShow: false,
 				tagHtml: '',
 				tagText: [],
@@ -161,14 +169,9 @@
 				console.log(lowerLimit);
 				console.log(result);
 				lowerLimit = lowerLimit.toFixed(1);
-				// if (result >= 100) {
-				// 	return parseFloat(100.0);
 				if (result != 100 && result < lowerLimit)
 					return parseFloat(lowerLimit);
-				// 	return parseFloat(lowerLimit);
-				// } else {
 				return parseFloat(result);
-				// }
 			}
 		},
 		mounted() {
@@ -179,9 +182,22 @@
 				this.canvas.addEventListener("mousemove", this.canvasMove);
 				this.canvas.addEventListener("touchstart", this.canvasDown);
 				this.getImgNames();
+				this.setCountDown();
 			})
 		},
 		methods: {
+			setCountDown() {
+				let _this = this;
+				countdown({
+					timeEnd: (new Date().getTime() + 900000),
+					selector: '#countDown',
+					msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
+					afterCount() {
+						_this.showMessage("timeOut");
+						_this.$router.push({path: '/profile'});
+					}
+				});
+			},
 			getImgNames() {
 				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
 				let header = {headers: {Authorization: this.$store.getters.getToken}};
@@ -266,12 +282,12 @@
 						message: '任务已经提交，请安心等待结果和奖励^_^',
 						type: 'success'
 					})
-				}else if("notDone" === type){
+				} else if ("notDone" === type) {
 					this.$message({
 						message: '您还没有完成这个任务^_^',
 						type: 'error'
 					})
-                }
+				}
 			}
 		}
 	}
