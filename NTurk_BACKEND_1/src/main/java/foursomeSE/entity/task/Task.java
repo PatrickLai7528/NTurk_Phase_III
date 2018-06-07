@@ -1,5 +1,7 @@
 package foursomeSE.entity.task;
 
+import foursomeSE.util.LocalDateTimeConverter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ public class Task {
     @NotNull
     private long requesterId;
     @NotNull
+    @Convert(converter = LocalDateTimeConverter.class)
     private LocalDateTime createTime;
 
     @NotNull

@@ -1,7 +1,6 @@
 package foursomeSE.jpa.task;
 
 import foursomeSE.entity.task.Microtask;
-import foursomeSE.entity.task.MicrotaskStatus;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -15,10 +14,11 @@ import java.util.Optional;
 public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
     @Query(value = "select * from microtasks\n" +
             "where task_id = ?1\n" +
-            "  and microtask_status <> 3 -- passed\n" +
-            "  and microtask_status <> 2 -- unreviewed\n" +
-            "  and microtask_status <> 1 -- unfinished\n" +
-            "order by microtask_status desc -- prefer \"failed\" to \"virgin\"",
+            "    and microtask_status <> 3 -- passed\n" +
+            "    and microtask_status <> 2 -- unreviewed\n" +
+            "    and microtask_status <> 1 -- unfinished\n" +
+            "order by microtask_status desc,  -- prefer \"failed\" to \"virgin\"\n" +
+            "    ord asc",
             nativeQuery = true)
     List<Microtask> getMicroTasks(long taskId);
 
@@ -31,18 +31,20 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
     Optional<Microtask> findByImgName(String imgName);
 
     @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1 and microtask status <> 3",
+            "where task_id = ?1 and microtask_status <> 3",
             nativeQuery = true)
     List<Microtask> findByTaskIdNotPassed(long taskId);
 }
 
 /*
+
 select * from microtasks
 where task_id = ?1
-  and microtask_status <> 3 -- passed
-  and microtask_status <> 2 -- unreviewed
-  and microtask_status <> 1 -- unfinished
-order by microtask_status desc -- prefer "failed" to "virgin"
+    and microtask_status <> 3 -- passed
+    and microtask_status <> 2 -- unreviewed
+    and microtask_status <> 1 -- unfinished
+order by microtask_status desc,  -- prefer "failed" to "virgin"
+    ord asc
 
 update microtasks
 set microtask_status = 4 -- failed
@@ -51,5 +53,5 @@ where microtask_status = 1 -- unfinished
 
 
 select * from microtasks
-where task_id = ?1 and microtask status <> 3
+where task_id = ?1 and microtask_status <> 3
 */

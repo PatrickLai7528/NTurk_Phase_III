@@ -34,7 +34,7 @@ public interface InspectionJPA extends CrudRepository<Inspection, Long> {
 
     long countByAnnotationIdAndUsername(long annotationId, String username);
 
-    List<Inspection> findByAnnotationIdAndUsername(long annotationId, String username);
+    List<Inspection> findByAnnotationId(long annotationId);
 
 }
 

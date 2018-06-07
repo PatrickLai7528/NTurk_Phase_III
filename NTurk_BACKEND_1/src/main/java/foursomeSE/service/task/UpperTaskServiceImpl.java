@@ -83,19 +83,25 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         requester.setCredit(requester.getCredit() - totalCost);
 
         task.setTaskStatus(TaskStatus.ONGOING);
+        task.setRequesterId(requester.getId());
         LocalDateTime createTime = LocalDateTime.now();
         task.setCreateTime(createTime);
         taskJPA.save(new Task(task));
 
-        Task savedTask = taskJPA.findByCreateTime(createTime);
-        task.getImgNames().forEach(s -> {
+        long temp = taskJPA.temp().get(0).longValue();
+//        System.out.println("pre print: " + temp);
+        Task savedTask = taskById(taskJPA, temp - 1);
+        for (int i = 0; i < task.getImgNames().size(); i++) {
+            String s = task.getImgNames().get(i);
             Microtask m = new Microtask();
             m.setTaskId(savedTask.getTaskId());
             m.setImgName(s);
+            m.setOrd(i);
             m.setMicrotaskStatus(MicrotaskStatus.VIRGIN);
 
             microtaskJPA.save(m);
-        });
+
+        }
 
         requesterJPA.save(requester);
 
@@ -159,7 +165,10 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
     @Override
     public EnterTaskResponse enterTask(long taskId, String username) {
-        List<Microtask> results = microtaskJPA.getMicroTasks(taskId).subList(0, NUM_OF_MICROTASK_PER_REQUEST);
+        List<Microtask> results = microtaskJPA.getMicroTasks(taskId);
+        if (results.size() > NUM_OF_MICROTASK_PER_REQUEST) {
+            results = results.subList(0, NUM_OF_MICROTASK_PER_REQUEST);
+        }
         results.forEach(r -> {
             r.setMicrotaskStatus(MicrotaskStatus.UNFINISHED);
             r.setLastRequestTime(LocalDateTime.now());

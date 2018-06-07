@@ -23,6 +23,9 @@ public class Microtask {
     @NotNull
     private MicrotaskStatus microtaskStatus;
 
+    @NotNull
+    private int ord;
+
     private LocalDateTime lastRequestTime;
 
     public Microtask() {
@@ -66,5 +69,13 @@ public class Microtask {
 
     public void setLastRequestTime(LocalDateTime lastRequestTime) {
         this.lastRequestTime = lastRequestTime;
+    }
+
+    public int getOrd() {
+        return ord;
+    }
+
+    public void setOrd(int ord) {
+        this.ord = ord;
     }
 }

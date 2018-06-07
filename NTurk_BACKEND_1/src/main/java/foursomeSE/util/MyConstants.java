@@ -12,4 +12,6 @@ public interface MyConstants {
     int INSPECTION_PER_CONTRACT = 2; // 在annotationJPA里的一个方法也写这个了，如果不写就要传进去，所以就直接写2了
 
     double ACCEPTED_SUM = 9;
+    double ANNOTATION_PERCENT = 0.6;
+    double INSPECTION_PERCENT = 0.05;
 }

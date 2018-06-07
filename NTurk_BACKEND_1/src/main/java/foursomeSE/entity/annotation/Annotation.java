@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Annotation {
+public class Annotation { // 先没有abstract，可能也许和annotationJPA冲突
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long annotationId;

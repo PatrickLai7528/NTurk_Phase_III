@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -42,9 +43,15 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
     /**
      * 这个主要是创建时用，先存，然后再根据createTime拿，这样才知道id，也只有创建时才知道createTime
      * 其他Entity类似情形下也可能采用这个方法
+     *
+     * 但是不知道为什么只能用craeteTime.minusNanos(1)这样调这个方法而不能直接判断相等
+     * 呃，-1还有时不行？？
+     * 呃，-1000还有时不行。。
      * */
-    Task findByCreateTime(LocalDateTime createTime);
+    Task findByCreateTimeAfter(LocalDateTime createTime);
 
+    @Query(value = "select * from hibernate_sequence", nativeQuery = true)
+    List<BigInteger> temp();
 
     /**
      * 这个方法只是测试用的…感觉这样不好……

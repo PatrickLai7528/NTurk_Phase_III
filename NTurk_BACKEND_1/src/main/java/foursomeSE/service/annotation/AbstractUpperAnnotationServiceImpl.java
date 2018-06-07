@@ -5,6 +5,7 @@ import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.annotation.RAnnotations;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.Microtask;
+import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.error.MyObjectNotFoundException;
@@ -19,6 +20,7 @@ import java.util.Optional;
 
 import static foursomeSE.service.annotation.AnnotationUtils.annotationByContractIdAndImgName;
 import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
+import static foursomeSE.service.task.TaskUtils.mtById;
 import static foursomeSE.service.task.TaskUtils.mtByImg;
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
@@ -40,19 +42,19 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         this.microtaskJPA = microtaskJPA;
     }
 
-    @Override
-    public T getOneBy(long taskId, String username, String imgName) {
-        return getOneBy(
-                contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username)
-                        .getContractId(),
-                imgName
-        );
-    }
-
-    @Override
-    public T getOneBy(long contractId, String imgName) {
-        return annotationByContractIdAndImgName(annotationJPA, contractId, imgName);
-    }
+//    @Override
+//    public T getOneBy(long taskId, String username, String imgName) {
+//        return getOneBy(
+//                contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username)
+//                        .getContractId(),
+//                imgName
+//        );
+//    }
+//
+//    @Override
+//    public T getOneBy(long contractId, String imgName) {
+//        return annotationByContractIdAndImgName(annotationJPA, contractId, imgName);
+//    }
 
 //    @Override
 //    public void addOneBy(long taskId, String username, T annotation) {
@@ -67,8 +69,10 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 
     @Override
     public T getById(long id) {
-        return annotationJPA.findById(id)
+        T t = annotationJPA.findById(id)
                 .orElseThrow(() -> new MyObjectNotFoundException("annotation with id " + id + " is not found"));
+        t.setImgName(mtById(microtaskJPA, t.getMicrotaskId()).getImgName());
+        return t;
     }
 
     @Override
@@ -107,6 +111,9 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
                 a.setMicrotaskId(microtask1.getMicrotaskId());
                 a.setParallel(0);
                 annotationJPA.save(a);
+
+                microtask1.setMicrotaskStatus(MicrotaskStatus.UNREVIEWED);
+                microtaskJPA.save(microtask1);
             });
         } else {
             throw new MyNotValidException();

@@ -6,6 +6,7 @@ import foursomeSE.entity.annotation.SegmentAnnotation;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.inspection.Inspection;
 import foursomeSE.entity.inspection.InspectionContract;
+import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.Task;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
@@ -16,6 +17,7 @@ import foursomeSE.jpa.annotation.SegmentAnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.inspection.InspectionJPA;
+import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.UserJPA;
@@ -28,59 +30,22 @@ import static foursomeSE.util.ConvenientFunctions.iterableToList;
 import static foursomeSE.util.ConvenientFunctions.iterableToStream;
 
 @Service
-public class DBDataKeeper {
-    private List<Contract> contracts;
+public class DBDataKeeper extends WithTheAutowired {
+    private List<Worker> workers;
+    private List<Requester> requesters;
+
     private List<Task> tasks;
+    private List<Contract> contracts;
+    private List<Microtask> microtasks;
 
     private List<FrameAnnotation> frameAnnotations;
     private List<GeneralAnnotation> generalAnnotations;
     private List<SegmentAnnotation> segmentAnnotations;
 
-    private List<Worker> workers;
-    private List<Requester> requesters;
-
     private List<Inspection> inspections;
-    private List<InspectionContract> inspectionContracts;
+//    private List<InspectionContract> inspectionContracts;
 
     // jpas messages就不测了吧
-    private WorkerJPA workerJPA;
-    private RequesterJPA requesterJPA;
-
-    private TaskJPA taskJPA;
-    private ContractJPA contractJPA;
-
-    private FrameAnnotationJPA frameAnnotationJPA;
-    private GeneralAnnotationJPA generalAnnotationJPA;
-    private SegmentAnnotationJPA segmentAnnotationJPA;
-
-    private InspectionJPA inspectionJPA;
-    private InspectionContractJPA inspectionContractJPA;
-
-    // 这个也行？
-    private AnnotationJPA annotationJPA;
-
-
-    public DBDataKeeper(WorkerJPA workerJPA,
-                        RequesterJPA requesterJPA,
-                        TaskJPA taskJPA,
-                        ContractJPA contractJPA,
-                        FrameAnnotationJPA frameAnnotationJPA,
-                        GeneralAnnotationJPA generalAnnotationJPA,
-                        SegmentAnnotationJPA segmentAnnotationJPA,
-                        InspectionJPA inspectionJPA,
-                        InspectionContractJPA inspectionContractJPA,
-                        AnnotationJPA annotationJPA) {
-        this.workerJPA = workerJPA;
-        this.requesterJPA = requesterJPA;
-        this.taskJPA = taskJPA;
-        this.contractJPA = contractJPA;
-        this.frameAnnotationJPA = frameAnnotationJPA;
-        this.generalAnnotationJPA = generalAnnotationJPA;
-        this.segmentAnnotationJPA = segmentAnnotationJPA;
-        this.inspectionJPA = inspectionJPA;
-        this.inspectionContractJPA = inspectionContractJPA;
-        this.annotationJPA = annotationJPA;
-    }
 
     public void stashAll() {
         workers = iterableToList(workerJPA.findAll());
@@ -88,13 +53,14 @@ public class DBDataKeeper {
 
         tasks = iterableToList(taskJPA.findAll());
         contracts = iterableToList(contractJPA.findAll());
+        microtasks = iterableToList(microtaskJPA.findAll());
 
         frameAnnotations = iterableToList(frameAnnotationJPA.findAll());
         generalAnnotations = iterableToList(generalAnnotationJPA.findAll());
         segmentAnnotations = iterableToList(segmentAnnotationJPA.findAll());
 
         inspections = iterableToList(inspectionJPA.findAll());
-        inspectionContracts = iterableToList(inspectionContractJPA.findAll());
+//        inspectionContracts = iterableToList(inspectionContractJPA.findAll());
 
         clearAll(); // 这个是删老的
     }
@@ -107,13 +73,14 @@ public class DBDataKeeper {
 
         taskJPA.saveAll(tasks);
         contractJPA.saveAll(contracts);
+        microtaskJPA.saveAll(microtasks);
 
         frameAnnotationJPA.saveAll(frameAnnotations);
         generalAnnotationJPA.saveAll(generalAnnotations);
         segmentAnnotationJPA.saveAll(segmentAnnotations);
 
         inspectionJPA.saveAll(inspections);
-        inspectionContractJPA.saveAll(inspectionContracts);
+//        inspectionContractJPA.saveAll(inspectionContracts);
     }
 
     public void clearAll() {
@@ -122,7 +89,9 @@ public class DBDataKeeper {
 
         taskJPA.deleteAll();
         contractJPA.deleteAll();
+        microtaskJPA.deleteAll();
 
+        annotationJPA.deleteAll();
         frameAnnotationJPA.deleteAll();
         generalAnnotationJPA.deleteAll();
         segmentAnnotationJPA.deleteAll();
@@ -130,6 +99,7 @@ public class DBDataKeeper {
         inspectionJPA.deleteAll();
         inspectionContractJPA.deleteAll();
 
-        annotationJPA.deleteAll();
+        // 别忘这个...
+        CriticalSection.inspectRecords.clear();
     }
 }
