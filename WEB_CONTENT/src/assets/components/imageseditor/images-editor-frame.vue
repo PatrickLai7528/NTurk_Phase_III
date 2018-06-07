@@ -147,12 +147,13 @@
 				taskId: this.$route.params.taskId,
 				imageLength: 0,
 				currentPlace: 1,
-				taskDescription: ""
+				taskDescription: "",
+                imgNames: this.$store.getters.imgNames,
 			}
 		},
 		computed: {
 			percent() {
-				console.log(this.currentPlace)
+				console.log(this.currentPlace);
 				let result, lowerLimit;
 				lowerLimit = 1 / this.imageLength * 100;
 				result = this.currentPlace / this.imageLength * 100;
@@ -163,7 +164,7 @@
 				if (result != 100 && result < lowerLimit)
 					return parseFloat(lowerLimit);
 				return parseFloat(result);
-			}
+			},
 		},
 		mounted() {
 			this.$nextTick(() => {
@@ -173,12 +174,24 @@
 				this.canvas.addEventListener("mousemove", this.canvasMove);
 				this.canvas.addEventListener("touchstart", this.canvasDown);
 				console.log(this.canvas);
+				console.log(this.$store.getters.getImgNames);
 				this.getImgNames();
 			})
 		},
 		methods: {
 			getImgNames() {
-				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
+                let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
+                let header = {headers: {Authorization: this.$store.getters.getToken}};
+                this.imageLength = this.imgNames.length;
+                viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer, 'http://localhost:8086/frameAnnotation/taskId/', this.taskId, this.$http);
+                this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/frameAnnotation/taskId/', 'http://localhost:8086/frameAnnotation', this.taskId, this.$http);
+                this.viewer.drawCurrent(header, () => {
+                    this.viewer.setTagUpdateCallback(this.updateTagHtml);
+                    this.viewer.setTagTextUpdateCallback(this.updateTagText);
+                    this.viewer.setTagTextGettingCallback(this.getTagText);
+                });
+
+				/*let route = 'http://localhost:8086/tasks/id/' + this.taskId;
 				let header = {headers: {Authorization: this.$store.getters.getToken}};
 				this.$http.get(route, header)
 					.then((response) => {
@@ -196,7 +209,7 @@
 					})
 					.catch(function (error) {
 						console.log(error);
-					})
+					})*/
 			},
 			updateTagHtml() {
 				this.tagHtml = this.viewer.shareTag();

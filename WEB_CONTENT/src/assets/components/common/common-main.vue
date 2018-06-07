@@ -11,20 +11,7 @@
                                     <span class="tableSlotSpan">{{props.row.requesterName}}</span>
                                 </el-form-item>
                             </el-col>
-
-                            <el-col :span="6">
-                                <el-form-item label="已加入人数">
-                                    <span class="tableSlotSpan">{{props.row.attendance}}</span>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :span="6">
-                                <el-form-item label="限制人数">
-                                    <span class="tableSlotSpan">{{props.row.capacity}}</span>
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                        <el-row>
-                            <el-col :span="24">
+                            <el-col :span="12">
                                 <el-form-item label="任务描述">
                                     <span class="tableSlotSpan">{{ props.row.taskDescription }}</span>
                                 </el-form-item>
@@ -33,10 +20,12 @@
                     </el-form>
                 </template>
             </el-table-column>
-            <el-table-column prop="taskStatus" label="任务类型" sortable :filters="[
-                                {text: '评审任务', value: '评审任务'},
-                                {text: '标注任务', value: '标注任务'}]"
-                             :filter-method="filterStateHandler"></el-table-column>
+            <el-table-column prop="source" label="任务来源" sortable :filters="[
+                                {text: '参加过', value: '参加过'},
+                                {text: '我喜欢', value: '标注任务'},
+                                {text: '猜你喜欢', value: '猜你喜欢'},
+                                {text: '新任务', value: '新任务'}]"
+                             :filter-method="filterSourceHandler"></el-table-column>
             <el-table-column prop="taskCategoryChi" label="类别" sortable
                              :filters="[
                                 {text: '整體標註', value: 'GENERAL'},
@@ -45,17 +34,11 @@
                              :filter-method="filterCategoryHandler"></el-table-column>
             <el-table-column prop="taskName" label="任务名称"></el-table-column>
             <!--<el-table-column prop="taskDescription" label="任务描述"></el-table-column>-->
-            <el-table-column prop="totalReward" label="總積分" sortable></el-table-column>
-            <el-table-column prop="formatEndTime" label="截止日期" sortable></el-table-column>
-            <el-table-column label="操作">
+            <el-table-column prop="rewardPerMicrotask" label="单张图奖励" sortable></el-table-column>
+            <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
-                    <!--<router-link v-blind:to="'pagesSelector(taskCategory)'">-->
-                    <!--<router-link>-->
-                    <el-button plain size="mini" class="submitButton"
-                               @click="handleClick(scope.row,scope.row.taskStatus,scope.row.taskId,scope.row.taskCategory)">
-                        进入
-                    </el-button>
-                    <!--</router-link>-->
+                    <el-button @click="handleAnnotationJump(scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
+                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId)">评审</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -80,7 +63,7 @@
                     reward: '',
                     endTime: '',
                     taskStatus: '',
-                    totalReward: '',    //任务的总积分奖励
+                    rewardPerMicrotask: '',    //总积分变成了每张图片多少钱  这里可以经过加工和处理
                     formatEndTime: '',   //将读出来的时间进行格式化再显示
                     attendance: 0,      //表示有多少人参加了这个标注任务
                     capacity: 0,          //表示这个标注任务共限制多少人参加
@@ -88,29 +71,35 @@
                 tableData: [],
                 contractData: '',
                 routerDictionary: [],     //进一步优化代码，用一个字典来装router要跳转的名称
+                sourceDictionary: [],     //添加这个字典来保存是什么来源的任务
             }
         }
         ,
         mounted: function () {
             let _this = this;
             this.$nextTick(function () {
-                console.log(_this.message);
-                this.routerDictionary = new Array();
-                this.routerDictionary['GENERAL'] = 'viewgeneral';
-                this.routerDictionary['SEGMENT'] = 'viewsegment';
-                this.routerDictionary['FRAME'] = 'viewframe';
+                this.initializeMap();
                 _this.getAll();
 
             })
         },
         methods: {
+            initializeMap(){     //在加载的时候就维护这个map
+                this.routerDictionary = new Array();
+                this.routerDictionary['GENERAL'] = 'viewgeneral';
+                this.routerDictionary['SEGMENT'] = 'viewsegment';
+                this.routerDictionary['FRAME'] = 'viewframe';
+                this.sourceDictionary["http://localhost:8086/workerTasks"] = '参加过';
+                //"http://localhost:8086/newTasks","http://localhost:8086/workerTasks"
+                this.sourceDictionary["http://localhost:8086/newTasks"] = '新任务';   //后面还可以扩充我喜欢或者为你推荐
+            },
             filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
                 return row.taskCategory === value;
             },
-            filterStateHandler(value,row,column){
-                return row.taskStatus === value;
+            filterSourceHandler(value,row,column){
+              return row.source === value;
             },
-            doWhileGetTableDataSuccess(response) {        //赖总的编程风格很友好啊，将代码都优化了
+            doWhileGetTableDataSuccess(response,url) {        //赖总的编程风格很友好啊，将代码都优化了
                 console.log(response.data);
                 if(response.data.length != 0){
                     this.tableData = this.tableData.concat(response.data);     //现在是多个response.data  用数组连接
@@ -120,28 +109,31 @@
                     if (e.capacity === 2147483647) {
                         e.capacity = "无限制";
                     }
+                    e.source = this.sourceDictionary[url];     //添加来源
                 }
                 this.translate();
             },
             decideGetTableDataUrl() {//现在的返回值是一个数组
-                if (this.message === "user")
-                    return ["http://localhost:8086/workerTasks","http://localhost:8086/tasks/workerInspectionTasks"]; //用户中心得到的是以前存在的任务
+                if (this.message === "user")   //现在理论上来说应该得到我喜欢的任务，但是还没有实现
+                    return ["http://localhost:8086/workerTasks"]; //用户中心得到的是以前存在的任务
                 else
-                    return ["http://localhost:8086/newTasks","http://localhost:8086/tasks/newInspectionTasks"];
+                    return ["http://localhost:8086/newTasks","http://localhost:8086/workerTasks"];
             },
             getTableData() {
                 let header = {Authorization: this.$store.getters.getToken};
+                let _this = this;
                 let getUrl = this.decideGetTableDataUrl();
                 for(let url of getUrl){
                     this.$http.get(
                         url,
                         {headers: header}
-                    ).then(this.doWhileGetTableDataSuccess).catch(function (error) {
+                    ).then(function (response) {
+                        _this.doWhileGetTableDataSuccess(response,url);
+                    }).catch(function (error) {
                         console.log(error);
                     });
                 }
             },
-
             translate: function () {
                 for (let i = 0; i < this.tableData.length; i++) {
                     if (this.tableData[i].taskCategory === "GENERAL") {
@@ -151,115 +143,43 @@
                     } else if (this.tableData[i].taskCategory === "SEGMENT") {
                         this.tableData[i].taskCategoryChi = "區域劃分";
                     }
-
-                    //这里有bug
-                    if(this.message === 'user'){
-                        if(this.tableData[i].mandatoryTime !== undefined){
-                            this.tableData[i].taskStatus = '评审任务';
-                        }
-                        else{
-                            this.tableData[i].taskStatus = '标注任务';   //这是原来完成的任务，不是评审任务，虽然taskStatus不一样
-                        }
-                    }
-                    else{
-                        if(this.tableData[i].taskStatus === 'ONGOING'){
-                            this.tableData[i].taskStatus = '标注任务';
-                        }
-                        else if(this.tableData[i].taskStatus === 'UNDER_REVIEW'){
-                            this.tableData[i].taskStatus = '评审任务';
-                        }
-                    }
                 }
+
+                console.log(this.tableData);
             },
-            handleReviewJump(row,taskCategory,taskId){     //处理是review的jump
-                let contractId = '';
+            handleAnnotationJump(taskId,path){      //处理任务中心的jump标注
                 let _this = this;
-                _this.$http.get('http://localhost:8086/contract/review/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    contractId = response.data.contractId;   //得到contractId
-                    console.log(contractId);
-                    let mandatory = 0
-                    if(row.mandatoryTime === undefined){
-                        mandatory = 1;
+                _this.$http.get('http://localhost:8086/task/' + taskId, {
+                    headers: {
+                        Authorization: _this.$store.getters.getToken,
                     }
-                    else{
-                        if(row.mandatoryTime !== 0){
-                            mandatory = row.mandatoryTime;
-                        }
-                    }
-                    _this.$router.push({name: _this.routerDictionary[taskCategory],params:{taskId:taskId,contractId:contractId,mandatoryTime:mandatory}});
+                }).then(function (response) {
+                    let imgNames = response.data;
+                    _this.$store.commit('changeImgNames',imgNames);
+                    _this.$router.push({name: path.toLowerCase(),params:{taskId:taskId}});
                 }).catch(function (error) {
-                    //如果在这里出现问题说明将所有标注都评分过了
+                    console.log(error);
+                })
+            },
+            handleReviewJump(taskCategory,taskId){     //处理是review的jump
+                let _this = this;
+                _this.$http.get('http://localhost:8086/inspect/enterInspection/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                    let annotationIds = response.data;
+                    console.log(response.data);
+                    _this.$store.commit('changeAnnotationIds',annotationIds);         //在vuex中提交更改
+                    _this.$router.push({name: _this.routerDictionary[taskCategory],params:{taskId : taskId}});         //现在的路由不需要参数了
+                }).catch(function (error) {
                     _this.successMessage();
                     console.log(error);
                 })
             },
-            successMessage(){
+            successMessage(){                    //这里有可能出现问题的原因是当前项目没得需要评审的任务了
                 this.$notify({
                     title: '系统提示',
-                    message: '您已经完成了这个项目的所有评审任务，换一个任务试试呦^_^',
+                    message: '这个任务没有更多需要评审的标注了，换个任务试试吧^_^',
                     type: 'success'
                 });
             },
-            handleNewJump(taskId,path){      //处理任务中心的jump标注
-                function Contract(taskId, workerId) {
-                    this.taskId = taskId;
-                    this.workerId = workerId;
-                }
-
-                let _this = this;
-                let contract = new Contract(taskId, _this.$store.getters.getUserId);
-                _this.$http.post('http://localhost:8086/contract', JSON.stringify(contract), {
-                    headers: {
-                        Authorization: _this.$store.getters.getToken,
-                        'Content-Type': 'application/json'
-                    }
-                }).then(function (response) {
-                    _this.$router.push({name: path.toLowerCase(), params: {taskId: taskId}});
-                }).catch(function (error) {
-                    console.log(error);
-                })
-            },
-            handleUserJump(taskId,path){     //处理个人中心的jump标注
-                //在这里判断这个任务是不是已经提交了，如果已经提交，不能跳转到修改界面
-                let _this = this;
-                _this.$http.get('http://localhost:8086/contract/taskId/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                	_this.contractData = response.data;
-                    if (_this.contractData.contractStatus === 'COMPLETED') {
-                        _this.messageHandler();
-                    }
-                    else if (_this.contractData.contractStatus === 'ABORT') {
-                        _this.badMessage();
-                    }
-                    else {
-                        _this.$router.push({name: path.toLowerCase(), params: {taskId: taskId}});
-                    }
-                }).catch(
-                    function (error) {
-                        console.log(error)
-                    }
-                );
-            },
-            handleClick(row,taskStatus, Id, taskCategory) {
-                let _this = this;
-                const h = this.$createElement;
-
-                //优化跳转判断逻辑,分成好几个方法，减少重复代码
-                if(taskStatus === '评审任务'){
-                    this.handleReviewJump(row,taskCategory,Id);
-                }
-                else if(taskStatus === '标注任务'){
-                    if(_this.message === 'user'){
-                        this.handleUserJump(Id,taskCategory);
-                    }
-                    else{
-                        this.handleNewJump(Id,taskCategory);
-                    }
-                }
-                else{
-                    console.log("Oops");        //调试使用
-                }
-            }
-            ,
             messageHandler() {
                 this.$message({
                     message: '您已经提交了该任务，不能对结果进行修改，请安心等待结果和奖励^_^',
@@ -273,8 +193,7 @@
             },
             getAll() {
                 this.getTableData();
-            }
-            ,
+            },
             tableRowClassName({row, rowIndex}) {
                 console.log("here" + rowIndex);
                 if (rowIndex % 2 === 1) {

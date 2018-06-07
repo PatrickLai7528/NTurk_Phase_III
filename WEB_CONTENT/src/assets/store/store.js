@@ -14,6 +14,8 @@ var store = new Vuex.Store({
         userId: "",
         userType: "",
         token: null,
+        annotationIds:[],
+        imgNames:[]
     },
     mutations: {
         LOG_IN(state, data) {  //登入，保存状态
@@ -31,11 +33,26 @@ var store = new Vuex.Store({
             sessionStorage.removeItem("token");
             sessionStorage.removeItem("userType");
             sessionStorage.removeItem("isLogin");
+            sessionStorage.removeItem('annotationIds');
+            sessionStorage.removeItem('imgNames');
             state.userId = '';           //同步的改变store中的状态
             state.token = null;
             state.userType = '';
-            state.isLogin = false
+            state.isLogin = false;
+            state.imgNames = [];
+            state.annotationIds = [];
         },
+        changeAnnotationIds(state,newList){      //更改AnnotationIds的值
+            let temp = JSON.stringify(newList);
+            sessionStorage.setItem('annotationIds',temp);
+            state.annotationIds = newList;
+        },
+        changeImgNames(state,newList){
+            let temp = JSON.stringify(newList);
+            console.log(temp);
+            sessionStorage.setItem('imgNames',temp);
+            state.imgNames = newList;
+        }
     },
     actions: {
         logIn({commit}, data) {
@@ -73,6 +90,14 @@ var store = new Vuex.Store({
             }
             return state.userType;
         },
+        getAnnotationIds(state){
+            state.annotationIds = JSON.parse(sessionStorage.getItem('annoatationIds'));
+            return state.annotationIds;
+        },
+        getImgNames(state){
+            state.imgNames = JSON.parse(sessionStorage.getItem('imgNames'));
+            return state.imgNames;
+        }
     }
 });
 
