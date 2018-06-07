@@ -140,6 +140,7 @@
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
 	import AnnotationEditor from '../../js/AnnotaionEditor.js'
 	import SegmentDrawingStrategy from '../../js/strategy/SegmentDrawingStrategy.js'
+	import countdown from 'light-countdown'
 
 	export default {
 		data() {
@@ -262,7 +263,6 @@
 			},
 			submit() {
 				if (this.viewer.submitCurrent(this.imageLength)) {
-					this.viewer.submitCurrent(this.imageLength);
 					this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
 						confirmButtonText: '确定',
 						cancelButtonText: '取消',
