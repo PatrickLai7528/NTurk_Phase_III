@@ -176,7 +176,7 @@
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
                 isRequester: null,
-                annotationIds: this.$store.annotationIds,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
+                annotationIds: this.$store.getters.getAnnotationIds,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
             }
         },
@@ -188,7 +188,7 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.number = _this.$store.annotationIds.length;
+                _this.number = _this.$store.getters.getAnnotationIds.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 let promise = new Promise(function (resolve) {
                     _this.loadAnnotationList();
@@ -198,7 +198,7 @@
                 promise.then(function () {
                     _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
                 });
-            })
+            });
         },
         watch:{
             $route: function (to,from) {
