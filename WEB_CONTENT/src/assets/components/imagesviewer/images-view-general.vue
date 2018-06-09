@@ -19,14 +19,28 @@
                 </el-form>
             </el-form>
             <div v-if="isRequester === false">
-                <div id="prompt">请点击星级进行评分：</div>
-                <el-rate
-                        id="rate-bar"
-                        v-model="nowRating"
-                        :colors="['#99A9BF', '#F7BA2A', '#FF6347']"
-                        v-on:change="ratingChange"
-                >
-                </el-rate>
+                <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
+                <div class="prompt text" v-if="taskType === 'coverage'">请判断标注的完整性：</div>
+                <div v-if="taskType === 'grade'">
+                    <div>
+                        <img src="../../images/good.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">我觉得可以</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/bad.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">我觉得不行</el-radio>
+                    </div>
+                </div>
+                <div v-if="taskType === 'coverage'">
+                    <div>
+                        <img src="../../images/continued.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">还有漏网之鱼</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/done.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">已经一网打尽</el-radio>
+                    </div>
+                </div>
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
@@ -68,7 +82,8 @@
                 nowRating: 0,        //对当前图片的评分
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
-                isRequester: null
+                isRequester: null,
+                taskType: this.$route.params.taskType,
             }
         },
         mounted: function () {
@@ -276,15 +291,21 @@
         margin: 10px;
     }
 
-    #prompt {
+    .prompt {
         margin-top: 100px;
-    }
-
-    #rate-bar {
-        margin-top: 20px;
     }
 
     #commit-button {
         margin-top: 50px;
     }
+
+    .next{
+        margin-top: 20px;
+    }
+
+    .text{
+        font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
+        font-weight:600;
+    }
+
 </style>
