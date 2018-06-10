@@ -42,6 +42,35 @@
                 </template>
             </el-table-column>
         </el-table>
+
+        <el-dialog class="tutorial" title="教程" :visible.sync="dialogTutorialVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，在您开始进行标注前，请您仔细阅读下面教程，可能会让你事半功倍呦：</p>
+            <p>首先您要了解什么是好的标注，接下来以<strong>画框标注</strong>为例：</p>
+            <img src="../../images/tutorial.png" height="400" width="600">
+            <p>对标注最大的要求首先是<strong>不偏不倚</strong>，根据任务的要求找到相应的物品，但是还远不止于此</p>
+            <p>例如上面例子中的<strong>错误示范</strong>，虽然它们都找到了相应的物品，却是不合理的标注</p>
+            <p>图二的标注不够精细，没有<strong>紧紧贴合</strong>物体的轮廓，框出了一些物体之外的背景</p>
+            <p>图三的标注虽然尝试贴合物体的轮廓，却没有将物体<strong>完整</strong>的圈出来</p>
+            <p>图五的标注看似不错，但是它圈出了一部分假想的，却不属于该物体<strong>可见的部分</strong></p>
+            <p>标注看似简单，但标出完美的标注还需要您的<strong>用心参与</strong></p>
+            <h1>加油吧💪!</h1>
+            <el-button type="primary" @click="read()">确 定</el-button>
+        </el-dialog>
+
+        <el-dialog class="tutorial" title="教程" :visible.sync="dialogGradingVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，您接下来要进行一项简单却事关重大的任务</p>
+            <p>您仅仅需要判断其他用户的标注是否<strong>准确</strong></p>
+            <p>接下来是几张优秀的标注和不准确的标注图片，请您过目：</p>
+            <img src="../../images/tutorial.png" height="400" width="600">
+            <p>上图二的标注不够精细，<strong>没有紧紧贴合</strong>物体的轮廓，框出了一些物体之外的背景，是<strong>不能过关</strong>的标注</p>
+            <p>上图三的标注虽然尝试贴合物体的轮廓，却<strong>没有</strong>将物体<strong>完整</strong>的圈出来,同样也是<strong>不能过关</strong>的标注</p>
+            <p>图五的标注看似不错，但是它圈出了一部分假想的，却<strong>不属于</strong>该物体<strong>可见的部分</strong>,也是<strong>不能过关</strong>的标注</p>
+            <p>您的判断对最后的质量把控十分<strong>重要</strong>，请<strong>严格</strong>要求标注的质量，不吝将有问题的标注拒之门外</p>
+            <p>我们将会随机的对您的判断进行<strong>核查</strong>，如果发现您的判断出现严重问题会对您发出<strong>警告</strong>，多次出现问题将会对您进行<strong>惩罚</strong></p>
+            <p>但是不要太过担心，毕竟这只是项简单的工作，只要<strong>用心参与</strong>就不会出现问题</p>
+            <h1>加油吧💪!</h1>
+            <el-button type="primary" @click="read()">确 定</el-button>
+        </el-dialog>
     </div>
 </template>
 
@@ -72,6 +101,10 @@
                 contractData: '',
                 routerDictionary: [],     //进一步优化代码，用一个字典来装router要跳转的名称
                 sourceDictionary: [],     //添加这个字典来保存是什么来源的任务
+                dialogTutorialVisible:false,   //判断教程是否显示
+                dialogGradingVisible:false,
+                path: '',
+                taskId: '',
             }
         }
         ,
@@ -98,6 +131,16 @@
             },
             filterSourceHandler(value,row,column){
               return row.source === value;
+            },
+            showTutorial(id,category,callback){
+                this.dialogTutorialVisible = true;
+
+            },
+            read(){
+                this.dialogTutorialVisible = false;
+                if(this.taskId !== '' & this.path !== ''){
+                    this.$router.push({name: this.path.toLowerCase(),params:{taskId:this.taskId}});
+                }
             },
             doWhileGetTableDataSuccess(response,url) {        //赖总的编程风格很友好啊，将代码都优化了
                 console.log(response.data);
@@ -149,6 +192,7 @@
             },
             handleAnnotationJump(taskId,path){      //处理任务中心的jump标注
                 let _this = this;
+                _this.dialogTutorialVisible = true;
                 _this.$http.get('http://localhost:8086/task/' + taskId, {
                     headers: {
                         Authorization: _this.$store.getters.getToken,
@@ -156,18 +200,21 @@
                 }).then(function (response) {
                     let imgNames = response.data;
                     _this.$store.commit('changeImgNames',imgNames);
-                    _this.$router.push({name: path.toLowerCase(),params:{taskId:taskId}});
+                    _this.taskId = taskId;
+                    _this.path = path;
                 }).catch(function (error) {
                     console.log(error);
                 })
             },
             handleReviewJump(taskCategory,taskId){     //处理是review的jump
                 let _this = this;
+                _this.dialogGradingVisible = true;
                 _this.$http.get('http://localhost:8086/inspect/enterInspection/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let annotationIds = response.data;
                     console.log(response.data);
                     _this.$store.commit('changeAnnotationIds',annotationIds);         //在vuex中提交更改
-                    _this.$router.push({name: _this.routerDictionary[taskCategory],params:{taskId : taskId}});         //现在的路由不需要参数了
+                    _this.taskId = taskId;
+                    _this.path = _this.routerDictionary[taskCategory];
                 }).catch(function (error) {
                     _this.successMessage();
                     console.log(error);
