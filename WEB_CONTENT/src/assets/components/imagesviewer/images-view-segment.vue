@@ -34,14 +34,28 @@
                 </li>
             </ul>
             <div v-if="isRequester === false">
-                <div id="prompt">请点击星级进行评分：</div>
-                <el-rate
-                        id="rate-bar"
-                        v-model="nowRating"
-                        :colors="['#99A9BF', '#F7BA2A', '#FF6347']"
-                        v-on:change="ratingChange"
-                >
-                </el-rate>
+                <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
+                <div class="prompt text" v-if="taskType === 'coverage'">请判断标注的完整性：</div>
+                <div v-if="taskType === 'grade'">
+                    <div>
+                        <img src="../../images/good.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">我觉得可以</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/bad.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">我觉得不行</el-radio>
+                    </div>
+                </div>
+                <div v-if="taskType === 'coverage'">
+                    <div>
+                        <img src="../../images/continued.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">还有漏网之鱼</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/done.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">已经一网打尽</el-radio>
+                    </div>
+                </div>
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
@@ -87,7 +101,7 @@
         color: white;
     }
 
-    #prompt {
+    .prompt {
         margin-top: 250px;
     }
 
@@ -97,6 +111,15 @@
 
     #commit-button {
         margin-top: 50px;
+    }
+
+    .next{
+        margin-top: 20px;
+    }
+
+    .text{
+        font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
+        font-weight:600;
     }
 </style>
 
@@ -164,30 +187,50 @@
                 nowRating: 0,        //对当前图片的评分
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
-                isRequester: null
+                isRequester: null,
+                annotationIds: this.$store.getters.getAnnotationIds,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
+                taskType: this.$route.params.taskType,
             }
         },
         mounted() {
             let _this = this;
             this.$nextTick(function () {
-                _this.getImgNames();
-                // _this.initDraw()
-                // _this.setCanvasStyle()
+                /*
+                const canvas = document.querySelector('#canvas');
+                _this.context = canvas.getContext('2d');
+                */
                 this.isRequester = UserUtils.isRequester(this);
-            })
+                _this.number = _this.$store.getters.getAnnotationIds.length;
+                _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
+                let promise = new Promise(function (resolve) {
+                    _this.loadAnnotationList();
+                    resolve();
+                });
+
+                promise.then(function () {
+                    _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
+                });
+            });
         },
         watch:{                        //路由参数变化重新加载界面
             $route: function (to,from) {
                 if(to.name === 'viewsegment'){
+                    let _this = this;
                     this.taskId = this.$route.params.taskId;
-                    this.contractId = this.$route.params.contractId;
-                    this.mandatoryTime = this.$route.params.mandatoryTime;   //表示还要再评几次
                     this.ratings = [];
                     this.imgNames = [];
-                    this.annotation = {};
                     this.nowRating = 0;
-                    console.log("haha Im in");
-                    this.getImgNames();
+                    this.annotation = {};
+                    _this.number = _this.$store.annotationIds.length;
+                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
+                    let promise = new Promise(function (resolve) {
+                        _this.loadAnnotationList();
+                        resolve();
+                    });
+
+                    promise.then(function () {
+                        _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
+                    });
                 }
             }
         },
@@ -271,51 +314,16 @@
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
             },
-            getImgNames() {
+            loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
-                let route = 'http://localhost:8086/tasks/id/' + this.taskId;
-                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    console.log(response.data.imgNames);
-                    let temp = response.data.imgNames;
-                    for (let i = 0; i < temp.length; i++) {
-                        console.log(temp[i]);
-                        _this.imgNames.push(temp[i]);
-                    }
-                    _this.loadImageAndAnnotation();
-                    _this.number = _this.imgNames.length;
-                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    // _this.loadFrontList(function () {    //进行初始化检查
-                    // _this.canCommit();
-                    // })
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            loadFrontList() {   //用这种方式来初始化前端的annotation数组
-                let _this = this;
-                console.log(_this.imgNames);
-                for (let path of _this.imgNames) {
-                    let route = 'http://localhost:8086/segmentAnnotation/taskId/' + _this.taskId + '/imgName/' + path;
-                    this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                        //let tem = eval(response.data);
-                        //_this.testData = response.data;
-                        let index = _this.getIndex(path);
-                        _this.$set(_this.annotationData, index, response.data);    //在组件中不能使用Vue.set来进行注册，应该用this.$set方法
-                        //_this.annotationData.splice(index,1,response.data);   //必须用splice方法vue才能检测到数组元素的变化
-                        _this.isNew[index] = false;//不是新的
-                        console.log("ha");
-                        console.log(_this.annotationData);
-
-                    }).catch(function (error) { //如果后端没有数据记录要自己造一个空的标注对象push进去
-                        let index = _this.getIndex(path);
-                        //在这里最好不要改变_this.segments   先进行尝试
-                        let tempAnnotation = {
-                            'imgName': _this.imgNames[index],
-                            'segments': [],
-                        };
-                        _this.$set(_this.annotationData, index, tempAnnotation);  //在前端注册index
-                        _this.isNew[index] = true;
-                        console.log(_this.annotationData);
+                for(let annotationId of this.annotationIds){
+                    let route = "http://localhost:8086/segmentAnnotation/id" + annotationId;
+                    this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                        _this.annotation = response.data;
+                        _this.imgNames.push(_this.annotation.imgName);
+                        _this.annotationData.push(_this.annotation);
+                    }).catch(function (error) {
+                        console.log(error);
                     })
                 }
             },

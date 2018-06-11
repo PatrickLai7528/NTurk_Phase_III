@@ -4,7 +4,7 @@
             <div class="block">
                 <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
                              v-on:change="onIndexChange">
-                    <el-carousel-item v-for="single in tableData.imgNames">
+                    <el-carousel-item v-for="single in imgNames">
                         <img v-bind:src="'http://localhost:8086/image/' + single" alt="图片" class="pic">
                     </el-carousel-item>
                 </el-carousel>
@@ -19,14 +19,28 @@
                 </el-form>
             </el-form>
             <div v-if="isRequester === false">
-                <div id="prompt">请点击星级进行评分：</div>
-                <el-rate
-                        id="rate-bar"
-                        v-model="nowRating"
-                        :colors="['#99A9BF', '#F7BA2A', '#FF6347']"
-                        v-on:change="ratingChange"
-                >
-                </el-rate>
+                <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
+                <div class="prompt text" v-if="taskType === 'coverage'">请判断标注的完整性：</div>
+                <div v-if="taskType === 'grade'">
+                    <div>
+                        <img src="../../images/good.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">我觉得可以</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/bad.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">我觉得不行</el-radio>
+                    </div>
+                </div>
+                <div v-if="taskType === 'coverage'">
+                    <div>
+                        <img src="../../images/continued.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="1">还有漏网之鱼</el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/done.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" label="2">已经一网打尽</el-radio>
+                    </div>
+                </div>
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
@@ -68,18 +82,24 @@
                 nowRating: 0,        //对当前图片的评分
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
-                isRequester: null
+                isRequester: null,
+                annotationIds: this.$store.getters.getAnnotationIds,
+                taskType: this.$route.params.taskType,
+                imgNames:[]
             }
         },
         mounted: function () {
+            let _this = this;
             this.$nextTick(function () {
-                //保证el已经插入文档
-                let _this = this;
+                /*
+                const canvas = document.querySelector('#canvas');
+                _this.context = canvas.getContext('2d');
+                */
                 this.isRequester = UserUtils.isRequester(this);
-                this.$nextTick(function () {
-                    _this.load();
-                })
-            });
+                _this.number = _this.$store.getters.getAnnotationIds.length;
+                _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
+                _this.loadAnnotationList();
+            })
         },
         watch:{
             $route: function (to,from) {
@@ -91,8 +111,7 @@
                     this.tableData = [];
                     this.nowRating = 0;
                     this.annotation = {};
-                    console.log("haha Im in");
-                    this.load();
+                    this.loadAnnotationList();
                 }
             }
         },
@@ -172,21 +191,18 @@
                     this.commitDisabled = 'disabled';
                 }
             },
-            load() {
+            loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
-                let theId = this.$route.params.taskId;
-                let route = 'http://localhost:8086/tasks/id/' + theId;
-                //{headers:{Authorization:that.$store.getters.getToken}
-                this.$http.get(route,{headers:{Authorization:_this.$store.getters.getToken}}).then(function (response) {
-                    _this.tableData = response.data;//将特定task的内容读入tableData,然后去后端的annotation里面遍历
-                    _this.number = _this.tableData.imgNames.length;
-                    _this.questionData = _this.tableData.questions;
-
-                    _this.getAnnotation();
-
-                }).catch(function (error) {
-                    console.log(error);
-                });
+                for(let annotationId of this.annotationIds){
+                    let route = "http://localhost:8086/generalAnnotation/id" + annotationId;
+                    this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                        _this.annotation = response.data;
+                        _this.imgNames.push(_this.annotation.imgName);
+                        _this.annotationData.push(_this.annotation);
+                    }).catch(function (error) {
+                        console.log(error);
+                    })
+                }
             },
             getIndex: function (imgSrc) {          //调用这个方法得到当前图片在imgNames中的位置保持同步
                 for (let i = 0; i < this.tableData.imgNames.length; i++) {
@@ -204,36 +220,6 @@
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
             },
-            getAnnotation: function () {
-                let _this = this;
-                for (let path of _this.tableData.imgNames) {
-                    let route = 'http://localhost:8086/generalAnnotation/contractId/' + _this.contractId +'/imgName/' + path;
-                    this.$http.get(route,{headers:{Authorization:_this.$store.getters.getToken}}).then(function (response) {
-                        let index = _this.getIndex(path);
-                        _this.$set(_this.annotationData, index, response.data);    //在组件中不能使用Vue.set来进行注册，应该用this.$set方法
-
-                    }).catch(function (error) { //如果后端没有数据记录要自己造一个空的标注对象push进去
-                        let index = _this.getIndex(path);
-
-                        function QuesAndAnswer(ques) {
-                            this.question = ques;
-                            this.answer = '';
-                        }
-
-                        function Annotation(img) {
-                            this.imgName = img;
-                            this.answerPairs = [];
-                        }
-
-                        let emptyAnnotation = new Annotation(path);
-                        for (let ques of _this.questionData) {
-                            let tem = new QuesAndAnswer(ques);
-                            emptyAnnotation.answerPairs.push(tem);
-                        }
-                        _this.$set(_this.annotationData, index, emptyAnnotation);
-                    })
-                }
-            }
         }
 
 
@@ -276,15 +262,21 @@
         margin: 10px;
     }
 
-    #prompt {
+    .prompt {
         margin-top: 100px;
-    }
-
-    #rate-bar {
-        margin-top: 20px;
     }
 
     #commit-button {
         margin-top: 50px;
     }
+
+    .next{
+        margin-top: 20px;
+    }
+
+    .text{
+        font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
+        font-weight:600;
+    }
+
 </style>

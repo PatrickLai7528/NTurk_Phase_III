@@ -29,8 +29,14 @@ let privateVariables = {
 	// deletedTagCounter: 0
 };
 let privateMethods = {
+	clearCanvas() {
+		let context;
+		context = privateVariables.canvas.getContext('2d');
+		context.clearRect(0, 0, privateVariables.config.defaultWidth, privateVariables.config.defaultHeight);
+		privateVariables.viewer.drawCurrent(privateVariables.header);
+	},
 	drawThis: function (marking) {
-		let context, header;
+		let context, currentAnnotation, markingType, header;
 		header = privateVariables.header;
 		context = privateVariables.canvas.getContext('2d');
 
@@ -38,24 +44,28 @@ let privateMethods = {
 		context.lineWidth = privateVariables.config.lineWidth;
 		context.clearRect(0, 0, privateVariables.config.defaultWidth, privateVariables.config.defaultHeight);
 
-		// 重新一次前面的標註, 之後再畫新的標註, 放在回調函數裡是因為drawCurrent可能要輪詢等待上一次的請求結束才執行
+		//重新一次前面的標註, 之後再畫新的標註, 放在回調函數裡是因為drawCurrent可能要輪詢等待上一次的請求結束才執行
 		privateVariables.viewer.drawCurrent(header, () => {
 			privateVariables.markingDrawingStrategy.drawThis(context, marking, privateVariables.config)
-		})
-		;
+		});
+		// markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
+		// currentAnnotation = this.getCurrentEditedAnnotation();
+		// currentAnnotation[markingType].forEach((value, index, array) => {
+		// 	privateVariables.markingDrawingStrategy.drawThis(context, value, privateVariables.config)
+		// })
+		// privateVariables.markingDrawingStrategy.drawThis(context, marking, privateVariables.config)
 	},
-	submitCurrent(callback = function () {
+	submitCurrent(annotation, callback = function () {
 	}) {
-		let router, header, http, data;
+		let router, header, http;
+		console.log("sumbit")
 		header = privateVariables.header;
 		http = privateVariables.http;
-		data = this.getSubmitData();
-		console.log("in submit current");
-		console.log(data);
+		// data = this.getSubmitData();
 		privateVariables.isLastSubmitLoading = true;
 		if (privateVariables.viewer.isCurrentAnnotationNew()) {
 			router = privateVariables.postBaseUrl + privateVariables.id;
-			http.post(router, data, header)
+			http.post(router, annotation, header)
 				.then((response) => {
 				})
 				.catch((error) => {
@@ -67,7 +77,7 @@ let privateMethods = {
 				})
 		} else {
 			router = privateVariables.putBaseUrl;
-			http.put(router, data, header)
+			http.put(router, annotation, header)
 				.then((response) => {
 				})
 				.catch((error) => {
@@ -86,7 +96,6 @@ let privateMethods = {
 		let markingType, marking, tagHtml = "", currentImageName/*, deleteTagCounter*/;
 		// deleteTagCounter = privateVariables.deletedTagCounter;
 		currentImageName = privateVariables.viewer.shareCurrentImageName();
-		// console.log("in tag html");
 		markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
 		marking = annotation[markingType];
 
@@ -99,7 +108,6 @@ let privateMethods = {
 		}
 	},
 	initTagText(annotation) {
-		// console.log("in tag text");
 		privateVariables.tagTextUpdateWay();
 	},
 	getSubmitData() {
@@ -130,11 +138,16 @@ let privateMethods = {
 		privateVariables.editedAnnotation.set(currentImageName, annotation);
 		privateVariables.isEdited.set(currentImageName, true);
 		// privateVariables.viewer.forceUpdate(currentImageName);
-		this.submitCurrent(() => {
-			this.drawThis(marking);
-		});
+		// this.submitCurrent(() => {
+		this.drawThis(marking);
+		// });
 		privateVariables.tagUpdateWay();
 		privateVariables.tagTextUpdateWay();
+	},
+	haveThisEditedAnnotation(imageName) {
+		let annotation;
+		annotation = privateVariables.editedAnnotation.get(imageName);
+		return undefined != annotation || null != annotation;
 	}
 };
 
@@ -168,26 +181,37 @@ class AnnotationEditor {
 		privateVariables.canvas = annotationViewer.shareCanvas();
 		privateVariables.annotation = annotationViewer.shareCurrentAnnotation();
 		privateVariables.markingDrawingStrategy = annotationViewer.shareMarkingDrawingStrategy();
+		privateVariables.config.defaultHeight = annotationViewer.shareHeight();
+		privateVariables.config.defaultWidth = annotationViewer.shareWidth();
 	}
 
 	drawCurrent(header, callback = function () {
 	}) {
-		let id, doIt, currentAnnotation, currentImageName;
+		let id, doIt, currentAnnotation, currentImageName, markingType;
 		doIt = () => {
-			// 先畫圖, 再畫標註, 畫完標註取得現在的標註
-			privateVariables.viewer.drawCurrent(header, () => {
-				currentAnnotation = privateVariables.viewer.shareCurrentAnnotation();
-				currentImageName = privateVariables.viewer.shareCurrentImageName();
-				console.log(currentAnnotation)
-				// console.log(currentAnnotation);
-				// console.log(currentImageName);
-				privateVariables.editedAnnotation.set(currentImageName, currentAnnotation);
-				privateVariables.isEdited.set(currentImageName, false);
-				// console.log(privateVariables.editedAnnotation);
-				callback();
-				privateMethods.initTagHtml(currentAnnotation);
-				privateMethods.initTagText(currentAnnotation);
-			});
+			let marking;
+			currentImageName = privateVariables.viewer.shareCurrentImageName();
+			if (privateMethods.haveThisEditedAnnotation(currentImageName)) {
+				markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
+				currentAnnotation = privateMethods.getCurrentEditedAnnotation();
+				if (currentAnnotation[markingType] === undefined || currentAnnotation[markingType].length === 0) {
+					privateMethods.clearCanvas();
+				}
+				for (marking of currentAnnotation[markingType]) {
+					privateMethods.drawThis(marking);
+				}
+			} else {
+				// 先畫圖, 再畫標註, 畫完標註取得現在的標註
+				privateVariables.viewer.drawCurrent(header, () => {
+					currentAnnotation = privateVariables.viewer.shareCurrentAnnotation();
+					currentImageName = privateVariables.viewer.shareCurrentImageName();
+					privateVariables.editedAnnotation.set(currentImageName, currentAnnotation);
+					privateVariables.isEdited.set(currentImageName, false);
+					callback();
+					privateMethods.initTagHtml(currentAnnotation);
+					privateMethods.initTagText(currentAnnotation);
+				});
+			}
 		};
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt()
@@ -206,24 +230,16 @@ class AnnotationEditor {
 	}) {
 		let id, doIt, defaultCallback, isNeedToSubmit, currentImageName;
 		doIt = () => {
+			// let marking, markingType, currentAnnotation;
 			defaultCallback = () => {
 				this.drawCurrent(privateVariables.header, callback);
 				// editedAnnotation.size - 1表達現在的annotation數量
 				privateVariables.tagUpdateWay();
 				privateVariables.tagTextUpdateWay();
 			};
-			// console.log(privateVariables.isEdited);
-			currentImageName = privateVariables.viewer.shareCurrentImageName();
-			isNeedToSubmit = privateVariables.isEdited.get(currentImageName);
-			if (!isNeedToSubmit) {
-				privateVariables.viewer.drawNext(defaultCallback)
-			} else {
-				privateMethods.submitCurrent(() => {
-					// privateVariables.viewer.forceUpdate(currentImageName);
-					privateVariables.viewer.drawNext(defaultCallback) // 提交完當前標註再跳轉下一張
-				})
-			}
-		};
+			privateVariables.viewer.drawNext(defaultCallback) // 提交完當前標註再跳轉下一張
+		}
+		;
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
 		} else {
@@ -238,25 +254,14 @@ class AnnotationEditor {
 
 	drawPrevious(callback = function () {
 	}) {
-		let id, doIt, defaultCallback, currentImageName, isNeedToSubmit;
-		// console.log("break here");
-		currentImageName = privateVariables.viewer.shareCurrentImageName();
+		let id, doIt, defaultCallback;
 		doIt = () => {
 			defaultCallback = () => {
 				this.drawCurrent(privateVariables.header, callback);
 				privateVariables.tagUpdateWay();
 				privateVariables.tagTextUpdateWay();
 			};
-			// privateVariables.viewer.drawPrevious(defaultCallback);
-			isNeedToSubmit = privateVariables.isEdited.get(currentImageName);
-			if (!isNeedToSubmit) {
-				privateVariables.viewer.drawPrevious(defaultCallback)
-			} else {
-				privateMethods.submitCurrent(() => {
-					// privateVariables.viewer.forceUpdate(currentImageName);
-					privateVariables.viewer.drawPrevious(defaultCallback) // 提交完當前標註再跳轉下一張
-				})
-			}
+			privateVariables.viewer.drawPrevious(defaultCallback) // 提交完當前標註再跳轉下一張
 		};
 		if (privateVariables.isLastSubmitLoading === false) {
 			doIt();
@@ -301,7 +306,7 @@ class AnnotationEditor {
 			currentImageName = privateVariables.viewer.shareCurrentImageName();
 			annotation = privateMethods.getCurrentEditedAnnotation();
 			markingTypeName = privateVariables.markingDrawingStrategy.getMarkingTypeName();
-			if (index > annotation[markingTypeName].length - 1) {
+			if (index > annotation[markingTypeName].length) {
 				return;
 			}
 			if (annotation[markingTypeName].length === 1) {
@@ -312,9 +317,9 @@ class AnnotationEditor {
 			}
 			privateVariables.editedAnnotation.set(currentImageName, annotation);
 			privateVariables.isEdited.set(currentImageName, true);
-			privateMethods.submitCurrent(() => {
-				this.drawCurrent(privateVariables.header);
-			});
+			// privateMethods.submitCurrent(() => {
+			this.drawCurrent(privateVariables.header);
+			// });
 			privateMethods.initTagHtml(annotation);
 			privateMethods.initTagText(annotation);
 		}
@@ -370,21 +375,16 @@ class AnnotationEditor {
 	forceUpdate(tagTexts) {
 		let currentImageName, annotation, markingType, i, doIt, id;
 		doIt = () => {
-			console.log(tagTexts);
-			// console.log(privateVariables.editedAnnotation);
 			currentImageName = privateVariables.viewer.shareCurrentImageName();
 			annotation = privateMethods.getCurrentEditedAnnotation();
 			markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
 			i = 0;
 			for (let item of tagTexts) {
-				console.log(item);
-				console.log(i);
-				annotation[markingType][i].tag = item.text;
-				i++;
+				if (annotation[markingType][i] !== undefined) {
+					annotation[markingType][i].tag = item.text;
+					i++;
+				}
 			}
-			console.log(annotation);
-			console.log(privateVariables.editedAnnotation);
-			console.log("forced update");
 			privateVariables.editedAnnotation.set(currentImageName, annotation);
 			privateVariables.isEdited.set(currentImageName, false);
 			// privateMethods.submitCurrent(() => {
@@ -411,7 +411,6 @@ class AnnotationEditor {
 		annotation = privateMethods.getCurrentEditedAnnotation();
 		annotation[markingType] = answerPairs;
 		privateVariables.editedAnnotation.set(currentImageName, annotation);
-		privateMethods.submitCurrent();
 	}
 
 	submitCurrent(annotationSize) {
@@ -436,7 +435,12 @@ class AnnotationEditor {
 			});
 		});
 		// 全部annotation都做完了
-		privateMethods.submitCurrent();
+		console.log(editedAnnotations);
+		editedAnnotations.forEach((value, key, map) => {
+			console.log("now submitting :");
+			console.log(value);
+			privateMethods.submitCurrent(value);
+		});
 		return true;
 	}
 }

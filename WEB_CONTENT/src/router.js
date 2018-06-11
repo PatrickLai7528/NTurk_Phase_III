@@ -90,7 +90,7 @@ const routes = [
         },
     },
     {
-        path:'/viewgeneral/:taskId/:contractId/:mandatoryTime',
+        path:'/viewgeneral/:taskType/:taskId',              //现在的路由参数还是需要taskId以便分发接下来的microtask    路由参数需要tasktype来帮助判断是评审还是coverage
         component:imagesViewGeneral,
         name:'viewgeneral',
         meta:{
@@ -98,7 +98,7 @@ const routes = [
         }
     },
     {
-        path:'/viewframe/:taskId/:contractId/:mandatoryTime',
+        path:'/viewframe/:taskType/:taskId',
         component:imagesViewFrame,
         name:'viewframe',
         meta:{
@@ -106,7 +106,7 @@ const routes = [
         }
     },
     {
-        path:'/viewsegment/:taskId/:contractId/:mandatoryTime',
+        path:'/viewsegment/:taskType/:taskId',
         component:imagesViewSegment,
         name:'viewsegment',
         meta:{

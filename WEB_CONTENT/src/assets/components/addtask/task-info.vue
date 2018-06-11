@@ -48,10 +48,6 @@
                     <el-option class="option" label="区域标注" value="SEGMENT"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="截止日期" prop="endTime">
-                <el-date-picker class="input" id="picker" type="datetime" placeholder="选择日期，请至少预留72小时的任务间隔"
-                                v-model="form.endTime" :picker-options="handlePicker"></el-date-picker>
-            </el-form-item>
             <el-form-item label="工人要求" prop="workerRequirement">
                 <el-radio-group v-model="form.workerRequirement">
                     <el-radio label="NONE">无要求</el-radio>
@@ -72,20 +68,9 @@
                     </el-select>
                 </el-form-item>
             </div>
-            <el-form-item id='d' label="奖励形式" prop="rewardStrategy">
-                <el-radio-group v-model="form.rewardStrategy">
-                    <el-radio label="TOTAL">固定积分</el-radio>
-                    <el-radio label="INDIVIDUAL">平分积分</el-radio>
-                </el-radio-group>
+            <el-form-item label="收费标准" prop="rewardPerMicrotask">
+                <el-input class="input" v-model.number="form.rewardPerMicrotask"></el-input>
             </el-form-item>
-            <el-form-item label="合计奖励" prop="totalReward">
-                <el-input class="input" v-model.number="form.totalReward"></el-input>
-            </el-form-item>
-            <el-form-item v-if="form.rewardStrategy=='INDIVIDUAL' && form.workerRequirement != 'APPOINT'"
-                          prop="capacity" label="限制人数">
-                <el-input class="input" v-model.number="form.capacity"></el-input>
-            </el-form-item>
-
             <el-form-item label="问题" v-if="form.taskCategory == 'GENERAL'" prop="questions">
                 <el-input v-if="questionVisible"
                           v-model="questionValue"
@@ -121,7 +106,7 @@
                 if (!value) {
                     return callback(new Error('该字段不能为空'));
                 }
-                if (!Number.isInteger(value)) {
+                if (parseFloat(value).toString() == "NaN") {
                     callback(new Error('请输入数字值'));
                 } else {
                     if (value <= 0) {
@@ -138,22 +123,17 @@
                     taskName: '',       //新创建的task的名字
                     taskCategory: '',
                     taskDescription: '',
-                    endTime: '',
                     workerRequirement: '',           //是否對工人有要求
                     rewardStrategy: '',//修改为rewardStrategy
                     imgNames: [],
-                    totalReward: '',
-                    //当积分模式是固定积分的时候用户直接填入totalReward  否则用户填入限制人数和总奖励
-                    capacity: '',       //人数限制
                     requiredExperience: 0,
                     createTime: new Date(),  //这个属性需要在addTask之前根据new Date时间进行添加
                     requesterId: '', //表示是谁创建了这个task
                     // valid only if taskType = general
                     questions: [],
                     nominees: [],//要求的工人
-                    rewardPerPerson: 0,//对于每个人所给的钱
+                    rewardPerMicrotask:0,     //对于每张图片的收费标准
                     taskTags: [],
-                    ddl: new Date(),    //任务的完成截止时间
                 },
                 tempQuestion: '',
                 allWorkers: [],  //在初始化的时候去后端拿所有工人列表   多选框的key是workerId  value是workerName
@@ -162,14 +142,6 @@
                 systemTags: [],
                 questionValue: "",
                 questionVisible: false,
-                handlePicker: {
-                    disabledDate(nowDate) {
-                        let date = new Date();
-                        date.setDate(date.getDate() + 3);
-                        return nowDate.getTime() < date;    //设置禁用时间，在三天内是禁用的。
-                    }
-                },
-
                 rules: {
                     taskName: [{required: true, message: '请输入任务名称', trigger: 'blur'}],
                     taskCategory: [{required: true, message: '请选择任务类型', trigger: 'change'}],
@@ -179,8 +151,7 @@
                     rewardStrategy: [{required: true, message: '请选择奖励方式', trigger: 'change'}],
                     nominees: [{type: 'array', required: true, message: '请至少选择一个工人', trigger: 'change'}],
                     questions: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
-                    capacity: [{validator: bePositive, trigger: "blur"}],
-                    totalReward: [{validator: bePositive,required: true, message: '请填入一个正整数', trigger: "blur"}],
+                    totalReward: [{validator: bePositive,required: true, message: '请填入一个正数', trigger: "blur"}],     //现在填入整数即可
                     requiredExperience: [{validator: bePositive, trigger: "blur"}]
                 }
             }
@@ -210,24 +181,13 @@
 				this.form.createTime.setTime(new Date().getTime() + 8 * 60 * 60 * 1000);
 				this.form.requesterId = this.$store.getters.getUserId;    //设置新建任务的用户名
 
-				if (this.form.rewardStrategy === "INDIVIDUAL") {
-					this.form.rewardPerPerson = this.form.totalReward / this.form.capacity;
-				}
-
 				if (this.form.workerRequirement === "APPOINT") {
 					this.form.requiredExperience = 2147483647;
-				}
-
-				if (this.form.rewardStrategy === "TOTAL") {
-					this.form.capacity = 2147483647;
 				}
 
 				if (this.form.taskCategory !== 'GENERAL') {
 					this.form.questions = [];
 				}
-
-				this.form.endTime.setTime(this.form.endTime.getTime() + 8 * 60 * 60 * 1000);
-				this.form.ddl.setTime(this.form.endTime.getTime() - 72 * 60 * 60 * 1000);      //将ddl设在endTime的72小时前
             },
             decidePostData(){
 				return {
@@ -239,19 +199,15 @@
                     taskCategory: this.form.taskCategory,
 					taskDescription: this.form.taskDescription,
                     taskTags: this.form.taskTags,
-					endTime: this.form.endTime,
 					workerRequirement: this.form.workerRequirement,
 					rewardStrategy: this.form.rewardStrategy,
 					imgNames: this.form.imgNames,
-					totalReward: this.form.totalReward,
-					capacity: this.form.capacity,
+					rewardPerMicrotask: this.form.rewardPerMicrotask,
 					requiredExperience: this.form.requiredExperience,
 					createTime: this.form.createTime,
 					requesterId: this.form.requesterId,
 					questions: this.form.questions,
 					nominees: this.form.nominees,
-					rewardPerPerson: this.form.rewardPerPerson,
-                    ddl: this.form.ddl,
 				}
             },
             async onSubmit(formName) {      //处理提交并且post到后台

@@ -4,7 +4,14 @@
             <el-col :span="15">
                 <el-card class="pic-area">
                     <div slot="header" class="pic-card-header">
-                        <span>任務描述: {{taskDescription}}</span>
+                        <el-row>
+                            <el-col :span="16">
+                                <span>任務描述: {{taskDescription}}</span>
+                            </el-col>
+                            <el-col :span="8" style="text-align: right">
+                                <div v-html="countDown">{{countDown}}</div>
+                            </el-col>
+                        </el-row>
                     </div>
                     <el-row>
                         <el-col :span="24">
@@ -132,10 +139,12 @@
 	import AnnotationViewer from '../../js/AnnotationViewer.js'
 	import AnnotationEditor from '../../js/AnnotaionEditor.js'
 	import AnswerPairsDrawingStrategy from '../../js/strategy/AnswerPairsDrawingStrategy.js'
+	import countdown from 'light-countdown'
 
 	export default {
 		data() {
 			return {
+				countDown: "<div id='countDown'></div>",
 				tagHtml: '',
 				viewer: {},
 				canvasHtml: '<canvas id="canvas"></canvas>',
@@ -151,7 +160,6 @@
 		},
 		computed: {
 			percent() {
-				console.log(this.currentPlace)
 				let result, lowerLimit;
 				lowerLimit = 1 / this.imageLength * 100;
 				result = this.currentPlace / this.imageLength * 100;
@@ -159,14 +167,9 @@
 				console.log(lowerLimit);
 				console.log(result);
 				lowerLimit = lowerLimit.toFixed(1);
-				// if (result >= 100) {
-				// 	return parseFloat(100.0);
 				if (result != 100 && result < lowerLimit)
 					return parseFloat(lowerLimit);
-				// 	return parseFloat(lowerLimit);
-				// } else {
 				return parseFloat(result);
-				// }
 			}
 		},
 		mounted() {
@@ -177,9 +180,22 @@
 				this.canvas.addEventListener("mousemove", this.canvasMove);
 				this.canvas.addEventListener("touchstart", this.canvasDown);
 				this.getImgNames();
+				this.setCountDown();
 			})
 		},
 		methods: {
+			setCountDown() {
+				let _this = this;
+				countdown({
+					timeEnd: (new Date().getTime() + 900000),
+					selector: '#countDown',
+					msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
+					afterCount() {
+						_this.showMessage("timeOut");
+						_this.$router.push({path: '/profile'});
+					}
+				});
+			},
 			getImgNames() {
 				let route = 'http://localhost:8086/tasks/id/' + this.taskId;
 				let header = {
@@ -187,17 +203,17 @@
 						'Content-Type': 'application/json',
 						Authorization: this.$store.getters.getToken
 					}
-				}
+				};
 				this.$http.get(route, header)
 					.then((response) => {
 						console.log(response);
 						this.questions = response.data.questions;
 						this.taskDescription = response.data.taskDescription;
-						console.log(this.questions)
+						console.log(this.questions);
 						this.initQuestion(this.questions);
 						let viewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
 						this.imageLength = response.data.imgNames.length;
-						this.answerPairsDrawingStrategy = new AnswerPairsDrawingStrategy()
+						this.answerPairsDrawingStrategy = new AnswerPairsDrawingStrategy();
 						viewer = new AnnotationViewer(this.answerPairsDrawingStrategy, viewer, 'http://localhost:8086/generalAnnotation/taskId/', this.taskId, this.$http);
 						this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/generalAnnotation/taskId/', 'http://localhost:8086/generalAnnotation', this.taskId, this.$http);
 						this.viewer.drawCurrent(header, () => {
