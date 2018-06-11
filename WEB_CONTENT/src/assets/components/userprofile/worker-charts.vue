@@ -46,21 +46,21 @@
                 let max = 0;
 
                 let data = [
-                    {date: "2018/05/13", value: 2},
-                    {date: "2018/05/14", value: 4},
-                    {date: "2018/05/16", value: 6},
-                    {date: "2018/05/17", value: 4},
-                    {date: "2018/05/18", value: 8},
-                    {date: "2018/05/20", value: 7},
-                    {date: "2018/05/23", value: 5},
-                    {date: "2018/05/25", value: 9},
-                    {date: "2018/05/28", value: 6},
-                    {date: "2018/05/31", value: 10},
-                    {date: "2018/06/01", value: 7},
-                    {date: "2018/06/04", value: 5},
-                    {date: "2018/06/07", value: 8},
-                    {date: "2018/06/09", value: 9},
-                    {date: "2018/06/10", value: 3},
+                    {date: "2018-05-13", value: 2},
+                    {date: "2018-05-14", value: 4},
+                    {date: "2018-05-16", value: 6},
+                    {date: "2018-05-17", value: 4},
+                    {date: "2018-05-18", value: 8},
+                    {date: "2018-05-20", value: 7},
+                    {date: "2018-05-23", value: 5},
+                    {date: "2018-05-25", value: 9},
+                    {date: "2018-05-28", value: 6},
+                    {date: "2018-05-31", value: 10},
+                    {date: "2018-06-01", value: 7},
+                    {date: "2018-06-04", value: 5},
+                    {date: "2018-06-07", value: 8},
+                    {date: "2018-06-09", value: 9},
+                    {date: "2018-06-10", value: 3},
                 ];
                 let dateList = data.map((item)=> {
                     // let date = item.date.split("/");
