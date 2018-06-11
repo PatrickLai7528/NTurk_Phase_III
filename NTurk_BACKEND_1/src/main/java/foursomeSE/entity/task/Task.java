@@ -33,9 +33,9 @@ public class Task {
 
     @NotNull
     private TaskCategory taskCategory;
-    @Basic
-    @Column(length=50000)
-    private ArrayList<String> questions;
+//    @Basic
+//    @Column(length=50000)
+//    private ArrayList<String> questions;
 
     @Basic
     @Column(length=50000)
@@ -163,14 +163,6 @@ public class Task {
 
     public void setTaskCategory(TaskCategory taskCategory) {
         this.taskCategory = taskCategory;
-    }
-
-    public ArrayList<String> getQuestions() {
-        return questions;
-    }
-
-    public void setQuestions(ArrayList<String> questions) {
-        this.questions = questions;
     }
 
     public ArrayList<String> getTagsForAnnotation() {

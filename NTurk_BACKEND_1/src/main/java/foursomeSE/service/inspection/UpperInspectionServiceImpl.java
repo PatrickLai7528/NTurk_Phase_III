@@ -107,7 +107,7 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
 
         ids.forEach(l -> {
             Annotation a = annotationJPA.findById(l).get();// 这是肯定的，所以故意没用，故意让他如果出错就报null pointer吧，但应该是不可能的
-            a.setParallel(a.getParallel() + 1);
+//            a.setParallel(a.getParallel() + 1);
             annotationJPA.save(a);
 
             CriticalSection.Item item = new CriticalSection.Item();
@@ -144,7 +144,7 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
                 Worker worker = userByUsername(workerJPA, annotation.getUsername());
                 Worker me = userByUsername(workerJPA, username);
 
-                annotation.setParallel(annotation.getParallel() - 1);
+//                annotation.setParallel(annotation.getParallel() - 1);
                 annotationJPA.save(annotation);
                 CriticalSection.inspectRecords.removeIf(ii -> ii.username.equals(username)
                         && ii.annotationId == ispt.getAnnotationId());
@@ -174,7 +174,7 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
                     } else {
                         annotation.setAnnotationStatus(AnnotationStatus.FAILED);
                         annotationJPA.save(annotation);
-                        microtask.setMicrotaskStatus(MicrotaskStatus.FAILED);
+//                        microtask.setMicrotaskStatus(MicrotaskStatus.FAILED);
                         microtaskJPA.save(microtask);
                     }
                 }

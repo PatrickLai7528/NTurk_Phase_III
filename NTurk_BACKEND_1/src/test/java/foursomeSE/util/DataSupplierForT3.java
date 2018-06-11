@@ -76,11 +76,11 @@ public class DataSupplierForT3 {
 //        task.setCreateTime(LocalDateTime.now());
         task.setWorkerRequirement(WorkerRequirement.NONE);
         task.setTaskCategory(TaskCategory.GENERAL);
-        task.setQuestions(new ArrayList<>(Arrays.asList(
-                "图中有几只猫",
-                "图中有几只狗",
-                "图中还有别的动物吗"
-        )));
+//        task.setQuestions(new ArrayList<>(Arrays.asList(
+//                "图中有几只猫",
+//                "图中有几只狗",
+//                "图中还有别的动物吗"
+//        )));
         task.setRewardPerMicrotask(10);
 
         ArrayList<String> imgs = IntStream.rangeClosed(1, 29).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));

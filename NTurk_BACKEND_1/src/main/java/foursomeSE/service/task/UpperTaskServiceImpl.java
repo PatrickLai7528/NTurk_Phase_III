@@ -2,10 +2,9 @@ package foursomeSE.service.task;
 
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
-import foursomeSE.entity.communicate.EnterTaskResponse;
+import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.contract.Contract;
-import foursomeSE.entity.contract.ContractStatus;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
@@ -97,7 +96,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
             m.setTaskId(savedTask.getTaskId());
             m.setImgName(s);
             m.setOrd(i);
-            m.setMicrotaskStatus(MicrotaskStatus.VIRGIN);
+            m.setMicrotaskStatus(MicrotaskStatus.YET_TO_DRAW);
 
             microtaskJPA.save(m);
 
@@ -164,18 +163,18 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
 
     @Override
-    public EnterTaskResponse enterTask(long taskId, String username) {
+    public EnterResponse enterTask(long taskId, String username) {
         List<Microtask> results = microtaskJPA.getMicroTasks(taskId);
         if (results.size() > NUM_OF_MICROTASK_PER_REQUEST) {
             results = results.subList(0, NUM_OF_MICROTASK_PER_REQUEST);
         }
         results.forEach(r -> {
-            r.setMicrotaskStatus(MicrotaskStatus.UNFINISHED);
+//            r.setMicrotaskStatus(MicrotaskStatus.UNFINISHED);
             r.setLastRequestTime(LocalDateTime.now());
             microtaskJPA.save(r);
         });
 
-        EnterTaskResponse result = new EnterTaskResponse();
+        EnterResponse result = new EnterResponse();
         result.setImgNames(
                 results.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new))
         );

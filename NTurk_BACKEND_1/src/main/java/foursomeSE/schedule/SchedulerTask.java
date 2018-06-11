@@ -69,7 +69,7 @@ public class SchedulerTask implements MyConstants {
         toBeDeleted.forEach(item -> {
             System.out.println();
             Annotation a = annotationJPA.findById(item.annotationId).orElseThrow(() -> new MyObjectNotFoundException(""));
-            a.setParallel(a.getParallel() - 1);
+//            a.setParallel(a.getParallel() - 1);
             annotationJPA.save(a);
 
             CriticalSection.inspectRecords.remove(item);

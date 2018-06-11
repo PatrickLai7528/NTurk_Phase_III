@@ -21,8 +21,8 @@ public class Annotation { // 先没有abstract，可能也许和annotationJPA冲
     @NotNull
     private AnnotationStatus annotationStatus;
 
-    @NotNull
-    private int parallel;
+//    @NotNull
+//    private int parallel;
 
     @Transient
     private String imgName;
@@ -70,11 +70,4 @@ public class Annotation { // 先没有abstract，可能也许和annotationJPA冲
         this.username = username;
     }
 
-    public int getParallel() {
-        return parallel;
-    }
-
-    public void setParallel(int parallel) {
-        this.parallel = parallel;
-    }
 }

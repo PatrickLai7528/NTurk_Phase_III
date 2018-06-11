@@ -2,28 +2,30 @@ package foursomeSE.entity.annotation;
 
 import foursomeSE.entity.Segment;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "segment_annotations")
 public class SegmentAnnotation extends Annotation {
-    private String color;
+    //    @Basic
+//    @Column(length = 100000)
 
-    @Basic
-    @Column(length = 100000)
+    @Transient
     private ArrayList<Segment> segments;
 
-    public String getColor() {
-        return color;
+    @NotNull
+    private Segment segment;
+
+
+    public Segment getSegment() {
+        return segment;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public void setSegment(Segment segment) {
+        this.segment = segment;
     }
 
     public ArrayList<Segment> getSegments() {
