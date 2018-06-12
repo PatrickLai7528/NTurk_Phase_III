@@ -5,13 +5,13 @@
                 <el-card class="pic-area">
                     <div slot="header" class="pic-card-header">
                         <el-row>
-                        <el-col :span="16">
-                            <span>任務描述: {{taskDescription}}</span>
-                        </el-col>
-                        <el-col :span="8" style="text-align: right">
-                            <div v-html="countDown">{{countDown}}</div>
-                        </el-col>
-                    </el-row>
+                            <el-col :span="16">
+                                <span>任務描述: {{taskDescription}}</span>
+                            </el-col>
+                            <el-col :span="8" style="text-align: right">
+                                <div v-html="countDown">{{countDown}}</div>
+                            </el-col>
+                        </el-row>
                     </div>
                     <el-row>
                         <el-col :span="24">
@@ -157,11 +157,9 @@
 				imageLength: 0,
 				currentPlace: 1,
 				taskDescription: "",
-                imgNames: this.$store.getters.imgNames,
+				imgNames: this.$store.getters.imgNames,
 			}
-		}
-
-		,
+		},
 		computed: {
 			percent() {
 				let result, lowerLimit;
@@ -205,16 +203,17 @@
 				});
 			},
 			getImgNames() {
-                let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
-                let header = {headers: {Authorization: this.$store.getters.getToken}};
-                this.imageLength = this.imgNames.length;
-                viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer, 'http://localhost:8086/frameAnnotation/taskId/', this.taskId, this.$http);
-                this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/frameAnnotation/taskId/', 'http://localhost:8086/frameAnnotation', this.taskId, this.$http);
-                this.viewer.drawCurrent(header, () => {
-                    this.viewer.setTagUpdateCallback(this.updateTagHtml);
-                    this.viewer.setTagTextUpdateCallback(this.updateTagText);
-                    this.viewer.setTagTextGettingCallback(this.getTagText);
-                });
+				console.log(this.imageNames);
+				let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
+				let header = {headers: {Authorization: this.$store.getters.getToken}};
+				this.imageLength = this.imgNames.length;
+				viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer, 'http://localhost:8086/frameAnnotation/taskId/', this.taskId, this.$http);
+				this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/frameAnnotation/taskId/', 'http://localhost:8086/frameAnnotation', this.taskId, this.$http);
+				this.viewer.drawCurrent(header, () => {
+					this.viewer.setTagUpdateCallback(this.updateTagHtml);
+					this.viewer.setTagTextUpdateCallback(this.updateTagText);
+					this.viewer.setTagTextGettingCallback(this.getTagText);
+				});
 
 				/*let route = 'http://localhost:8086/tasks/id/' + this.taskId;
 				let header = {headers: {Authorization: this.$store.getters.getToken}};
