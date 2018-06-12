@@ -15,7 +15,7 @@ var store = new Vuex.Store({
         userType: "",
         token: null,
         annotationIds:[],
-        imgNames:[]
+        imgNames:[],
     },
     mutations: {
         LOG_IN(state, data) {  //登入，保存状态

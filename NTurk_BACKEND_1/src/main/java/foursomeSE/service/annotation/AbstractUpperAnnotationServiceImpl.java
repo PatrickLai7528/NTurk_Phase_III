@@ -43,36 +43,16 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     }
 
 //    @Override
-//    public T getOneBy(long taskId, String username, String imgName) {
-//        return getOneBy(
-//                contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username)
-//                        .getContractId(),
-//                imgName
-//        );
-//    }
-//
-//    @Override
-//    public T getOneBy(long contractId, String imgName) {
-//        return annotationByContractIdAndImgName(annotationJPA, contractId, imgName);
-//    }
-
-//    @Override
-//    public void addOneBy(long taskId, String username, T annotation) {
-//        annotation.setContractId(contractByTaskIdAndUsername(contractJPA, workerJPA, taskId, username).getContractId());
-//        annotationJPA.save(annotation);
-//    }
-
-//    @Override
-//    public void update(T annotation) {
-//        annotationJPA.save(annotation);
+//    public T getById(long id) {
+//        T t = annotationJPA.findById(id)
+//                .orElseThrow(() -> new MyObjectNotFoundException("annotation with id " + id + " is not found"));
+//        t.setImgName(mtById(microtaskJPA, t.getMicrotaskId()).getImgName());
+//        return t;
 //    }
 
     @Override
-    public T getById(long id) {
-        T t = annotationJPA.findById(id)
-                .orElseThrow(() -> new MyObjectNotFoundException("annotation with id " + id + " is not found"));
-        t.setImgName(mtById(microtaskJPA, t.getMicrotaskId()).getImgName());
-        return t;
+    public T getByImgName(String imgName) {
+        return null;
     }
 
     @Override
@@ -109,10 +89,10 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
                 a.setAnnotationStatus(AnnotationStatus.REVIEWABLE);
                 a.setUsername(username);
                 a.setMicrotaskId(microtask1.getMicrotaskId());
-                a.setParallel(0);
+//                a.setParallel(0);
                 annotationJPA.save(a);
 
-                microtask1.setMicrotaskStatus(MicrotaskStatus.UNREVIEWED);
+//                microtask1.setMicrotaskStatus(MicrotaskStatus.UNREVIEWED);
                 microtaskJPA.save(microtask1);
             });
         } else {

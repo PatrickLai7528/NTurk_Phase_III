@@ -26,6 +26,15 @@ public class Microtask {
     @NotNull
     private int ord;
 
+    @NotNull
+    private int parallel;
+
+    @NotNull
+    private int iteration;
+
+    @NotNull
+    private boolean isSample;
+
     private LocalDateTime lastRequestTime;
 
     public Microtask() {
@@ -77,5 +86,29 @@ public class Microtask {
 
     public void setOrd(int ord) {
         this.ord = ord;
+    }
+
+    public int getParallel() {
+        return parallel;
+    }
+
+    public void setParallel(int parallel) {
+        this.parallel = parallel;
+    }
+
+    public boolean isSample() {
+        return isSample;
+    }
+
+    public void setSample(boolean sample) {
+        isSample = sample;
+    }
+
+    public int getIteration() {
+        return iteration;
+    }
+
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
     }
 }

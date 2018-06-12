@@ -2,7 +2,7 @@ package foursomeSE.service.task;
 
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
-import foursomeSE.entity.communicate.EnterTaskResponse;
+import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
@@ -51,7 +51,7 @@ public interface UpperTaskService {
     /**
      *
      * */
-    EnterTaskResponse enterTask(long taskId, String username);
+    EnterResponse enterTask(long taskId, String username);
 
 
     /**

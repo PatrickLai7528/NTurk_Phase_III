@@ -2,10 +2,10 @@ package foursomeSE.entity.communicate;
 
 import java.util.ArrayList;
 
-public class EnterTaskResponse {
+public class EnterResponse {
     private ArrayList<String> imgNames;
 
-    public EnterTaskResponse() {
+    public EnterResponse() {
     }
 
     public ArrayList<String> getImgNames() {

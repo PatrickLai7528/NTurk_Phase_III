@@ -203,17 +203,17 @@
 						'Content-Type': 'application/json',
 						Authorization: this.$store.getters.getToken
 					}
-				}
+				};
 				this.$http.get(route, header)
 					.then((response) => {
 						console.log(response);
 						this.questions = response.data.questions;
 						this.taskDescription = response.data.taskDescription;
-						console.log(this.questions)
+						console.log(this.questions);
 						this.initQuestion(this.questions);
 						let viewer = new ImageViewer(this.canvas, response.data.imgNames, "http://localhost:8086/image/");
 						this.imageLength = response.data.imgNames.length;
-						this.answerPairsDrawingStrategy = new AnswerPairsDrawingStrategy()
+						this.answerPairsDrawingStrategy = new AnswerPairsDrawingStrategy();
 						viewer = new AnnotationViewer(this.answerPairsDrawingStrategy, viewer, 'http://localhost:8086/generalAnnotation/taskId/', this.taskId, this.$http);
 						this.viewer = new AnnotationEditor(viewer, header, 'http://localhost:8086/generalAnnotation/taskId/', 'http://localhost:8086/generalAnnotation', this.taskId, this.$http);
 						this.viewer.drawCurrent(header, () => {
