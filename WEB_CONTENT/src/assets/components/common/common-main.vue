@@ -38,7 +38,8 @@
             <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
                     <el-button @click="handleAnnotationJump(scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
-                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId)">评审</el-button>
+                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')">正确性判断</el-button>
+                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')">完整性判断</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -54,7 +55,7 @@
             <p>图五的标注看似不错，但是它圈出了一部分假想的，却不属于该物体<strong>可见的部分</strong></p>
             <p>标注看似简单，但标出完美的标注还需要您的<strong>用心参与</strong></p>
             <h1>加油吧💪!</h1>
-            <el-button type="primary" @click="read()">确 定</el-button>
+            <el-button type="primary" @click="read('tutorial')">确 定</el-button>
         </el-dialog>
 
         <el-dialog class="tutorial" title="教程" :visible.sync="dialogGradingVisible" :modal="false" top="9vh">
@@ -69,7 +70,22 @@
             <p>我们将会随机的对您的判断进行<strong>核查</strong>，如果发现您的判断出现严重问题会对您发出<strong>警告</strong>，多次出现问题将会对您进行<strong>惩罚</strong></p>
             <p>但是不要太过担心，毕竟这只是项简单的工作，只要<strong>用心参与</strong>就不会出现问题</p>
             <h1>加油吧💪!</h1>
-            <el-button type="primary" @click="read()">确 定</el-button>
+            <el-button type="primary" @click="read('grade')">确 定</el-button>
+        </el-dialog>
+
+        <el-dialog class="tutorial" title="教程" :visible.sync="dialogCoverageVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，您接下来要进行一项简单却事关重大的任务</p>
+            <p>您仅仅需要判断其他用户的标注是否<strong>准确</strong></p>
+            <p>接下来是几张优秀的标注和不准确的标注图片，请您过目：</p>
+            <img src="../../images/tutorial.png" height="400" width="600">
+            <p>上图二的标注不够精细，<strong>没有紧紧贴合</strong>物体的轮廓，框出了一些物体之外的背景，是<strong>不能过关</strong>的标注</p>
+            <p>上图三的标注虽然尝试贴合物体的轮廓，却<strong>没有</strong>将物体<strong>完整</strong>的圈出来,同样也是<strong>不能过关</strong>的标注</p>
+            <p>图五的标注看似不错，但是它圈出了一部分假想的，却<strong>不属于</strong>该物体<strong>可见的部分</strong>,也是<strong>不能过关</strong>的标注</p>
+            <p>您的判断对最后的质量把控十分<strong>重要</strong>，请<strong>严格</strong>要求标注的质量，不吝将有问题的标注拒之门外</p>
+            <p>我们将会随机的对您的判断进行<strong>核查</strong>，如果发现您的判断出现严重问题会对您发出<strong>警告</strong>，多次出现问题将会对您进行<strong>惩罚</strong></p>
+            <p>但是不要太过担心，毕竟这只是项简单的工作，只要<strong>用心参与</strong>就不会出现问题</p>
+            <h1>加油吧💪!</h1>
+            <el-button type="primary" @click="read('coverage')">确 定</el-button>
         </el-dialog>
     </div>
 </template>
@@ -103,6 +119,7 @@
                 sourceDictionary: [],     //添加这个字典来保存是什么来源的任务
                 dialogTutorialVisible:false,   //判断教程是否显示
                 dialogGradingVisible:false,
+                dialogCoverageVisible:false,       //这个教程待写
                 path: '',
                 taskId: '',
             }
@@ -136,10 +153,14 @@
                 this.dialogTutorialVisible = true;
 
             },
-            read(){
-                this.dialogTutorialVisible = false;
+            read(router){
                 if(this.taskId !== '' & this.path !== ''){
-                    this.$router.push({name: this.path.toLowerCase(),params:{taskId:this.taskId}});
+                    if(router === 'tutorial'){
+                        this.$router.push({name: this.path.toLowerCase(),params:{taskId:this.taskId}});
+                    }
+                    else{
+                        this.$router.push({name:this.path,params:{taskId : this.taskId, taskType: router}});
+                    }
                 }
             },
             doWhileGetTableDataSuccess(response,url) {        //赖总的编程风格很友好啊，将代码都优化了
@@ -206,13 +227,27 @@
                     console.log(error);
                 })
             },
-            handleReviewJump(taskCategory,taskId){     //处理是review的jump
+            handleReviewJump(taskCategory,taskId,type){     //处理是review的jump   type为coverage或grade
                 let _this = this;
-                _this.dialogGradingVisible = true;
-                _this.$http.get('http://localhost:8086/inspect/enterInspection/' + taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    let annotationIds = response.data;
+                let path = "";
+                if(type === 'grade'){
+                    _this.dialogGradingVisible = true;
+                    path = 'http://localhost:8086/qualityVerification/taskId/' + taskId;  //评分的交互路径
+                }
+                else if(type === 'coverage'){
+                    _this.dialogCoverageVisible = true;
+                    path = 'http://localhost:8086/coverageVerification/taskId/' + taskId;   //完整性判断的交互路径
+                }
+                else{
+                    console.log("emmmm");
+                }
+
+                _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+
+                    //TODO:  因为接口没有完全写好，所以我猜测返回的是imgNames列表
+                    let imgNames = response.data;
                     console.log(response.data);
-                    _this.$store.commit('changeAnnotationIds',annotationIds);         //在vuex中提交更改
+                    _this.$store.commit('changeImgNames',imgNames);         //在vuex中提交更改
                     _this.taskId = taskId;
                     _this.path = _this.routerDictionary[taskCategory];
                 }).catch(function (error) {

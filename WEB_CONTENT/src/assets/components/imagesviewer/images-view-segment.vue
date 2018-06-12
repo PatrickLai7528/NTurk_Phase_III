@@ -129,7 +129,6 @@
         data() {
             return {
                 context: {},
-                imgNames: [],
                 nowIndex: 0,
                 annotation: {},
                 annotationData: [],
@@ -181,15 +180,13 @@
                 number: 0,
                 userClick: true,
                 submitDisabled: "disabled",
-                taskId: this.$route.params.taskId,
-                contractId: this.$route.params.contractId,
-                mandatoryTime:this.$route.params.mandatoryTime,   //表示还要再评几次
                 nowRating: 0,        //对当前图片的评分
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
                 isRequester: null,
-                annotationIds: this.$store.getters.getAnnotationIds,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
+                imgNames: this.$store.getters.getImgNames,
+                taskId: this.$route.params.taskId,
             }
         },
         mounted() {
@@ -200,7 +197,8 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.number = _this.$store.getters.getAnnotationIds.length;
+                this.imgNames = this.$store.getters.getImgNames;
+                _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 let promise = new Promise(function (resolve) {
                     _this.loadAnnotationList();
@@ -217,11 +215,13 @@
                 if(to.name === 'viewsegment'){
                     let _this = this;
                     this.taskId = this.$route.params.taskId;
+                    this.taskType = this.$route.params.taskType;
                     this.ratings = [];
-                    this.imgNames = [];
+                    this.imgNames = this.$store.getters.getImgNames;
                     this.nowRating = 0;
                     this.annotation = {};
-                    _this.number = _this.$store.annotationIds.length;
+                    this.annotationData = [];
+                    _this.number = _this.imgNames.length;
                     _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                     let promise = new Promise(function (resolve) {
                         _this.loadAnnotationList();
@@ -249,26 +249,23 @@
                     inspections.push(nowInspection);
                 }
 
-                function AllInspection(contractId,inspectionList){
-                    this.inspections = inspectionList;
-                    this.contractId = contractId;
+                let _this = this;
+
+                let path = '';
+                if(_this.taskType === 'coverage'){
+                    path = 'http://localhost:8086/coverageVerification/saveVerifications';
+                }
+                else if(_this.taskType === 'grade'){
+                    path = 'http://localhost:8086/qualityVerification/saveVerifications';
+                }
+                else{
+                    console.log("error");
                 }
 
-                let InspectionContract = new AllInspection(this.contractId,inspections);
-                console.log(InspectionContract);
-
-                let _this = this;
-                this.$http.post('http://localhost:8086/inspect',
-                    JSON.stringify(InspectionContract),
+                this.$http.post(path,
+                    JSON.stringify(inspections),
                     {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                    _this.mandatoryTime = _this.mandatoryTime - 1;   //将必做次数递减
-                    if(_this.mandatoryTime >= 1){
-                        _this.showMessage();    //显示提示，要接着做
-                    }
-                    else{       //完成了，显示提示消息，返回上一级
-                        _this.successMessage();
-                        _this.$router.push({path:'/profile'});
-                    }
+                        _this.showMessage();
                 }).catch(function (error) {
                     console.log(error);
                 });
@@ -282,16 +279,28 @@
             },
             showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;
-                this.$confirm('您还有要进行评审的任务，是否继续', '温馨提示', {
+                this.$confirm('不够过瘾，再来一组^_^',  '温馨提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
                     let contractId = '';
-                    _this.$http.get('http://localhost:8086/contract/review/' + _this.taskId, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                        contractId = response.data.contractId;   //得到contractId
-                        console.log(contractId);
-                        _this.$router.push({name: 'viewsegment',params:{taskId:_this.taskId,contractId:contractId,mandatoryTime:_this.mandatoryTime}});
+                    let path = '';
+                    if(_this.taskType === 'grade'){
+                        path = 'http://localhost:8086/qualityVerification/taskId/' + _this.taskId;  //评分的交互路径
+                    }
+                    else if(_this.taskType === 'coverage'){
+                        path = 'http://localhost:8086/coverageVerification/taskId/' + _this.taskId;   //完整性判断的交互路径
+                    }
+                    else{
+                        console.log("emmmm");
+                    }
+
+                    _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                        let imgNames = response.data;
+                        _this.$store.commit('changeImgNames',imgNames);
+                        console.log(imgNames);
+                        _this.$router.push({name: 'viewsegment',params:{taskId:_this.taskId,taskType:_this.taskType}});
                     }).catch(function (error) {
                         _this.successMessage();
                         _this.$router.push({path: '/profile'});
@@ -316,22 +325,15 @@
             },
             loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
-                for(let annotationId of this.annotationIds){
-                    let route = "http://localhost:8086/segmentAnnotation/id" + annotationId;
+                for(let img of this.imgNames){
+                    let route = "http://localhost:8086/segmentAnnotation/imgName/" + img;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                         _this.annotation = response.data;
-                        _this.imgNames.push(_this.annotation.imgName);
+                        console.log(response.data);
                         _this.annotationData.push(_this.annotation);
                     }).catch(function (error) {
                         console.log(error);
                     })
-                }
-            },
-            getIndex: function (imgSrc) {          //调用这个方法得到当前图片在imgNames中的位置保持同步
-                for (let i = 0; i < this.imgNames.length; i++) {
-                    if (imgSrc === this.imgNames[i]) {
-                        return i;
-                    }
                 }
             },
             onIndexChange: function (newIndex, oldIndex) {
@@ -368,25 +370,7 @@
              * loading-related methods. (mouse-event listeners are down below)
              * */
             loadAnnotation() {
-                let _this = this;
-                this.$http.get('http://localhost:8086/segmentAnnotation/contractId/' + _this.contractId + '/imgName/' + this.imgNames[this.nowIndex], {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    if (response.status === 200) {
-                        _this.annotation = response.data;
-                        _this.segments = _this.annotation.segments;
-                        _this.annotationData[_this.nowIndex] = _this.annotation;    //如果是评分，不会有没有做完的annotation
-                        _this.initialDraw();
-                    }
-                }).catch(function (error) {
-                    _this.segments = [];
-                    _this.annotation = {
-                        'imgName': _this.imgNames[_this.nowIndex],
-                        'segments': _this.segments
-                    };
-                    _this.isNew[_this.nowIndex] = true;
-                    _this.annotationData[_this.nowIndex] = _this.annotation;    //如果是评分，不会有没有做完的annotation
-                    _this.initialDraw();
-                    console.log(error);
-                })
+                this.annotation = this.annotationData[this.nowIndex];
             },
             /**
              * draw methods. (and tag)

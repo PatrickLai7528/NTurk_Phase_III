@@ -137,6 +137,18 @@
                         </el-col>
                     </el-row>
                 </el-tab-pane>
+                <el-tab-pane label="用户图表">
+                    <el-row>
+                        <el-col :span="18" :offset="3" class="title">
+                            <span>统计信息</span>
+                        </el-col>
+                    </el-row>
+                    <el-row class="functionPane">
+                        <div>
+                            <user-charts></user-charts>
+                        </div>
+                    </el-row>
+                </el-tab-pane>
                 <el-tab-pane label="消息中心">
                     <el-row class="functionPane">
                         <el-col>
@@ -163,12 +175,14 @@
 	import UserUtils from '../../js/utils/UserUtils.js'
 	import DateUtils from '../../js/utils/DateUtils.js'
 	import TranslateUtils from '../../js/utils/TranslateUtils.js'
+    import userCharts from './user-charts.vue'
 
 	export default {
 		name: "",
 		components: {
 			taskLobby,
 			requesterLobby,
+            userCharts
 		},
 		data() {
 			return {
@@ -337,7 +351,7 @@
     }
 
     .functionPane {
-        height: 500px;
+        height: 600px;
         overflow: auto;
     }
 
