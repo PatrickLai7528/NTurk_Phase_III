@@ -3,7 +3,6 @@ package foursomeSE.service.task;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
@@ -12,7 +11,6 @@ import foursomeSE.entity.statistics.TaskStatusData;
 import foursomeSE.entity.task.*;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
-import foursomeSE.error.MyNotValidException;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
@@ -20,6 +18,7 @@ import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -67,42 +66,45 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         this.microtaskJPA = microtaskJPA;
     }
 
-    @Override
-    public CTask getById(long id) {
-        return sToD(taskById(taskJPA, id));
-    }
+//    @Override
+//    public CTask getById(long id) {
+//        return sToD(taskById(taskJPA, id));
+//    }
 
     @Override
-    public void add(RTask task, String username) {
+    public void add(Task task, String username) {
         Requester requester = userByUsername(requesterJPA, username);
-        double totalCost = task.getRewardPerMicrotask() * task.getImgNames().size();
-        if (requester.getCredit() - totalCost < 0) {
-            throw new MyNotValidException();
-        }
-        requester.setCredit(requester.getCredit() - totalCost);
+//        double totalCost = task.getRewardPerMicrotask() * task.getImgNames().size();
+//        if (requester.getCredit() - totalCost < 0) {
+//            throw new MyNotValidException();
+//        }
+//        requester.setCredit(requester.getCredit() - totalCost);
 
-        task.setTaskStatus(TaskStatus.ONGOING);
+
         task.setRequesterId(requester.getId());
-        LocalDateTime createTime = LocalDateTime.now();
-        task.setCreateTime(createTime);
+        task.setCreateTime(LocalDateTime.now());
+        task.setTaskStatus(TaskStatus.ONGOING);
+        task.setIsCollecting(1);
         taskJPA.save(new Task(task));
 
         long temp = taskJPA.temp().get(0).longValue();
-//        System.out.println("pre print: " + temp);
         Task savedTask = taskById(taskJPA, temp - 1);
         for (int i = 0; i < task.getImgNames().size(); i++) {
             String s = task.getImgNames().get(i);
             Microtask m = new Microtask();
             m.setTaskId(savedTask.getTaskId());
             m.setImgName(s);
-            m.setOrd(i);
             m.setMicrotaskStatus(MicrotaskStatus.YET_TO_DRAW);
+            m.setOrd(i);
+            m.setParallel(0);
+            m.setIteration(0);
+            m.setIsSample(i < SAMPLE_SIZE ? 1 : 0);
 
             microtaskJPA.save(m);
 
         }
 
-        requesterJPA.save(requester);
+//        requesterJPA.save(requester);
 
 //        messageJPA.save(Message.createMessage(username, MessageType.ISSUE_TASK, new String[]{
 //                task.getTaskName(),
@@ -149,7 +151,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         return contractJPA.findByWorkerId(userByUsername(workerJPA, username).getId())
                 .stream()
                 .mapToLong(Contract::getTaskId)
-                .mapToObj(this::getById)
+                .mapToObj(id -> sToD(taskById(taskJPA, id)))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -168,47 +170,54 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         if (results.size() > NUM_OF_MICROTASK_PER_REQUEST) {
             results = results.subList(0, NUM_OF_MICROTASK_PER_REQUEST);
         }
+
         results.forEach(r -> {
-//            r.setMicrotaskStatus(MicrotaskStatus.UNFINISHED);
             r.setLastRequestTime(LocalDateTime.now());
+            r.setParallel(1); // 反正得到的一定是0的
             microtaskJPA.save(r);
+
+            // 下面的不需要，因为反正parallel只能是0或者1，parallel就足够取代原来unfinished的状态
+            // 本来加入下面的就是为了并行。但是实际上没有并行
+//            CriticalSection.Item item = new CriticalSection.Item();
+//            item.username = username;
+//            item.requestTime = LocalDateTime.now();
+//            item.microtaskId = r.getMicrotaskId();
+//            CriticalSection.drawRecords.add(item);
         });
 
         EnterResponse result = new EnterResponse();
-        result.setImgNames(
-                results.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new))
-        );
+        result.setImgNames(results.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new)));
         return result;
     }
 
-    /**
-     * inspection
-     */
-    @Override
-    public List<CTask> getNewInspectionTasks(String username) {
-        this.username = username;
-
-        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal());
-        result.removeAll(getWorkerInspectionTasks(username));
-
-        return listConvert(result, this::sToD);
-    }
-
-    @Override
-    public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
-        this.username = username;
-
-        return taskJPA.findWorkerInspectionTasks(username)
-                .stream()
-                .map(this::sToD2)
-                .collect(Collectors.toCollection(ArrayList::new));
-
-//        return getWorkerTasks(username).stream()
-//                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW
-//                        && t.get)
+//    /**
+//     * inspection
+//     */
+//    @Override
+//    public List<CTask> getNewInspectionTasks(String username) {
+//        this.username = username;
+//
+//        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal());
+//        result.removeAll(getWorkerInspectionTasks(username));
+//
+//        return listConvert(result, this::sToD);
+//    }
+//
+//    @Override
+//    public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
+//        this.username = username;
+//
+//        return taskJPA.findWorkerInspectionTasks(username)
+//                .stream()
 //                .map(this::sToD2)
 //                .collect(Collectors.toCollection(ArrayList::new));
-    }
+//
+////        return getWorkerTasks(username).stream()
+////                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW
+////                        && t.get)
+////                .map(this::sToD2)
+////                .collect(Collectors.toCollection(ArrayList::new));
+//    }
 
 
     /**
@@ -365,9 +374,22 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 //                ).size();
 
         String requesterName = userById(requesterJPA, task.getRequesterId()).getNickname();
-
         CTask result = new CTask(task);
         result.setRequesterName(requesterName);
+
+        if (username == null) {
+            List<String> imgs = microtaskJPA.retrieveImgNames(task.getTaskId());
+            result.setImgNames(new ArrayList<>(imgs));
+        }
+
+        if (username != null) {
+            result.setDraw(microtaskJPA.getMicroTasks(task.getTaskId()).size());
+            int yetToVerifyQuality = microtaskJPA.getForVerification(task.getTaskId(), username, MicrotaskStatus.YET_TO_VERIFY_QUALITY.ordinal()).size();
+            int yetToVerifyCoverage = microtaskJPA.getForVerification(task.getTaskId(), username, MicrotaskStatus.YET_TO_VERIFY_COVERAGE.ordinal()).size();
+            result.setVerifyQuality(yetToVerifyQuality);
+            result.setVerifyCoverage(yetToVerifyCoverage);
+        }
+
         return result;
 //        if (username == null) {
 //            return new CTask(task, attendance, requesterName);

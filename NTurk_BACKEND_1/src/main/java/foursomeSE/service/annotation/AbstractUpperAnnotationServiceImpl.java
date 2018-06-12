@@ -8,18 +8,20 @@ import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
-import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
+import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.util.MyConstants;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static foursomeSE.service.annotation.AnnotationUtils.annotationByContractIdAndImgName;
-import static foursomeSE.service.contract.ContractUtils.contractByTaskIdAndUsername;
+import static foursomeSE.service.annotation.AnnotationUtils.anttById;
 import static foursomeSE.service.task.TaskUtils.mtById;
 import static foursomeSE.service.task.TaskUtils.mtByImg;
 import static foursomeSE.service.user.UserUtils.userByUsername;
@@ -27,24 +29,27 @@ import static foursomeSE.service.user.UserUtils.userByUsername;
 public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         implements UpperAnnotationService<T>, MyConstants {
     private ContractJPA contractJPA;
-    private AbstractAnnotationJPA<T> annotationJPA;
+    private AbstractAnnotationJPA<T> abstractAnnotationJPA;
     private WorkerJPA workerJPA;
     private MicrotaskJPA microtaskJPA;
+    private AnnotationJPA annotationJPA;
 
 
     public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA,
-                                              AbstractAnnotationJPA<T> annotationJPA,
+                                              AbstractAnnotationJPA<T> abstractAnnotationJPA,
                                               WorkerJPA workerJPA,
-                                              MicrotaskJPA microtaskJPA) {
+                                              MicrotaskJPA microtaskJPA,
+                                              AnnotationJPA annotationJPA) {
         this.contractJPA = contractJPA;
-        this.annotationJPA = annotationJPA;
+        this.abstractAnnotationJPA = abstractAnnotationJPA;
         this.workerJPA = workerJPA;
         this.microtaskJPA = microtaskJPA;
+
     }
 
 //    @Override
 //    public T getById(long id) {
-//        T t = annotationJPA.findById(id)
+//        T t = abstractAnnotationJPA.findById(id)
 //                .orElseThrow(() -> new MyObjectNotFoundException("annotation with id " + id + " is not found"));
 //        t.setImgName(mtById(microtaskJPA, t.getMicrotaskId()).getImgName());
 //        return t;
@@ -52,7 +57,25 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 
     @Override
     public T getByImgName(String imgName) {
-        return null;
+        Microtask mt = mtByImg(microtaskJPA, imgName);
+
+
+        Annotation a = annotationJPA.findLatestByImgName(imgName);
+        // 除非是第一次，不然肯定是有的。
+        if (a == null) { // 如果是第一次，直接特殊处理吧。
+            return null;
+        }
+
+        T t = anttById(abstractAnnotationJPA, a.getAnnotationId());
+
+        List<T> previous  = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
+                mt.getMicrotaskId(), a.getCreateTime(), AnnotationStatus.PASSED
+        );
+
+        ArrayList<Object> cores = previous.stream().map(Annotation::core).collect(Collectors.toCollection(ArrayList::new));
+        t.setCore(cores);
+
+        return t;
     }
 
     @Override
@@ -61,10 +84,11 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
             throw new MyNotValidException();
         }
 
-        // 所以这里存那么多其实是有问题的 ...
+        // 所以这里存那么多其实是有问题的 ... 5个里面存一个就可以了
         T t0 = rAnnotations.getAnnotations().get(0);
         String imgName = t0.getImgName();
         Microtask mt0 = mtByImg(microtaskJPA, imgName);
+
 
         if (mt0.getLastRequestTime().isAfter(LocalDateTime.now().minusMinutes(TASK_DURATION))) {
             long taskId = mt0.getTaskId();
@@ -84,16 +108,18 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 
 
             rAnnotations.getAnnotations().forEach(a -> {
-                Microtask microtask1 = mtByImg(microtaskJPA, a.getImgName());
+                Microtask mt = mtByImg(microtaskJPA, a.getImgName());
 
-                a.setAnnotationStatus(AnnotationStatus.REVIEWABLE);
                 a.setUsername(username);
-                a.setMicrotaskId(microtask1.getMicrotaskId());
-//                a.setParallel(0);
-                annotationJPA.save(a);
+                a.setMicrotaskId(mt.getMicrotaskId());
+                a.setAnnotationStatus(AnnotationStatus.REVIEWABLE);
+                a.setCreateTime(LocalDateTime.now());
+                a.setIteration(mt.getIteration());
+                abstractAnnotationJPA.save(a);
 
-//                microtask1.setMicrotaskStatus(MicrotaskStatus.UNREVIEWED);
-                microtaskJPA.save(microtask1);
+                mt.setParallel(0);
+                mt.setMicrotaskStatus(MicrotaskStatus.YET_TO_VERIFY_QUALITY);
+                microtaskJPA.save(mt);
             });
         } else {
             throw new MyNotValidException();

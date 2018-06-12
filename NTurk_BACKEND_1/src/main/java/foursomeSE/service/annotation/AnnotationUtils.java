@@ -1,6 +1,7 @@
 package foursomeSE.service.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
+import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
@@ -14,5 +15,9 @@ public class AnnotationUtils {
 
     public static Annotation anttById(AnnotationJPA annotationJPA, long id) {
         return annotationJPA.findById(id).orElseThrow(() -> new MyObjectNotFoundException("annotatoin with id " + id + " is not found"));
+    }
+
+    public static <T extends Annotation> T anttById(AbstractAnnotationJPA<T> annotationJPA, long id) {
+        return annotationJPA.findById(id).orElseThrow(() -> new MyObjectNotFoundException(""));
     }
 }

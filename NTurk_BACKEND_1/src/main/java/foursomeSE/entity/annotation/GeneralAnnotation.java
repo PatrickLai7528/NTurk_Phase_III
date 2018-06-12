@@ -31,4 +31,6 @@ public class GeneralAnnotation extends Annotation {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
+
+    // 那两个core应该就不用管了，反正也是什么也没干。
 }

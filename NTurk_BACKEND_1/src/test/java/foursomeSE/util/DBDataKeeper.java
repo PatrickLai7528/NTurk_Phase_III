@@ -100,6 +100,6 @@ public class DBDataKeeper extends WithTheAutowired {
         inspectionContractJPA.deleteAll();
 
         // 别忘这个...
-        CriticalSection.inspectRecords.clear();
+        CriticalSection.clearAll();
     }
 }

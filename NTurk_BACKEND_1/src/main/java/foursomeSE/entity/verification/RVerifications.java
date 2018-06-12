@@ -2,14 +2,14 @@ package foursomeSE.entity.verification;
 
 import java.util.List;
 
-public class RVerifications<T extends Verification> {
-    private List<T> verifications;
+public class RVerifications {
+    private List<Verification> verifications;
 
-    public List<T> getVerifications() {
+    public List<Verification> getVerifications() {
         return verifications;
     }
 
-    public void setVerifications(List<T> verifications) {
+    public void setVerifications(List<Verification> verifications) {
         this.verifications = verifications;
     }
 }
