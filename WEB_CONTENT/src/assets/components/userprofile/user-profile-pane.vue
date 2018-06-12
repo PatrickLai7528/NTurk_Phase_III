@@ -145,7 +145,7 @@
                     </el-row>
                     <el-row class="functionPane">
                         <div>
-                            <worker-charts></worker-charts>
+                            <user-charts></user-charts>
                         </div>
                     </el-row>
                 </el-tab-pane>
@@ -175,14 +175,14 @@
 	import UserUtils from '../../js/utils/UserUtils.js'
 	import DateUtils from '../../js/utils/DateUtils.js'
 	import TranslateUtils from '../../js/utils/TranslateUtils.js'
-    import workerCharts from './worker-charts.vue'
+    import userCharts from './user-charts.vue'
 
 	export default {
 		name: "",
 		components: {
 			taskLobby,
 			requesterLobby,
-            workerCharts
+            userCharts
 		},
 		data() {
 			return {

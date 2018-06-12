@@ -22,16 +22,36 @@
             </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button @click="handleClick(scope.row)" type="text" size="small" align="left">查看详情</el-button>
+                    <!--<el-button @click="handleClick(scope.row)" type="primary" size="small" align="left" round>查看详情</el-button>-->
+                    <el-popover placement="left" width="300px" trigger="hover">
+                        <p style="font-size: 16px; font-weight: bold; text-align: center">请 选 择 要 查 看 的 内 容</p>
+                        <div style="text-align: center; margin: 0">
+                            <el-button type="info" size="medium" @click="showChart(scope.row)" round> 统计信息 </el-button>
+                            <el-button type="success" size="medium" @click="handleClick(scope.row)" round> 标注结果 </el-button>
+                        </div>
+
+                        <el-button slot="reference" type="primary" size="medium" align="left" round> 查 看 </el-button>
+                    </el-popover>
                 </template>
             </el-table-column>
         </el-table>
+
+        <el-dialog title="添加标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false">
+            <div>
+                <user-charts></user-charts>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
     import DateUtils from '../../js/utils/DateUtils.js'
+    import userCharts from '../userprofile/user-charts.vue'
+
     export default {
+        components: {
+            userCharts
+        },
         props: ['message'],
         data() {
             return {
@@ -48,7 +68,9 @@
                 }
                  */
                 taskData: [],
-                temPath: ''
+                temPath: '',
+                dialogFormVisible: false,
+                popoverVisible: []
             }
         },
         mounted: function () {
@@ -70,6 +92,11 @@
                 ///user/${userId}
                 this.$router.push({name: 'requesterlobby',params:{taskId:row.taskId}});
             },
+            showChart(row){
+                let taskId = row.taskId;
+                this.dialogFormVisible = true;
+                this.popoverVisible = false;
+            },
             filterStatus(value, row) {    //根据合同状态筛选
                 return row.taskStatus === value;
             },
@@ -85,12 +112,11 @@
                 }
             },
             getTableData() {          //获得tabledata的数据
-                let _this = this;
                 //  this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: store.state.token}}).then(function (response)
-                _this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    _this.taskData = response.data;     //只需要获得taskData的数据就可以了
-                    for (let item of _this.taskData){
-                        item.taskStatus = _this.translateContractStatus(item.taskStatus);
+                this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
+                    this.taskData = response.data;     //只需要获得taskData的数据就可以了
+                    for (let item of this.taskData){
+                        item.taskStatus = this.translateContractStatus(item.taskStatus);
                         item.endTime = DateUtils.dateFormat(item.endTime);
                     }
                 })
