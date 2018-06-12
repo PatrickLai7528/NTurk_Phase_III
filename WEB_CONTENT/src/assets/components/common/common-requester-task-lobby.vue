@@ -36,7 +36,7 @@
             </el-table-column>
         </el-table>
 
-        <el-dialog :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="1000">
+        <el-dialog :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="1000px">
             <div>
                 <task-info-chart></task-info-chart>
             </div>
@@ -75,10 +75,9 @@
             }
         },
         mounted: function () {
-            let _this = this;
-            this.$nextTick(function () {
-                _this.setUpBusEvent();
-                _this.getAll();
+            this.$nextTick(()=> {
+                this.setUpBusEvent();
+                this.getAll();
             })
         },
 
@@ -94,13 +93,13 @@
                 this.$router.push({name: 'requesterlobby',params:{taskId:row.taskId}});
             },
             showChart(row){
-                let taskId = row.taskId;
+                let taskID = row.taskId;
                 this.dialogFormVisible = true;
             },
             filterStatus(value, row) {    //根据合同状态筛选
                 return row.taskStatus === value;
             },
-            translateContractStatus: function (status) {        //翻译状态
+            translateContractStatus: (status)=> {        //翻译状态
                 if (status === "ONGOING") {
                     return "标注阶段";
                 }
@@ -118,7 +117,6 @@
                     for (let item of this.taskData){
                         item.taskStatus = this.translateContractStatus(item.taskStatus);
                         item.endTime = DateUtils.dateFormat(item.endTime);
-                        this.popoverVisible.push(false);
                     }
                 })
             },
