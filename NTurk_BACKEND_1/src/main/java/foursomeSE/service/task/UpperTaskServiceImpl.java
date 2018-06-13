@@ -12,7 +12,6 @@ import foursomeSE.entity.task.*;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.jpa.contract.ContractJPA;
-import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
@@ -44,7 +43,6 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private ContractJPA contractJPA;
     private TaskJPA taskJPA;
     private MessageJPA messageJPA;
-    private InspectionContractJPA inspectionContractJPA;
 
     private MicrotaskJPA microtaskJPA;
 
@@ -55,14 +53,12 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
                                 ContractJPA contractJPA,
                                 TaskJPA taskJPA,
                                 MessageJPA messageJPA,
-                                InspectionContractJPA inspectionContractJPA,
                                 MicrotaskJPA microtaskJPA) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
         this.messageJPA = messageJPA;
-        this.inspectionContractJPA = inspectionContractJPA;
         this.microtaskJPA = microtaskJPA;
     }
 
@@ -178,11 +174,12 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
             // 下面的不需要，因为反正parallel只能是0或者1，parallel就足够取代原来unfinished的状态
             // 本来加入下面的就是为了并行。但是实际上没有并行
-//            CriticalSection.Item item = new CriticalSection.Item();
-//            item.username = username;
-//            item.requestTime = LocalDateTime.now();
-//            item.microtaskId = r.getMicrotaskId();
-//            CriticalSection.drawRecords.add(item);
+            // 但是但是因为太懒，还是这样写了
+            CriticalSection.Item item = new CriticalSection.Item();
+            item.username = username;
+            item.requestTime = LocalDateTime.now();
+            item.microtaskId = r.getMicrotaskId();
+            CriticalSection.drawRecords.add(item);
         });
 
         EnterResponse result = new EnterResponse();
@@ -411,20 +408,20 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     }
 
 
-    private CTaskForInspection sToD2(Task task) {
-        CTaskForInspection result = new CTaskForInspection(sToD(task));
-        // 所有这个worker做过的关于这个task的inspection
-        int alreadyDone = (int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId());
-        if (alreadyDone >= MANDATORY_TIME) {
-            result.setMandatoryTime(0);
-        } else { // 还要要求mandatoryTime不能大于目前他还可以做的inpection数量。
-            int maxCanDo = contractJPA.findByTaskIdForInspection(task.getTaskId(), userByUsername(workerJPA, username).getId()).size();
-            result.setMandatoryTime(Math.min(MANDATORY_TIME - alreadyDone, maxCanDo));
-        }
-
-        return result;
-    }
-//    private List<Task> _getWorkerTasks(String username) {
+//    private CTaskForInspection sToD2(Task task) {
+//        CTaskForInspection result = new CTaskForInspection(sToD(task));
+//        // 所有这个worker做过的关于这个task的inspection
+//        int alreadyDone = (int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId());
+//        if (alreadyDone >= MANDATORY_TIME) {
+//            result.setMandatoryTime(0);
+//        } else { // 还要要求mandatoryTime不能大于目前他还可以做的inpection数量。
+//            int maxCanDo = contractJPA.findByTaskIdForInspection(task.getTaskId(), userByUsername(workerJPA, username).getId()).size();
+//            result.setMandatoryTime(Math.min(MANDATORY_TIME - alreadyDone, maxCanDo));
+//        }
+//
+//        return result;
+//    }
+////    private List<Task> _getWorkerTasks(String username) {
 //
 //    }
 }

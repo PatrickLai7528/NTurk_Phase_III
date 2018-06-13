@@ -1,33 +1,20 @@
 package foursomeSE.util;
 
+import foursomeSE.entity.Gold;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.annotation.SegmentAnnotation;
 import foursomeSE.entity.contract.Contract;
-import foursomeSE.entity.inspection.Inspection;
-import foursomeSE.entity.inspection.InspectionContract;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.Task;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
-import foursomeSE.jpa.annotation.AnnotationJPA;
-import foursomeSE.jpa.annotation.FrameAnnotationJPA;
-import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
-import foursomeSE.jpa.annotation.SegmentAnnotationJPA;
-import foursomeSE.jpa.contract.ContractJPA;
-import foursomeSE.jpa.inspection.InspectionContractJPA;
-import foursomeSE.jpa.inspection.InspectionJPA;
-import foursomeSE.jpa.task.MicrotaskJPA;
-import foursomeSE.jpa.task.TaskJPA;
-import foursomeSE.jpa.user.RequesterJPA;
-import foursomeSE.jpa.user.UserJPA;
-import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.entity.verification.Verification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static foursomeSE.util.ConvenientFunctions.iterableToList;
-import static foursomeSE.util.ConvenientFunctions.iterableToStream;
 
 @Service
 public class DBDataKeeper extends WithTheAutowired {
@@ -42,8 +29,9 @@ public class DBDataKeeper extends WithTheAutowired {
     private List<GeneralAnnotation> generalAnnotations;
     private List<SegmentAnnotation> segmentAnnotations;
 
-    private List<Inspection> inspections;
-//    private List<InspectionContract> inspectionContracts;
+    private List<Verification> verifications;
+    private List<Gold> golds;
+
 
     // jpas messages就不测了吧
 
@@ -59,8 +47,9 @@ public class DBDataKeeper extends WithTheAutowired {
         generalAnnotations = iterableToList(generalAnnotationJPA.findAll());
         segmentAnnotations = iterableToList(segmentAnnotationJPA.findAll());
 
-        inspections = iterableToList(inspectionJPA.findAll());
-//        inspectionContracts = iterableToList(inspectionContractJPA.findAll());
+        verifications = iterableToList(verificationJPA.findAll());
+        golds = iterableToList(goldJPA.findAll());
+
 
         clearAll(); // 这个是删老的
     }
@@ -79,7 +68,9 @@ public class DBDataKeeper extends WithTheAutowired {
         generalAnnotationJPA.saveAll(generalAnnotations);
         segmentAnnotationJPA.saveAll(segmentAnnotations);
 
-        inspectionJPA.saveAll(inspections);
+        verificationJPA.saveAll(verifications);
+        goldJPA.saveAll(golds);
+
 //        inspectionContractJPA.saveAll(inspectionContracts);
     }
 
@@ -96,8 +87,9 @@ public class DBDataKeeper extends WithTheAutowired {
         generalAnnotationJPA.deleteAll();
         segmentAnnotationJPA.deleteAll();
 
-        inspectionJPA.deleteAll();
-        inspectionContractJPA.deleteAll();
+        verificationJPA.deleteAll();
+        goldJPA.deleteAll();
+
 
         // 别忘这个...
         CriticalSection.clearAll();

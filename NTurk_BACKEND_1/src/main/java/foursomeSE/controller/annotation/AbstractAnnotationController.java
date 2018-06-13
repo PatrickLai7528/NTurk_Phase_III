@@ -31,7 +31,8 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
     @RequestMapping(value = "/imgName/{imgName}",
     method = RequestMethod.GET)
     public ResponseEntity<?> getByImgName(@PathVariable("imgName") String imgName) {
-        return null;
+        T a = annotationService.getByImgName(imgName);
+        return new ResponseEntity<>(a, HttpStatus.OK);
     }
 
 

@@ -36,6 +36,7 @@ public class SchedulerTask implements MyConstants {
 //        checkMicroTask();
         check(CriticalSection.qualityVerificationRecords);
         check(CriticalSection.coverageVerificationRecords);
+        check(CriticalSection.drawRecords);
     }
 
 

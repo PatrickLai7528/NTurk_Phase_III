@@ -26,37 +26,42 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             nativeQuery = true)
     List<Microtask> getMicroTasks(long taskId);
 
-    @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1\n" +
-            "    and microtask_status = ?3\n" +
-            "    and is_sample = all (select is_collecting from tasks where task_id = ?1)\n" +
-            "    and parallel < all (select 1 + 2 * is_collecting from tasks where task_id = ?1)\n" +
-            "    and not exists (\n" +
-            "        select * from ( -- 最新的那一个annotation（这个肯定有），不是：1他做的。2他评过\n" +
-            "            select * from annotation a1\n" +
-            "            where microtasks.microtask_id = a1.microtask_id\n" +
-            "                and not exists (\n" +
-            "                    select * from annotation a2\n" +
-            "                    where microtasks.microtask_id = annotation.microtask_id\n" +
-            "                        and a1.create_time < a2.create_time\n" +
-            "                )\n" +
-            "        ) as A\n" +
-            "        where username = ?2 -- 1. 他做的\n" +
-            "            or exists ( -- 2. 他过评的同种类的关于这个annotation的verification\n" +
-            "                select * from verification\n" +
-            "                where verification.annotation_id = A.annotation_id\n" +
-            "                    and verification_status = ?3 - 1\n" +
-            "                    and username = ?2\n" +
-            "            )\n" +
+    @Query(value = "SELECT *\n" +
+            "FROM microtasks m\n" +
+            "WHERE task_id = ?1\n" +
+            "      AND microtask_status = ?3\n" +
+            "      AND is_sample = ALL (SELECT is_collecting\n" +
+            "                           FROM tasks\n" +
+            "                           WHERE task_id = ?1)\n" +
+            "      AND parallel < ALL (SELECT 1 + 2 * is_collecting\n" +
+            "                          FROM tasks\n" +
+            "                          WHERE task_id = ?1)\n" +
+            "      AND NOT exists(\n" +
+            "    SELECT *\n" +
+            "    FROM annotation a1\n" +
+            "    WHERE a1.microtask_id = m.microtask_id\n" +
+            "          AND NOT exists(\n" +
+            "        SELECT *\n" +
+            "        FROM annotation a2\n" +
+            "        WHERE a2.microtask_id = m.microtask_id\n" +
+            "              AND a1.create_time < a2.create_time\n" +
             "    )\n" +
-            "order by iteration desc, ord asc",
+            "          AND (username = ?2 OR exists(\n" +
+            "        SELECT *\n" +
+            "        FROM verification\n" +
+            "        WHERE verification.annotation_id = a1.annotation_id\n" +
+            "              AND verification_type = ?3 - 1\n" +
+            "              AND username = ?2\n" +
+            "    ))\n" +
+            ")\n" +
+            "ORDER BY iteration DESC, ord ASC",
             nativeQuery = true)
     List<Microtask> getForVerification(long taskId, String username, int microtaskStatusOrd);
 
     @Query(value = "select * from microtasks\n" +
             "where microtask_id in (\n" +
             "    select microtask_id from annotation\n" +
-            "    wherer annotation_id = ?1\n" +
+            "    where annotation_id = ?1\n" +
             ")",
             nativeQuery = true)
     Microtask findByAnnotationId(long annotation_id);
@@ -109,37 +114,68 @@ select * from microtasks
 where task_id = ?1
     and microtask_status = 0
     and parallel = 0
-order by is_collecting desc,
+order by is_sample desc,
     iteration desc,
     ord asc
 
 // is_collecting是1，那么可以拿3个
 // is_collectin是0，那么可以拿1个
 
-select * from microtasks
+select * from microtasks m
 where task_id = ?1
     and microtask_status = ?3
     and is_sample = all (select is_collecting from tasks where task_id = ?1)
     and parallel < all (select 1 + 2 * is_collecting from tasks where task_id = ?1)
     and not exists (
-        select * from ( -- 最新的那一个annotation（这个肯定有），不是：1他做的。2他评过
+        -- select * from ( -- 最新的那一个annotation（这个肯定有），不是：1他做的。2他评过
             select * from annotation a1
-            where microtasks.microtask_id = a1.microtask_id
+            where m.microtask_id = a1.microtask_id
                 and not exists (
                     select * from annotation a2
-                    where microtasks.microtask_id = annotation.microtask_id
+                    where m.microtask_id = annotation.microtask_id
                         and a1.create_time < a2.create_time
                 )
-        ) as A
-        where username = ?2 -- 1. 他做的
-            or exists ( -- 2. 他过评的同种类的关于这个annotation的verification
-                select * from verification
-                where verification.annotation_id = A.annotation_id
-                    and verification_status = ?3 - 1
-                    and username = ?2
-            )
+        -- ) as A
+        -- where username = ?2 -- 1. 他做的
+--             or exists ( -- 2. 他过评的同种类的关于这个annotation的verification
+   --             select * from verification
+     --           where verification.annotation_id = A.annotation_id
+       --             and verification_status = ?3 - 1
+         --           and username = ?2
+           -- )
     )
 order by iteration desc, ord asc
+
+// 上面那个不行，好像是因为where里面的from里的subquery
+SELECT *
+FROM microtasks m
+WHERE task_id = ?1
+      AND microtask_status = ?3
+      AND is_sample = ALL (SELECT is_collecting
+                           FROM tasks
+                           WHERE task_id = ?1)
+      AND parallel < ALL (SELECT 1 + 2 * is_collecting
+                          FROM tasks
+                          WHERE task_id = ?1)
+      AND NOT exists(
+    SELECT *
+    FROM annotation a1
+    WHERE a1.microtask_id = m.microtask_id
+          AND NOT exists(
+        SELECT *
+        FROM annotation a2
+        WHERE a2.microtask_id = m.microtask_id
+              AND a1.create_time < a2.create_time
+    )
+          AND (username = ?2 OR exists(
+        SELECT *
+        FROM verification
+        WHERE verification.annotation_id = a1.annotation_id
+              AND verification_type = ?3 - 1
+              AND username = ?2
+    ))
+)
+ORDER BY iteration DESC, ord ASC
 
 
 select * from microtasks

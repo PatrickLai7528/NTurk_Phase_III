@@ -18,19 +18,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static foursomeSE.service.user.UserUtils.userByUsername;
 import static foursomeSE.util.ConvenientFunctions.iterableToList;
 import static org.junit.Assert.assertEquals;
 
 @Service
-public class DataSupplierForT3 {
-    @Autowired
-    private RequesterJPA requesterJPA;
-    @Autowired
-    private WorkerJPA workerJPA;
-    @Autowired
-    private UpperTaskService taskService;
-    @Autowired
-    private MicrotaskJPA microtaskJPA;
+public class DataSupplier extends WithTheAutowired {
 
     public void mockWorkers() {
         List<Worker> result = new ArrayList<>();
@@ -69,25 +62,28 @@ public class DataSupplierForT3 {
     }
 
     public void mockTasks() {
-//        RTask task = new RTask();
-//        task.setTaskName("task1");
-//        task.setTaskDescription("这是改接口以后的测试");
-////        task.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
-////        task.setCreateTime(LocalDateTime.now());
-//        task.setWorkerRequirement(WorkerRequirement.NONE);
-//        task.setTaskCategory(TaskCategory.GENERAL);
-////        task.setQuestions(new ArrayList<>(Arrays.asList(
-////                "图中有几只猫",
-////                "图中有几只狗",
-////                "图中还有别的动物吗"
-////        )));
-//        task.setRewardPerMicrotask(10);
-//
-//        ArrayList<String> imgs = IntStream.rangeClosed(1, 29).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
-//        task.setImgNames(imgs);
-//
-////        task.setTaskStatus(TaskStatus.ONGOING);
-//
-//        taskService.add(task, "requester1@ex.com");
+        Task task = new Task();
+        task.setTaskName("task1");
+        task.setTaskDescription("这是改接口以后的测试");
+        task.setWorkerRequirement(WorkerRequirement.NONE);
+        task.setTaskCategory(TaskCategory.GENERAL);
+        task.setRewardPerMicrotask(10);
+
+        ArrayList<String> imgs = IntStream.rangeClosed(101, 129).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
+        task.setImgNames(imgs);
+
+        taskService.add(task, "requester1@ex.com");
+
+        Task t = new Task();
+        t.setTaskName("task2");
+        t.setTaskDescription("框");
+        t.setWorkerRequirement(WorkerRequirement.NONE);
+        t.setTaskCategory(TaskCategory.FRAME);
+        t.setRewardPerMicrotask(0);
+
+        ArrayList<String> imgs1 = IntStream.rangeClosed(1, 40).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
+        t.setImgNames(imgs1);
+
+        taskService.add(t, "requester1@ex.com");
     }
 }
