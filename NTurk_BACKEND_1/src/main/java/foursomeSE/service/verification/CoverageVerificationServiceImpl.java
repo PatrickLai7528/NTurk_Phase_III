@@ -1,7 +1,11 @@
 package foursomeSE.service.verification;
 
+import foursomeSE.entity.Gold;
+import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.communicate.EnterResponse;
+import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
+import foursomeSE.entity.task.TaskStatus;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.jpa.annotation.AnnotationJPA;
@@ -13,6 +17,8 @@ import foursomeSE.util.CriticalSection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,20 +29,37 @@ public class CoverageVerificationServiceImpl extends AbstractVerificationService
     }
 
     @Override
-    protected MicrotaskStatus getStt() {
+    protected void passVerification() {
+        super.passVerification();
+
+        checkAndFindGold();
+        checkFinishTask();
+        // 都是有可能结束了的，包括collecting还没有结束时。极端一点就是所有结果都是2/3
+    }
+
+    @Override
+    protected void failVerification() {
+        super.failVerification();
+
+        // 呃，iteration好像就只是说有几个框的问题，不要也罢。。
+        // 然后如果是general，那么一概不用管iteration
+        microtask.setIteration(microtask.getIteration() + 1);
+        microtaskJPA.save(microtask);
+    }
+
+    /**
+     * trivial
+     * */
+
+    @Override
+    protected MicrotaskStatus getPriorMtStt() {
         return MicrotaskStatus.YET_TO_VERIFY_COVERAGE;
     }
 
     @Override
-    protected MicrotaskStatus getSuccessfulNextStt() {
+    protected MicrotaskStatus getSuccessfulMtStt() {
         return MicrotaskStatus.PASSED;
     }
-
-    @Override
-    protected MicrotaskStatus getFailedNextStt() {
-        return MicrotaskStatus.YET_TO_DRAW;
-    }
-    // TODO 这两个都是draw，那怎么还分出了这劳什子abstract方法
 
     @Override
     protected VerificationType getVType() {
@@ -46,5 +69,10 @@ public class CoverageVerificationServiceImpl extends AbstractVerificationService
     @Override
     protected List<CriticalSection.Item> getRecords() {
         return CriticalSection.coverageVerificationRecords;
+    }
+
+    @Override
+    protected AnnotationStatus getFailedAnStt() {
+        return AnnotationStatus.PASSED;
     }
 }

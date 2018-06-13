@@ -33,9 +33,6 @@ public class Task {
 
     @NotNull
     private TaskCategory taskCategory;
-//    @Basic
-//    @Column(length=50000)
-//    private ArrayList<String> questions;
 
     @Basic
     @Column(length=50000)
@@ -46,11 +43,10 @@ public class Task {
 
 //    @OneToMany(orphanRemoval = true)
 //    @JoinColumn(name = "task_id")
-//    private Set<Tag> taskTags = new HashSet<>();
+    @Basic
+    @Column(length = 50000)
+    private ArrayList<Tag> taskTags = new ArrayList<>();
 
-//    @Basic
-//    @NotNull
-//    @Column(length=100000)
     @Transient
     private ArrayList<String> imgNames;
 
@@ -207,5 +203,13 @@ public class Task {
 
     public void setImgNames(ArrayList<String> imgNames) {
         this.imgNames = imgNames;
+    }
+
+    public ArrayList<Tag> getTaskTags() {
+        return taskTags;
+    }
+
+    public void setTaskTags(ArrayList<Tag> taskTags) {
+        this.taskTags = taskTags;
     }
 }
