@@ -2,11 +2,14 @@ package foursomeSE.controller.verification;
 
 import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.verification.RVerifications;
+import foursomeSE.error.MyFailTestException;
 import foursomeSE.security.JwtUtil;
 import foursomeSE.service.verification.VerificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 
 public class AbstractVerificationController {
     protected VerificationService verificationService;
@@ -30,7 +33,12 @@ public class AbstractVerificationController {
                                                @RequestBody RVerifications verifications) {
         String username = JwtUtil.getUsernameFromToken(token);
 
-        verificationService.saveVerifications(verifications, username);
+        try {
+            verificationService.saveVerifications(verifications, username);
+        } catch (MyFailTestException e) {
+            ArrayList<Long> failedIds = e.getFailedIds();
+            return new ResponseEntity<Object>(failedIds, HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
 
