@@ -10,6 +10,7 @@
     import UserUtils from '../../js/utils/UserUtils.js'
 
     export default {
+        props: ["taskId","taskName"],
         data() {
             return {
 
@@ -62,7 +63,7 @@
                     },
                     title: [{
                         left: '10%',
-                        text: "任务x进展情况",
+                        text: "任务："+this.taskName,
                         textStyle: {
                             fontSize: 20
                         }
