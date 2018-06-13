@@ -1,10 +1,13 @@
 package foursomeSE.service.verification;
 
+import foursomeSE.entity.annotation.Annotation;
+import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.jpa.annotation.AnnotationJPA;
+import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
@@ -18,23 +21,37 @@ import java.util.List;
 @Service
 @Qualifier("quality")
 public class QualityVerificationServiceImpl extends AbstractVerificationServiceImpl {
-    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA) {
+    private GeneralAnnotationJPA generalAnnotationJPA;
+
+
+    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, GeneralAnnotationJPA generalAnnotationJPA) {
         super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA);
+        this.generalAnnotationJPA = generalAnnotationJPA;
     }
 
     @Override
-    protected MicrotaskStatus getStt() {
+    protected void passVerification() {
+        super.passVerification();
+
+        if (isGeneral()) {
+            // 但是general也不用管iteration。
+            checkAndFindGold();
+            checkFinishTask();
+        }
+    }
+
+    private boolean isGeneral() {
+        return generalAnnotationJPA.findById(annotation.getAnnotationId()).isPresent();
+    }
+
+    @Override
+    protected MicrotaskStatus getPriorMtStt() {
         return MicrotaskStatus.YET_TO_VERIFY_QUALITY;
     }
 
     @Override
-    protected MicrotaskStatus getSuccessfulNextStt() {
-        return MicrotaskStatus.YET_TO_VERIFY_COVERAGE;
-    }
-
-    @Override
-    protected MicrotaskStatus getFailedNextStt() {
-        return MicrotaskStatus.YET_TO_DRAW;
+    protected MicrotaskStatus getSuccessfulMtStt() {
+        return isGeneral() ? MicrotaskStatus.PASSED : MicrotaskStatus.YET_TO_VERIFY_COVERAGE;
     }
 
     @Override
@@ -45,5 +62,10 @@ public class QualityVerificationServiceImpl extends AbstractVerificationServiceI
     @Override
     protected List<CriticalSection.Item> getRecords() {
         return CriticalSection.qualityVerificationRecords;
+    }
+
+    @Override
+    protected AnnotationStatus getFailedAnStt() {
+        return AnnotationStatus.FAILED;
     }
 }

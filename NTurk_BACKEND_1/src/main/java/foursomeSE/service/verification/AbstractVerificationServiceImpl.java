@@ -32,11 +32,17 @@ import static foursomeSE.service.task.TaskUtils.taskById;
 
 public abstract class AbstractVerificationServiceImpl implements VerificationService, MyConstants {
 
-    private MicrotaskJPA microtaskJPA;
-    private TaskJPA taskJPA;
-    private GoldJPA goldJPA;
-    private AnnotationJPA annotationJPA;
-    private VerificationJPA verificationJPA;
+    protected MicrotaskJPA microtaskJPA;
+    protected TaskJPA taskJPA;
+    protected GoldJPA goldJPA;
+    protected AnnotationJPA annotationJPA;
+    protected VerificationJPA verificationJPA;
+
+
+    protected String username;
+    protected Microtask microtask;
+    protected Annotation annotation;
+    protected Task task;
 
     public AbstractVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA) {
         this.microtaskJPA = microtaskJPA;
@@ -48,16 +54,19 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
     @Override
     public EnterResponse enterVerification(long taskId, String username) {
-        List<Microtask> candidates = microtaskJPA.getForVerification(taskId, username, getStt().ordinal());
+        this.username = username;
+
+        List<Microtask> candidates = microtaskJPA.getForVerification(taskId, username, getPriorMtStt().ordinal());
         if (candidates.size() > NUM_OF_INSPECTION_PER_REQUEST) {
             candidates = candidates.subList(0, NUM_OF_INSPECTION_PER_REQUEST);
         }
 
         List<String> golds = new ArrayList<>();
 
-        Task task = taskById(taskJPA, taskId);
+        this.task = taskById(taskJPA, taskId);
+
         if (task.getIsCollecting() == 0) {
-            long haveEnter = microtaskJPA.countInspectionTimes(taskId, username, getStt().ordinal());
+            long haveEnter = microtaskJPA.countInspectionTimes(taskId, username, getPriorMtStt().ordinal());
             if (haveEnter + 1 == TRAPS.get(0)) { // 感觉应该直接写0或1的
                 if (candidates.size() > 3) { // 这个为了简单，如果是最后几个，就不挖坑了
                     String img1 = goldJPA.findByTaskIdAndOrd(taskId, 0);
@@ -118,104 +127,28 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
     @Override
     public void saveVerifications(RVerifications verifications, String username) {
+        this.username = username;
+
         if (verifications.getVerifications().size() != NUM_OF_INSPECTION_PER_REQUEST) {
             throw new MyNotValidException();
         }
 
-        if (verifications.getVerifications().stream().anyMatch(v -> {
-            Microtask mt = microtaskJPA.findByAnnotationId(v.getAnnotationId());
+        if (isInTime(verifications)) {
+            // 肯定都是这个task
+            // 虽然好像应该检查一下。。
+            Task task = taskJPA.findByAnnotationId(verifications.getVerifications().get(0).getAnnotationId());
 
-            return mt.getMicrotaskStatus() != MicrotaskStatus.PASSED // 说明是gold，有gold则下面肯定没有记录
-                    && getRecords().stream().anyMatch(i -> i.username.equals(username) && i.microtaskId == mt.getMicrotaskId());
-        })) {
-
-            Task tsk = taskJPA.findByAnnotationId(verifications.getVerifications().get(0).getAnnotationId());
-
-            if (tsk.getIsCollecting() == 1) {
+            if (task.getIsCollecting() == 1) {
                 verifications.getVerifications().forEach(v -> {
-                    v.setVerificationType(getVType());
-                    v.setUsername(username);
-                    verificationJPA.save(v);
-
-
-                    Task task = taskJPA.findByAnnotationId(v.getAnnotationId());
-                    Microtask microtask = microtaskJPA.findByAnnotationId(v.getAnnotationId());
-                    Annotation annotation = anttById(annotationJPA, v.getAnnotationId());
-
-                    microtask.setParallel(microtask.getParallel() - 1);
-                    microtaskJPA.save(microtask);
-                    getRecords().removeIf(ii -> ii.username.equals(username) && ii.microtaskId == microtask.getMicrotaskId());
+                    acceptVerification(v);
 
                     List<Verification> haveVerified = verificationJPA.findByAnnotationIdAndVerificationType(annotation.getAnnotationId(), getVType());
                     if (haveVerified.size() == INSPECTION_PER_CONTRACT) {
                         int sum = haveVerified.stream().mapToInt(Verification::getRate).sum();
-                        if (sum >= 2) {
-                            // 这个再set一次也没什么问题吧
-                            annotation.setAnnotationStatus(AnnotationStatus.PASSED);
-                            annotationJPA.save(annotation);
-
-                            microtask.setMicrotaskStatus(getSuccessfulNextStt());
-                            microtaskJPA.save(microtask);
-
-                            // 选gold
-                            // 这个是不是很不符合软工原则啊。。
-                            // 改成一个抽象方法让下面选择干不干吧
-                            // 但是下面annotationStatus那里好像也只能那样了。。
-                            if (getStt() == MicrotaskStatus.YET_TO_VERIFY_COVERAGE) {
-                                microtask.setIteration(microtask.getIteration() + 1);
-                                microtaskJPA.save(microtask);
-
-                                List<Microtask> samples = microtaskJPA.getSampling(task.getTaskId());
-                                List<Long> results = new ArrayList<>();
-                                if (samples.stream().allMatch(s -> s.getMicrotaskStatus() == MicrotaskStatus.PASSED)) {
-                                    for (Microtask s : samples) {
-                                        List<BigInteger> candidates = annotationJPA.getSample(s.getMicrotaskId(), getVType().ordinal());
-                                        if (!candidates.isEmpty()) {
-                                            results.add(candidates.get(0).longValue());
-                                        }
-                                    }
-                                }
-                                if (results.size() >= 10) {
-                                    results = results.subList(0, 10);
-                                    for (int i = 0; i < 10; i++) {
-                                        long l = results.get(i);
-                                        Gold gold = new Gold();
-                                        gold.annotationId = l;
-                                        gold.ord = i;
-                                        gold.taskId = task.getTaskId();
-                                        goldJPA.save(gold);
-                                    }
-
-                                    task.setIsCollecting(0);
-                                    taskJPA.save(task);
-                                } else { // 应该不怎么会用到这里吧。。
-                                    int deficit = 10 - results.size();
-                                    List<Microtask> unSampled = microtaskJPA.getUnSampled(task.getTaskId());
-                                    if (unSampled.size() > deficit) {
-                                        unSampled = unSampled.subList(0, deficit);
-                                    }
-                                    for (Microtask m : unSampled) {
-                                        m.setIsSample(1);
-                                        microtaskJPA.save(m);
-                                    }
-
-                                }
-                            }
-
-                            // 也有可能是还没有先完就结束了。极端一点就是所有结果都是2/3
-                            List<Microtask> notPassed = microtaskJPA.findByTaskIdNotPassed(task.getTaskId());
-                            if (notPassed.isEmpty()) {
-                                task.setTaskStatus(TaskStatus.FINISHED);
-                                taskJPA.save(task);
-                            }
+                        if (sum >= 2) { // 如果成功了
+                            passVerification();
                         } else {
-                            if (getStt() == MicrotaskStatus.YET_TO_VERIFY_QUALITY) {
-                                annotation.setAnnotationStatus(AnnotationStatus.FAILED);
-                                annotationJPA.save(annotation);
-                            }
-
-                            microtask.setMicrotaskStatus(getFailedNextStt());
-                            microtaskJPA.save(microtask);
+                            failVerification();
                         }
                     }
                 });
@@ -234,40 +167,12 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
                 if (diffs.isEmpty()) {
                     for (Verification v : verifications.getVerifications()) {
-                        v.setVerificationType(getVType());
-                        v.setUsername(username);
-                        verificationJPA.save(v);
-
-                        Task task = taskJPA.findByAnnotationId(v.getAnnotationId());
-                        Microtask microtask = microtaskJPA.findByAnnotationId(v.getAnnotationId());
-                        Annotation annotation = anttById(annotationJPA, v.getAnnotationId());
-
-                        microtask.setParallel(microtask.getParallel() - 1);
-                        microtaskJPA.save(microtask);
-                        getRecords().removeIf(ii -> ii.username.equals(username) && ii.microtaskId == microtask.getMicrotaskId());
-
+                        acceptVerification(v);
 
                         if (v.getRate() == 1) {
-                            annotation.setAnnotationStatus(AnnotationStatus.PASSED);
-                            annotationJPA.save(annotation);
-
-                            microtask.setMicrotaskStatus(getSuccessfulNextStt());
-                            microtaskJPA.save(microtask);
-
-                            // 这个操作也只有
-                            List<Microtask> notPassed = microtaskJPA.findByTaskIdNotPassed(task.getTaskId());
-                            if (notPassed.isEmpty()) {
-                                task.setTaskStatus(TaskStatus.FINISHED);
-                                taskJPA.save(task);
-                            }
+                            passVerification();
                         } else {
-                            if (getStt() == MicrotaskStatus.YET_TO_VERIFY_QUALITY) {
-                                annotation.setAnnotationStatus(AnnotationStatus.FAILED);
-                                annotationJPA.save(annotation);
-                            }
-
-                            microtask.setMicrotaskStatus(getFailedNextStt());
-                            microtaskJPA.save(microtask);
+                            failVerification();
                         }
                     }
                 } else {
@@ -283,18 +188,128 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
     /**
      * private
-     * */
+     */
+    private boolean isInTime(RVerifications verifications) {
+        // 只要有一个就可以了，因为是一波一波的，实际上应该保证每一项都满足要么是gold，要么在时间限度内
+        return verifications.getVerifications().stream().anyMatch(v -> {
+            Microtask mt = microtaskJPA.findByAnnotationId(v.getAnnotationId());
+
+            return mt.getMicrotaskStatus() != MicrotaskStatus.PASSED // 说明是gold，有gold则下面肯定没有记录
+                    && getRecords().stream().anyMatch(i -> i.username.equals(username) && i.microtaskId == mt.getMicrotaskId());
+        });
+    }
+
+    private void acceptVerification(Verification v) {
+        v.setVerificationType(getVType());
+        v.setUsername(username);
+        verificationJPA.save(v);
+
+        setMicrotaskAndAnnotation(v);
+
+
+        microtask.setParallel(microtask.getParallel() - 1);
+        microtaskJPA.save(microtask);
+
+        getRecords().removeIf(ii -> ii.username.equals(username) && ii.microtaskId == microtask.getMicrotaskId());
+    }
+
+    protected void passVerification() {
+        // 如果是coverageVerification这个再set一次也没什么问题吧
+        annotation.setAnnotationStatus(getSuccessfulAnStt());
+        annotationJPA.save(annotation);
+
+        microtask.setMicrotaskStatus(getSuccessfulMtStt());
+        microtaskJPA.save(microtask);
+    }
+
+
+    protected void failVerification() {
+        annotation.setAnnotationStatus(getFailedAnStt());
+        annotationJPA.save(annotation);
+
+        microtask.setMicrotaskStatus(getFailedMtStt());
+        microtaskJPA.save(microtask);
+    }
+
+    private void setMicrotaskAndAnnotation(Verification v) {
+        this.microtask = microtaskJPA.findByAnnotationId(v.getAnnotationId());
+        this.annotation = anttById(annotationJPA, v.getAnnotationId());
+    }
+
+    protected void checkFinishTask() {
+        List<Microtask> notPassed = microtaskJPA.findByTaskIdNotPassed(task.getTaskId());
+        if (notPassed.isEmpty()) {
+            task.setTaskStatus(TaskStatus.FINISHED);
+            taskJPA.save(task);
+        }
+    }
+
+    protected void checkAndFindGold() {
+        if (task.getIsCollecting() == 1) {
+            List<Microtask> samples = microtaskJPA.getSampling(task.getTaskId());
+            // 如果所有sample都完成了，选gold
+            if (samples.stream().allMatch(s -> s.getMicrotaskStatus() == MicrotaskStatus.PASSED)) {
+                findGold(samples);
+            }
+        }
+    }
+
+    private void findGold(List<Microtask> samples) {
+        List<Long> results = new ArrayList<>();
+
+        for (Microtask s : samples) {
+            List<BigInteger> candidates = annotationJPA.getSample(s.getMicrotaskId(), getVType().ordinal());
+            if (!candidates.isEmpty()) {
+                results.add(candidates.get(0).longValue());
+            }
+        }
+
+        if (results.size() >= 10) {
+            results = results.subList(0, 10);
+            for (int i = 0; i < 10; i++) {
+                long l = results.get(i);
+                Gold gold = new Gold();
+                gold.annotationId = l;
+                gold.ord = i;
+                gold.taskId = task.getTaskId();
+                goldJPA.save(gold);
+            }
+
+            task.setIsCollecting(0);
+            taskJPA.save(task);
+        } else { // 应该不怎么会用到这里吧。。
+            int deficit = 10 - results.size();
+            List<Microtask> unSampled = microtaskJPA.getUnSampled(task.getTaskId());
+            if (unSampled.size() > deficit) {
+                unSampled = unSampled.subList(0, deficit);
+            }
+            for (Microtask m : unSampled) {
+                m.setIsSample(1);
+                microtaskJPA.save(m);
+            }
+
+        }
+    }
 
 
 
     /**
-     * protected (trivial)
+     * trivial
      * */
-    protected abstract MicrotaskStatus getStt();
+    protected abstract MicrotaskStatus getPriorMtStt();
 
-    protected abstract MicrotaskStatus getSuccessfulNextStt();
+    protected abstract MicrotaskStatus getSuccessfulMtStt();
 
-    protected abstract MicrotaskStatus getFailedNextStt();
+    protected MicrotaskStatus getFailedMtStt() {
+        return MicrotaskStatus.YET_TO_DRAW;
+    }
+
+    protected AnnotationStatus getSuccessfulAnStt() {
+        return AnnotationStatus.PASSED;
+    }
+
+    protected abstract AnnotationStatus getFailedAnStt();
+
 
     protected abstract VerificationType getVType();
 

@@ -1,15 +1,16 @@
 package foursomeSE.entity.task;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
-@Entity
-@Table(name = "tags")
-public class Tag {
-    @Id
-    @GeneratedValue
+//@Entity
+//@Table(name = "tags")
+public class Tag implements Serializable {
+//    @Id
+//    @GeneratedValue
     public long id;
 
-    @Column(unique = true)
+//    @Column(unique = true)
     public String name;
 
     public Tag(String name) {

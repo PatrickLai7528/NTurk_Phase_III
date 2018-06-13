@@ -30,7 +30,7 @@ public class Microtask {
     private int parallel;
 
     @NotNull
-    private int iteration;
+    private int iteration; // 这个有点想去掉，见coverageVerificationServiceImpl
 
     @NotNull
     private int isSample;
