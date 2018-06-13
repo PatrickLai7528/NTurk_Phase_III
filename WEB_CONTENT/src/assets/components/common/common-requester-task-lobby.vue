@@ -6,19 +6,17 @@
             </el-table-column>
             <el-table-column label="任务名称" prop="taskName">
             </el-table-column>
-            <el-table-column label="参与人数" prop="attendance">
+            <el-table-column label="创建时间" prop="createTime" sortable>
             </el-table-column>
             <el-table-column label="任务状态" prop="taskStatus"
-                             :filters="[{text:'标注阶段',value:'标注阶段'},{text:'评审阶段',value:'评审阶段'},{text:'已完成',value:'已完成'}]"
+                             :filters="[{text:'正在进行',value:'正在进行'},{text:'已完成',value:'已完成'}]"
                              :filter-method="filterStatus">
                 <template slot-scope="scope">
                     <el-tag
-                            :type="scope.row.taskStatus === '标注阶段' ? 'primary' : (scope.row.taskStatus === '已完成') ? 'success':'waring'"
+                            :type="scope.row.taskStatus === '正在进行' ? 'primary' : (scope.row.taskStatus === '已完成') ? 'success':'waring'"
                             close-transition>{{scope.row.taskStatus}}
                     </el-tag>
                 </template>
-            </el-table-column>
-            <el-table-column label="截止时间" prop="endTime" sortable width="250">
             </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
@@ -71,15 +69,20 @@
                  */
                 taskData: [],
                 temPath: '',
+                routerPath:[],
                 dialogFormVisible: false,
                 taskIdOfChart: null,
                 taskNameOfChart: null
             }
         },
         mounted: function () {
-            this.$nextTick(()=> {
-                this.setUpBusEvent();
-                this.getAll();
+            let _this = this;
+            this.$nextTick(function () {
+                _this.routerPath['GENERAL'] = 'viewgeneral';
+                _this.routerPath['FRAME'] = 'viewframe';
+                _this.routerPath['SEGMENT'] = 'viewsegment';         //现在不存在两级目录了，直接通过task-lobby看标注结果
+                _this.setUpBusEvent();
+                _this.getAll();
             })
         },
 
@@ -89,10 +92,40 @@
                     this.handleClick(row);
                 })
             },
+            dateFormat(oldDate) {
+                Date.prototype.format = function (fmt) {
+                    let o = {
+                        "M+": this.getMonth() + 1,                 //月份
+                        "d+": this.getDate(),                    //日
+                        "h+": this.getHours(),                   //小时
+                        "m+": this.getMinutes(),                 //分
+                        "s+": this.getSeconds(),                 //秒
+                        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                        "S": this.getMilliseconds()             //毫秒
+                    };
+                    if (/(y+)/.test(fmt)) {
+                        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+                    }
+                    for (let k in o) {
+                        if (new RegExp("(" + k + ")").test(fmt)) {
+                            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                        }
+                    }
+                    return fmt;
+                };
+
+                let tem = new Date(oldDate).getTime();
+                let ans = new Date(tem).format("yyyy-MM-dd hh:mm:ss");
+                return ans;
+            },
             handleClick(row){
                 //点击任务进入该任务的合同列表
-                ///user/${userId}
-                this.$router.push({name: 'requesterlobby',params:{taskId:row.taskId}});
+                let imgNames = row.imgNames;     //TODO：听说是task里面有imgNames，所以查看标注方法应该一样
+                console.log(imgNames);
+                this.$store.commit('changeImgNames',imgNames);
+                console.log("haha");
+                console.log(this.$store.getters.getImgNames);
+                this.$router.push({name: this.routerPath[row.taskCategory],params:{taskId:row.taskId,taskType:'requester'}});
             },
             showChart(row){
                 this.taskIdOfChart = row.taskId;
@@ -102,7 +135,7 @@
             filterStatus(value, row) {    //根据合同状态筛选
                 return row.taskStatus === value;
             },
-            translateContractStatus: (status)=> {        //翻译状态
+            translateContractStatus: function (status) {        //TODO:翻译状态        这个状态的翻译看后端怎么判断已完成
                 if (status === "ONGOING") {
                     return "标注阶段";
                 }
@@ -115,11 +148,13 @@
             },
             getTableData() {          //获得tabledata的数据
                 //  this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: store.state.token}}).then(function (response)
-                this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    this.taskData = response.data;     //只需要获得taskData的数据就可以了
-                    for (let item of this.taskData){
-                        item.taskStatus = this.translateContractStatus(item.taskStatus);
-                        item.endTime = DateUtils.dateFormat(item.endTime);
+                let _this = this;
+                this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: this.$store.getters.getToken}}).then(function (response) {
+
+                    _this.taskData = response.data;     //只需要获得taskData的数据就可以了
+                    for (let item of _this.taskData){
+                        item.taskStatus = _this.translateContractStatus(item.taskStatus);
+                        item.createTime = _this.dateFormat(item.createTime);
                     }
                 })
             },

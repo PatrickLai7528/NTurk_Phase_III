@@ -59,6 +59,13 @@
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
+
+        <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+            <canvas>
+
+            </canvas>
+        </el-dialog>
     </el-container>
 </template>
 
@@ -187,6 +194,9 @@
                 taskType: this.$route.params.taskType,
                 imgNames: this.$store.getters.getImgNames,
                 taskId: this.$route.params.taskId,
+                dialogVisible: false,
+                wrongAnnotation: {},
+                wrongImg: '',
             }
         },
         mounted() {
@@ -277,6 +287,15 @@
                     type: 'success'
                 });
             },
+            getWrongImgAnnotation(wrongImg){
+                let _this = this;
+                let route = "http://localhost:8086/segmentAnnotation/imgName/" + wrongImg;
+                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                    _this.wrongAnnotation = response.data;
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log("error");
+                });
+            },
             showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;
                 this.$confirm('不够过瘾，再来一组^_^',  '温馨提示', {
@@ -331,7 +350,13 @@
                         _this.annotation = response.data;
                         console.log(response.data);
                         _this.annotationData.push(_this.annotation);
-                    }).catch(function (error) {
+                    }).catch(function (error) {             //FIXME:因为发起者看有一些标注是没有的，所以创建一个空对象push进去  现在开起来不知道这个逻辑可不可行
+                        _this.segments = [];
+                        _this.annotation = {
+                            'imgName': _this.img,
+                            'segments': _this.segments
+                        };
+                        _this.annotationData.push(_this.annotation);
                         console.log(error);
                     })
                 }
@@ -371,6 +396,8 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
+                this.segments = this.annotation.segments;
+                this.initialDraw();
             },
             /**
              * draw methods. (and tag)

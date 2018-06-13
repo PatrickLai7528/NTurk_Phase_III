@@ -52,44 +52,38 @@
                 <el-radio-group v-model="form.workerRequirement">
                     <el-radio label="NONE">无要求</el-radio>
                     <el-radio label="EXPERIENCE">经验要求</el-radio>
-                    <el-radio label="APPOINT">指定工人</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item v-if="form.workerRequirement=='EXPERIENCE'" prop="requiredExperience" label="经验要求">
                 <el-input class="input" v-model.number="form.requiredExperience"></el-input>
             </el-form-item>
-            <div>
-                <el-form-item id="select" v-if="form.workerRequirement=='APPOINT'" prop="nominees" label="选择工人">
-                    <el-select id="select" class="setSize" v-if="form.workerRequirement=='APPOINT'"
-                               v-model="form.nominees"
-                               multiple placeholder="请选择">
-                        <el-option v-for="item in allWorkers" :label="item.workerName" :key="item.workerId"
-                                   :value="item.workerId"></el-option>
-                    </el-select>
-                </el-form-item>
-            </div>
-            <el-form-item label="收费标准" prop="rewardPerMicrotask">
-                <el-input class="input" v-model.number="form.rewardPerMicrotask"></el-input>
+            <el-form-item label="提供备选" prop="haveAnswer">
+                <el-radio-group v-model="form.haveAnswer">
+                    <el-radio label="YES">是</el-radio>
+                    <el-radio label="NO">否</el-radio>
+                </el-radio-group>
             </el-form-item>
-            <el-form-item label="问题" v-if="form.taskCategory == 'GENERAL'" prop="questions">
+            <el-form-item label="备选答案" v-if="form.haveAnswer == 'YES'" prop="tagsForAnnotation">
                 <el-input v-if="questionVisible"
                           v-model="questionValue"
-                          ref="saveQuestionInput"
                           @keyup.enter.native="questionInputConfirm"
                           @blur="questionInputConfirm"
                 >
                 </el-input>
                 <el-button v-else size="small" @click="questionInput" style="font-size: 16px">+</el-button>
-                <el-row v-for="question in form.questions">
+                <el-row v-for="tags in form.tagsForAnnotation">
                     <el-tag
                             type="warning"
-                            :key="question"
+                            :key="tags"
                             closable
                             class="question"
-                            @close="questionClose(question)">
-                        {{question}}
+                            @close="questionClose(tags)">
+                        {{tags}}
                     </el-tag>
                 </el-row>
+            </el-form-item>
+            <el-form-item label="收费标准" prop="rewardPerMicrotask">
+                <el-input class="input" v-model.number="form.rewardPerMicrotask"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button class="finishButton" @click="onSubmit('form')">完成</el-button>
@@ -134,6 +128,8 @@
                     nominees: [],//要求的工人
                     rewardPerMicrotask:0,     //对于每张图片的收费标准
                     taskTags: [],
+                    haveAnswer: '',            //是否提供内置答案
+                    tagsForAnnotation: [],     //如果提供内置答案，采用内置答案
                 },
                 tempQuestion: '',
                 allWorkers: [],  //在初始化的时候去后端拿所有工人列表   多选框的key是workerId  value是workerName
@@ -145,12 +141,13 @@
                 rules: {
                     taskName: [{required: true, message: '请输入任务名称', trigger: 'blur'}],
                     taskCategory: [{required: true, message: '请选择任务类型', trigger: 'change'}],
-                    taskTags: [{type: 'array', required: true, message: '请添加至少一个任务标签', trigger: 'blur'}],
+                    taskTags: [{type: 'array', required: true, message: '请添加至少一个任务标签', trigger: 'change'}],
                     workerRequirement: [{required: true, message: '请选择工人要求', trigger: 'change'}],
                     endTime: [{type: 'date', required: true, message: '请选择截止日期', trigger: 'change'}],
                     rewardStrategy: [{required: true, message: '请选择奖励方式', trigger: 'change'}],
                     nominees: [{type: 'array', required: true, message: '请至少选择一个工人', trigger: 'change'}],
-                    questions: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
+                    haveAnswer: [{required: true, message: '请选择是否提供备选答案选项', trigger: 'change'}],
+                    tagsForAnnotation: [{type: 'array', required: true, message: '请至少提出一个问题', trigger: 'blur'}],
                     totalReward: [{validator: bePositive,required: true, message: '请填入一个正数', trigger: "blur"}],     //现在填入整数即可
                     requiredExperience: [{validator: bePositive, trigger: "blur"}]
                 }
@@ -158,7 +155,6 @@
         },
         mounted: function () {
             this.$nextTick(()=> {
-                this.getAllWorkers();   //获得所有当前的工人列表
                 this.getSystemTags();   //获得系统Tag列表
             });
 
@@ -185,9 +181,9 @@
 					this.form.requiredExperience = 2147483647;
 				}
 
-				if (this.form.taskCategory !== 'GENERAL') {
-					this.form.questions = [];
-				}
+				if(this.form.haveAnswer === "NO"){
+				    this.form.tagsForAnnotation = [];   //如果不提供内置的tag，为空
+                }
             },
             decidePostData(){
 				return {
@@ -206,8 +202,7 @@
 					requiredExperience: this.form.requiredExperience,
 					createTime: this.form.createTime,
 					requesterId: this.form.requesterId,
-					questions: this.form.questions,
-					nominees: this.form.nominees,
+					tagsForAnnotation: this.form.tagsForAnnotation,
 				}
             },
             async onSubmit(formName) {      //处理提交并且post到后台
@@ -290,7 +285,7 @@
             },
 
             questionClose(question) {
-                this.form.questions.splice(this.form.questions.indexOf(question), 1);
+                this.form.tagsForAnnotation.splice(this.form.tagsForAnnotation.indexOf(question), 1);
             },
             questionInput() {
                 this.questionVisible = true;
@@ -300,25 +295,16 @@
             },
             questionInputConfirm() {
                 let questionValue = this.questionValue;
-                if(this.duplicateKeys(questionValue, this.form.questions)) {
-                    this.badMessage("问题重复");
+                if(this.duplicateKeys(questionValue, this.form.tagsForAnnotation)) {
+                    this.badMessage("备选答案重复");
                     this.questionValue = "";
                 } else {
                     if (questionValue) {
-                        this.form.questions.push(questionValue);
+                        this.form.tagsForAnnotation.push(questionValue);
                     }
                     this.questionVisible = false;
                     this.questionValue = '';
                 }
-            },
-
-            getAllWorkers() {
-                this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    this.allWorkers = response.data;
-                    for (let e of this.allWorkers) {
-                        e.workerName = e.nickname + '/(' + e.emailAddress + ')';
-                    }
-                })
             },
             getSystemTags() {
                 // this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
