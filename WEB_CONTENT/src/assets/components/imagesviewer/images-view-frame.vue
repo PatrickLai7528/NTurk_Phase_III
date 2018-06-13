@@ -74,7 +74,9 @@
 
         <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
             <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+            <canvas>
 
+            </canvas>
         </el-dialog>
     </el-container>
 
@@ -185,6 +187,8 @@
                 taskType: this.$route.params.taskType,
                 dialogVisible: false,
                 wrongImg:'',            //假设返回的是wrongImg
+                wrongAnnotation:{}      //这是那个wrongImg的annotation
+
             }
         },
         mounted() {
@@ -195,10 +199,11 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.number = _this.$store.getters.getAnnotationIds.length;
+                _this.number = _this.$store.getters.getImgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 let promise = new Promise(function (resolve) {
                     _this.loadAnnotationList();
+                    console.log(_this.imgNames);
                     resolve();
                 });
 
@@ -271,6 +276,15 @@
                     type: 'success'
                 });
             },
+            getWrongImgAnnotation(wrongImg){
+                let _this = this;
+                let route = "http://localhost:8086/frameAnnotation/imgName/" + wrongImg;
+                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                    _this.wrongAnnotation = response.data;
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log("error");
+                });
+            },
             showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;
                 this.$confirm('不够过瘾，再来一组^_^', '温馨提示', {
@@ -319,20 +333,25 @@
                 for(let img of this.imgNames){
                     let route = "http://localhost:8086/frameAnnotation/imgName/" + img;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        _this.annotation = response.data;
-
-                        //TODO:这里返回值的实体名称属性还没有定下来，先todo
-                        _this.imgNames.push(_this.annotation.imgName);
-                        _this.annotationData.push(_this.annotation);
-                    }).catch(function (error) {
-                        _this.segments = [];
+                        //_this.annotation = response.data;
+                        console.log(response);
+                        _this.frames = [];
                         _this.annotation = {
                             'imgName': _this.img,
-                            'segments': _this.segments
+                            'frames': _this.frames,
+                        };
+                        //TODO:这里返回值的实体名称属性还没有定下来，先todo
+                        _this.annotationData.push(_this.annotation);
+                    }).catch(function (error) {
+                        console.log("error");
+                        _this.frames = [];
+                        _this.annotation = {
+                            'imgName': _this.img,
+                            'frame': _this.frame,
                         };
                         _this.annotationData.push(_this.annotation);
                         console.log(error);
-                    })
+                    });
                 }
             },
             onIndexChange: function (newIndex, oldIndex) {
@@ -378,6 +397,7 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
+                console.log(this.annotationData);
                 this.frames = this.annotation.frames;             //之前实现的有问题，应该现把frames加载，然后调用initialDraw方法
                 this.initialDraw();
             },
@@ -409,6 +429,7 @@
                 this.context.drawImage(this.pic, 0, 0, this.canvasWidth, this.canvasHeight);
                 this.context.strokeStyle = this.color;
                 this.context.lineWidth = 5;
+                console.log(this.frames);
                 for (let i = 0; i < this.frames.length; i++) {
                     const f = this.frames[i];
                     this.context.strokeRect(f.p1.x, f.p1.y,

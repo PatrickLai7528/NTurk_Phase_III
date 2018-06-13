@@ -59,6 +59,13 @@
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
+
+        <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+            <canvas>
+
+            </canvas>
+        </el-dialog>
     </el-container>
 </template>
 
@@ -187,6 +194,9 @@
                 taskType: this.$route.params.taskType,
                 imgNames: this.$store.getters.getImgNames,
                 taskId: this.$route.params.taskId,
+                dialogVisible: false,
+                wrongAnnotation: {},
+                wrongImg: '',
             }
         },
         mounted() {
@@ -275,6 +285,15 @@
                     title: '提交成功',
                     message: '恭喜你完成评审任务，请耐心等待系统发放奖励^_^',
                     type: 'success'
+                });
+            },
+            getWrongImgAnnotation(wrongImg){
+                let _this = this;
+                let route = "http://localhost:8086/segmentAnnotation/imgName/" + wrongImg;
+                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                    _this.wrongAnnotation = response.data;
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log("error");
                 });
             },
             showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
