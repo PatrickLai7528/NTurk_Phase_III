@@ -37,8 +37,8 @@
         </el-table>
 
         <el-dialog :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="1000px">
-            <div>
-                <task-info-chart></task-info-chart>
+            <div v-if="dialogFormVisible">
+                <task-info-chart :taskId="taskIdOfChart" :taskName="taskNameOfChart"></task-info-chart>
             </div>
         </el-dialog>
     </div>
@@ -71,7 +71,9 @@
                  */
                 taskData: [],
                 temPath: '',
-                dialogFormVisible: false
+                dialogFormVisible: false,
+                taskIdOfChart: null,
+                taskNameOfChart: null
             }
         },
         mounted: function () {
@@ -93,7 +95,8 @@
                 this.$router.push({name: 'requesterlobby',params:{taskId:row.taskId}});
             },
             showChart(row){
-                let taskID = row.taskId;
+                this.taskIdOfChart = row.taskId;
+                this.taskNameOfChart = row.taskName;
                 this.dialogFormVisible = true;
             },
             filterStatus(value, row) {    //根据合同状态筛选
