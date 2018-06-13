@@ -31,8 +31,6 @@
         mounted: function () {
             this.isWorker = UserUtils.isWorker(this);
             this.$nextTick(()=> {
-
-                alert("I am fucking running!");
                 if(this.isWorker){
                     this.setWaveGraph('general', '整体标注参与数', null, 'rgb(135, 224, 166)');
                     this.setWaveGraph('frame', '画框标注参与数', null, 'rgb(245, 105, 57)');
