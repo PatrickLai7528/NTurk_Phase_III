@@ -20,7 +20,7 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             "where task_id = ?1\n" +
             "    and microtask_status = 0\n" +
             "    and parallel = 0\n" +
-            "order by is_collecting desc,\n" +
+            "order by is_sample desc,\n" +
             "    iteration desc,\n" +
             "    ord asc",
             nativeQuery = true)
