@@ -2,13 +2,13 @@
     <el-container class="user-charts">
         <el-main>
             <el-tabs type="border-card" class="tab">
-                <el-tab-pane label="整体标注" style="width: 100%">
+                <el-tab-pane label="整体标注">
                     <div id="general" class="charts"></div>
                 </el-tab-pane>
-                <el-tab-pane label="画框标注" style="width: 100%">
+                <el-tab-pane label="画框标注">
                     <div id="frame" class="charts"></div>
                 </el-tab-pane>
-                <el-tab-pane label="区域标注" style="width: 100%">
+                <el-tab-pane label="区域标注">
                     <div id="segment" class="charts"></div>
                 </el-tab-pane>
             </el-tabs>
@@ -28,6 +28,8 @@
         mounted: function () {
             this.isWorker = UserUtils.isWorker(this);
             this.$nextTick(()=> {
+
+                alert("I am fucking running!");
                 if(this.isWorker){
                     this.setWaveGraph('general', '整体标注参与数', null, 'rgb(135, 224, 166)');
                     this.setWaveGraph('frame', '画框标注参与数', null, 'rgb(245, 105, 57)');
@@ -37,6 +39,9 @@
                     this.setWaveGraph('frame', '画框标注发布数', null, 'rgb(245, 105, 57)');
                     this.setWaveGraph('segment', '区域标注发布数', null, 'rgb(198, 38, 47)');
                 }
+                this.setWaveGraph('general', '整体标注发布数', null, 'rgb(135, 224, 166)');
+                this.setWaveGraph('frame', '画框标注发布数', null, 'rgb(245, 105, 57)');
+                this.setWaveGraph('segment', '区域标注发布数', null, 'rgb(198, 38, 47)');
             })
         },
         methods: {
@@ -119,12 +124,11 @@
                         max: max*1.5
                     }],
                     grid: [{
-                        bottom: '15%'
+                        bottom: '10%'
                     }],
                     series: [{
                         type: 'line',
                         showSymbol: false,
-                        center: ['40%', '50%'],
                         data: valueList,
                         lineStyle: {
                             width: 0

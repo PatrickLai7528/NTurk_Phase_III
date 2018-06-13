@@ -20,17 +20,38 @@
             </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button @click="handleClick(scope.row)" type="text" size="small" align="left">查看标注</el-button>
-                    <el-button @click="showGraph(scope.row)" type="text" size="small" align="left">查看进度</el-button>
+                    <!--<el-button @click="handleClick(scope.row)" type="primary" size="small" align="left" round>查看详情</el-button>-->
+                    <el-popover placement="left" width="300px" trigger="hover">
+                        <p style="font-size: 16px; font-weight: bold; text-align: center;">请选择要查看的任务信息</p>
+                        <div style="text-align: center;">
+                            <el-button type="info" size="medium" @click="showChart(scope.row)" round> 统计信息 </el-button>
+                            <el-button type="success" size="medium" @click="handleClick(scope.row)" round> 标注结果 </el-button>
+                        </div>
+
+                        <el-button slot="reference" type="primary" size="medium" align="left" round> 查 看 </el-button>
+                    </el-popover>
                 </template>
             </el-table-column>
         </el-table>
+
+        <el-dialog :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="1000px">
+            <div>
+                <task-info-chart></task-info-chart>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
     import DateUtils from '../../js/utils/DateUtils.js'
+    import userCharts from '../userprofile/user-charts.vue'
+    import taskInfoChart from '../userprofile/task-info-chart.vue'
+
     export default {
+        components: {
+            userCharts,
+            taskInfoChart
+        },
         props: ['message'],
         data() {
             return {
@@ -77,6 +98,10 @@
                 this.$store.commit('changeImgNames',imgNames);
                 this.$router.push({name: this.routerPath[row.taskCategory],params:{taskId:row.taskId,taskType:'requester'}});
             },
+            showChart(row){
+                let taskID = row.taskId;
+                this.dialogFormVisible = true;
+            },
             filterStatus(value, row) {    //根据合同状态筛选
                 return row.taskStatus === value;
             },
@@ -92,7 +117,6 @@
                 }
             },
             getTableData() {          //获得tabledata的数据
-                let _this = this;
                 //  this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: store.state.token}}).then(function (response)
                 _this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     _this.taskData = response.data;     //只需要获得taskData的数据就可以了

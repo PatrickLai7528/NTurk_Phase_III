@@ -4,8 +4,8 @@ import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
 
-public interface VerificationService<T extends Verification> {
-    EnterResponse enterVerification(long taskId);
+public interface VerificationService {
+    EnterResponse enterVerification(long taskId, String username);
 
-    void saveVerifications(RVerifications<T> verifications);
+    void saveVerifications(RVerifications verifications, String username);
 }

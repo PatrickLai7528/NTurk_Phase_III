@@ -4,7 +4,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Verification {
     @Id
     @GeneratedValue
@@ -17,7 +16,10 @@ public class Verification {
     private long annotationId;
 
     @NotNull
-    private double rate;
+    private int rate;
+
+    @NotNull
+    private VerificationType verificationType;
 
     public long getId() {
         return id;
@@ -43,11 +45,19 @@ public class Verification {
         this.annotationId = annotationId;
     }
 
-    public double getRate() {
+    public int getRate() {
         return rate;
     }
 
-    public void setRate(double rate) {
+    public void setRate(int rate) {
         this.rate = rate;
+    }
+
+    public VerificationType getVerificationType() {
+        return verificationType;
+    }
+
+    public void setVerificationType(VerificationType verificationType) {
+        this.verificationType = verificationType;
     }
 }

@@ -33,7 +33,7 @@ public class CInspection implements Serializable {
     @Override
     public String toString() {
         return "CInspection{" +
-                "annotationId=" + annotationId +
+                "microtaskId=" + annotationId +
                 ", rate=" + rate +
                 '}';
     }

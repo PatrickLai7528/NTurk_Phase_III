@@ -1,7 +1,11 @@
 package foursomeSE.entity.annotation;
 
+import javafx.beans.property.ObjectProperty;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -21,8 +25,11 @@ public class Annotation { // 先没有abstract，可能也许和annotationJPA冲
     @NotNull
     private AnnotationStatus annotationStatus;
 
-//    @NotNull
-//    private int parallel;
+    @NotNull
+    private LocalDateTime createTime;
+
+    @NotNull
+    private int iteration;
 
     @Transient
     private String imgName;
@@ -70,4 +77,26 @@ public class Annotation { // 先没有abstract，可能也许和annotationJPA冲
         this.username = username;
     }
 
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public int getIteration() {
+        return iteration;
+    }
+
+    public void setIteration(int iteration) {
+        this.iteration = iteration;
+    }
+
+    public Object core() {
+        return null;
+    }
+
+    public void setCore(ArrayList<Object> list) {
+    }
 }

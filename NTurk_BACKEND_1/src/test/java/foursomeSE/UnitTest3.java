@@ -185,27 +185,27 @@ public class UnitTest3 extends WithTheAutowired {
         generalAnnotationService.saveAnnotations(rats(IntStream.rangeClosed(1, 5)), "worker1@ex.com");
 
 
-        EnterInspectionResponse ei1 = inspectionService.enterInspection(tid, "worker2@ex.com");
-        EnterInspectionResponse ei2 = inspectionService.enterInspection(tid, "worker3@ex.com");
-
-        CriticalSection.inspectRecords.forEach(i -> {
-            if (i.username.equals("worker2@ex.com")) {
-                i.requestTime = i.requestTime.minusMinutes(15);
-            }
-        });
-
-        GeneralAnnotation a0 = generalAnnotationJPA.findByMicrotaskId(mtByImg(microtaskJPA, "1.jpg").getMicrotaskId()).get(0);
-//        assertEquals(2, a0.getParallel());
-
-        Thread.sleep(13000);
-
-        assertEquals(5, CriticalSection.inspectRecords.size());
-        assertEquals("worker3@ex.com", CriticalSection.inspectRecords.get(0).username);
-        assertTrue(CriticalSection.inspectRecords.stream().noneMatch(i -> i.username.equals("worker2@ex.com")));
-
-        a0 = generalAnnotationJPA.findByMicrotaskId(mtByImg(microtaskJPA, "1.jpg").getMicrotaskId()).get(0);
-//        assertEquals(1, a0.getParallel());
-        // assertTrue();
+//        EnterInspectionResponse ei1 = inspectionService.enterInspection(tid, "worker2@ex.com");
+//        EnterInspectionResponse ei2 = inspectionService.enterInspection(tid, "worker3@ex.com");
+//
+//        CriticalSection.inspectRecords.forEach(i -> {
+//            if (i.username.equals("worker2@ex.com")) {
+//                i.requestTime = i.requestTime.minusMinutes(15);
+//            }
+//        });
+//
+//        GeneralAnnotation a0 = generalAnnotationJPA.findByMicrotaskId(mtByImg(microtaskJPA, "1.jpg").getMicrotaskId()).get(0);
+////        assertEquals(2, a0.getParallel());
+//
+//        Thread.sleep(13000);
+//
+//        assertEquals(5, CriticalSection.inspectRecords.size());
+//        assertEquals("worker3@ex.com", CriticalSection.inspectRecords.get(0).username);
+//        assertTrue(CriticalSection.inspectRecords.stream().noneMatch(i -> i.username.equals("worker2@ex.com")));
+//
+//        a0 = generalAnnotationJPA.findByMicrotaskId(mtByImg(microtaskJPA, "1.jpg").getMicrotaskId()).get(0);
+////        assertEquals(1, a0.getParallel());
+//        // assertTrue();
     }
 
     // 现在还有inspection没有提方法

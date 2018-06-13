@@ -3,21 +3,21 @@ package foursomeSE.service.task;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.statistics.TaskParticipation;
 import foursomeSE.entity.statistics.TaskStatusData;
+import foursomeSE.entity.task.Task;
 
 import java.util.List;
 
 public interface UpperTaskService {
-    /**
-     * 不确定是怎么用这个方法的（下面说的都没做）
-     * 如果是Requester，那么需要这个任务是他发布的（他不能以requester的身份看其他人的哪怕是新任务）
-     * 如果是Worker，可以看到没有结束的新任务（不能是指定模式下且没指定他的），和他领取过的所有任务。（也就是getWorkerTasks和getNewTasks里规定的）
-     * */
-    CTask getById(long id);
+//    /**
+//     * 不确定是怎么用这个方法的（下面说的都没做）
+//     * 如果是Requester，那么需要这个任务是他发布的（他不能以requester的身份看其他人的哪怕是新任务）
+//     * 如果是Worker，可以看到没有结束的新任务（不能是指定模式下且没指定他的），和他领取过的所有任务。（也就是getWorkerTasks和getNewTasks里规定的）
+//     * */
+//    CTask getById(long id);
 
     /**
      * task的要求:（没做）
@@ -25,13 +25,13 @@ public interface UpperTaskService {
      *  requesterId 后端设成username一致的就好
      *  createTime后端设
      *  workerRequirement必须有，据此判断requiredExperience和nominees(必须是存在的id)。
-     *  taskCategory必须有，据此判断question或tagsForAnnotation
+     *  taskCategory必须有，据此判断是否有tagsForAnnotation
      *  rewardPerMicrotask必须有
      *  taskStatus后端设
      *  imgNames必须有
      * 扣钱，不够报错。
      * */
-    void add(RTask task, String username);
+    void add(Task task, String username);
 
     /**
      * 返回当前在进行中的，且worker没有领取的任务
@@ -54,15 +54,15 @@ public interface UpperTaskService {
     EnterResponse enterTask(long taskId, String username);
 
 
-    /**
-     * 返回worker自己没参加过的underReview的task
-     * */
-    List<CTask> getNewInspectionTasks(String username);
-
-    /**
-     * 返回worker自己做过的underReview的task，不管有没有完成mandatory time
-     * */
-    List<CTaskForInspection> getWorkerInspectionTasks(String username);
+//    /**
+//     * 返回worker自己没参加过的underReview的task
+//     * */
+//    List<CTask> getNewInspectionTasks(String username);
+//
+//    /**
+//     * 返回worker自己做过的underReview的task，不管有没有完成mandatory time
+//     * */
+//    List<CTaskForInspection> getWorkerInspectionTasks(String username);
 
     /**
      * Statistics

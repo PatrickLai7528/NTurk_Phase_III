@@ -33,7 +33,7 @@ public class Microtask {
     private int iteration;
 
     @NotNull
-    private boolean isSample;
+    private int isSample;
 
     private LocalDateTime lastRequestTime;
 
@@ -96,12 +96,12 @@ public class Microtask {
         this.parallel = parallel;
     }
 
-    public boolean isSample() {
+    public int getIsSample() {
         return isSample;
     }
 
-    public void setSample(boolean sample) {
-        isSample = sample;
+    public void setIsSample(int isSample) {
+        this.isSample = isSample;
     }
 
     public int getIteration() {

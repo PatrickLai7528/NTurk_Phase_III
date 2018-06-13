@@ -12,9 +12,9 @@ public class CTask extends Task {
 
     // TODO
     // 对于这个任务而言
-//    private int waiting; // 还需要做的
-//    private int pending; // 做了待审核的
-//    private int ongoing; // 现在正在做的
+    private int draw; // 还需要做的
+    private int verifyQuality; // 做了待审核的
+    private int verifyCoverage; // 现在正在做的
 
 //    private int haveDone; // 具体这个工人做了多少
 //    private int haveReviewed; // 具体这个工人审了多少
@@ -47,5 +47,29 @@ public class CTask extends Task {
 
     public void setRequesterName(String requesterName) {
         this.requesterName = requesterName;
+    }
+
+    public int getDraw() {
+        return draw;
+    }
+
+    public void setDraw(int draw) {
+        this.draw = draw;
+    }
+
+    public int getVerifyQuality() {
+        return verifyQuality;
+    }
+
+    public void setVerifyQuality(int verifyQuality) {
+        this.verifyQuality = verifyQuality;
+    }
+
+    public int getVerifyCoverage() {
+        return verifyCoverage;
+    }
+
+    public void setVerifyCoverage(int verifyCoverage) {
+        this.verifyCoverage = verifyCoverage;
     }
 }

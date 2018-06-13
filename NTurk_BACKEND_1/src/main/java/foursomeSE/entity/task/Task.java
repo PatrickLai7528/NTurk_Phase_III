@@ -19,10 +19,10 @@ public class Task {
     private String taskName;
     private String taskDescription;
     @NotNull
-    private long requesterId;
+    private long requesterId; // NN
     @NotNull
     @Convert(converter = LocalDateTimeConverter.class)
-    private LocalDateTime createTime;
+    private LocalDateTime createTime; // NN
 
     @NotNull
     private WorkerRequirement workerRequirement;
@@ -51,10 +51,14 @@ public class Task {
 //    @Basic
 //    @NotNull
 //    @Column(length=100000)
-//    private ArrayList<String> imgNames; // 需要先用taskCategory来判断什么类型到什么数库里取
+    @Transient
+    private ArrayList<String> imgNames;
 
     @NotNull
-    private TaskStatus taskStatus;
+    private TaskStatus taskStatus; // NN
+
+    @NotNull
+    private int isCollecting; // NN
 
     public Task() {
     }
@@ -187,5 +191,21 @@ public class Task {
 
     public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public int getIsCollecting() {
+        return isCollecting;
+    }
+
+    public void setIsCollecting(int isCollecting) {
+        this.isCollecting = isCollecting;
+    }
+
+    public ArrayList<String> getImgNames() {
+        return imgNames;
+    }
+
+    public void setImgNames(ArrayList<String> imgNames) {
+        this.imgNames = imgNames;
     }
 }

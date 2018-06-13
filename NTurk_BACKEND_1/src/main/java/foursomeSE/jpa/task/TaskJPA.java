@@ -24,6 +24,18 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
 //    List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
 //    List<Task> findByTaskStatusAndDdlBefore(TaskStatus taskStatus, LocalDateTime now);
 
+    @Query(value = "select * from tasks\n" +
+            "where task_id in (\n" +
+            "    select task_id from microtasks\n" +
+            "    where microtask_id in (\n" +
+            "        select microtask_id from annotation\n" +
+            "        where annotation_id = ?1\n" +
+            "    )\n" +
+            ")",
+            nativeQuery = true)
+    Task findByAnnotationId(long id);
+
+
     @Query(value = "select * from tasks where task_status = ?1", nativeQuery = true)
     List<Task> findByTaskStatus(int taskStatus);
 
@@ -76,6 +88,16 @@ where task_status = 1 and task_id in (
     where contract_status = 0 and worker_id in (
         select id from workers
         where email_address = 'worker2@ex.com'
+    )
+)
+
+
+select * from tasks
+where task_id in (
+    select task_id from microtasks
+    where microtask_id in (
+        select microtask_id from annotation
+        where annotation_id = ?1
     )
 )
 */

@@ -69,25 +69,25 @@ public class DataSupplierForT3 {
     }
 
     public void mockTasks() {
-        RTask task = new RTask();
-        task.setTaskName("task1");
-        task.setTaskDescription("这是改接口以后的测试");
-//        task.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
-//        task.setCreateTime(LocalDateTime.now());
-        task.setWorkerRequirement(WorkerRequirement.NONE);
-        task.setTaskCategory(TaskCategory.GENERAL);
-//        task.setQuestions(new ArrayList<>(Arrays.asList(
-//                "图中有几只猫",
-//                "图中有几只狗",
-//                "图中还有别的动物吗"
-//        )));
-        task.setRewardPerMicrotask(10);
-
-        ArrayList<String> imgs = IntStream.rangeClosed(1, 29).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
-        task.setImgNames(imgs);
-
-//        task.setTaskStatus(TaskStatus.ONGOING);
-
-        taskService.add(task, "requester1@ex.com");
+//        RTask task = new RTask();
+//        task.setTaskName("task1");
+//        task.setTaskDescription("这是改接口以后的测试");
+////        task.setRequesterId(userByUsername(requesterJPA, "requester1@ex.com").getId());
+////        task.setCreateTime(LocalDateTime.now());
+//        task.setWorkerRequirement(WorkerRequirement.NONE);
+//        task.setTaskCategory(TaskCategory.GENERAL);
+////        task.setQuestions(new ArrayList<>(Arrays.asList(
+////                "图中有几只猫",
+////                "图中有几只狗",
+////                "图中还有别的动物吗"
+////        )));
+//        task.setRewardPerMicrotask(10);
+//
+//        ArrayList<String> imgs = IntStream.rangeClosed(1, 29).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
+//        task.setImgNames(imgs);
+//
+////        task.setTaskStatus(TaskStatus.ONGOING);
+//
+//        taskService.add(task, "requester1@ex.com");
     }
 }

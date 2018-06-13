@@ -6,7 +6,6 @@ import foursomeSE.entity.communicate.CInspection;
 import foursomeSE.entity.communicate.CInspectionContract;
 import foursomeSE.entity.communicate.EnterInspectionResponse;
 import foursomeSE.entity.inspection.Inspection;
-import foursomeSE.entity.inspection.InspectionContract;
 import foursomeSE.entity.inspection.RInspections;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
@@ -14,7 +13,6 @@ import foursomeSE.entity.task.Task;
 import foursomeSE.entity.task.TaskStatus;
 import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
-import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.inspection.InspectionContractJPA;
 import foursomeSE.jpa.inspection.InspectionJPA;
@@ -113,8 +111,8 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
             CriticalSection.Item item = new CriticalSection.Item();
             item.requestTime = LocalDateTime.now();
             item.username = username;
-            item.annotationId = l;
-            CriticalSection.inspectRecords.add(item);
+            item.microtaskId = l;
+            CriticalSection.qualityVerificationRecords.add(item);
         });
 
 
@@ -130,9 +128,9 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
         }
 
         Inspection ispt = rInspections.getInspections().get(0);
-        if (CriticalSection.inspectRecords.stream()
+        if (CriticalSection.qualityVerificationRecords.stream()
                 .anyMatch(i -> i.username.equals(username)
-                        && i.annotationId == ispt.getAnnotationId())) {
+                        && i.microtaskId == ispt.getAnnotationId())) {
             rInspections.getInspections().forEach(i -> {
                 // 接下来就对于这个inspection对应的annotation，microtask，task，
                 i.setUsername(username);
@@ -146,8 +144,9 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
 
 //                annotation.setParallel(annotation.getParallel() - 1);
                 annotationJPA.save(annotation);
-                CriticalSection.inspectRecords.removeIf(ii -> ii.username.equals(username)
-                        && ii.annotationId == ispt.getAnnotationId());
+                CriticalSection.qualityVerificationRecords.removeIf(ii -> ii.username.equals(username)
+                        && ii.microtaskId == ispt.getAnnotationId());
+                // 这里是改过的，所以才有问题
 
                 me.setCredit(me.getCredit() + task.getRewardPerMicrotask() * INSPECTION_PERCENT);
                 workerJPA.save(me);
@@ -184,4 +183,5 @@ public class UpperInspectionServiceImpl implements UpperInspectionService, MyCon
         }
 
     }
+
 }

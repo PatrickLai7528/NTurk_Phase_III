@@ -1,12 +1,12 @@
 package foursomeSE.controller;
 
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.task.RTask;
 import foursomeSE.entity.statistics.TaskGrowth;
 import foursomeSE.entity.statistics.TaskParticipation;
 import foursomeSE.entity.statistics.TaskStatusData;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.statistics.TaskNum;
+import foursomeSE.entity.task.Task;
 import foursomeSE.error.MyErrorType;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.security.JwtUtil;
@@ -84,7 +84,7 @@ public class TaskController {
             method = RequestMethod.POST)
     @PreAuthorize("hasRole('REQUESTER')")
     public ResponseEntity<?> addTask(@RequestHeader("Authorization") String token,
-                                     @RequestBody RTask task) {
+                                     @RequestBody Task task) {
         String username = JwtUtil.getUsernameFromToken(token);
         try {
             taskService.add(task, username);
