@@ -6,7 +6,7 @@
             </el-table-column>
             <el-table-column label="任务名称" prop="taskName">
             </el-table-column>
-            <el-table-column label="参与人数" prop="attendance">
+            <el-table-column label="创建时间" prop="createTime" sortable>
             </el-table-column>
             <el-table-column label="任务状态" prop="taskStatus"
                              :filters="[{text:'正在进行',value:'正在进行'},{text:'已完成',value:'已完成'}]"
@@ -122,7 +122,9 @@
             },
             getTableData() {          //获得tabledata的数据
                 //  this.$http.get("http://localhost:8086/newTasks", {headers: {Authorization: store.state.token}}).then(function (response)
-                _this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                let _this = this;
+                this.$http.get("http://localhost:8086/requesterTasks", {headers: {Authorization: this.$store.getters.getToken}}).then(function (response) {
+
                     _this.taskData = response.data;     //只需要获得taskData的数据就可以了
                     for (let item of _this.taskData){
                         item.taskStatus = _this.translateContractStatus(item.taskStatus);
