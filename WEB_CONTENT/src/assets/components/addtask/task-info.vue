@@ -52,22 +52,12 @@
                 <el-radio-group v-model="form.workerRequirement">
                     <el-radio label="NONE">无要求</el-radio>
                     <el-radio label="EXPERIENCE">经验要求</el-radio>
-                    <el-radio label="APPOINT">指定工人</el-radio>
                 </el-radio-group>
             </el-form-item>
+
             <el-form-item v-if="form.workerRequirement=='EXPERIENCE'" prop="requiredExperience" label="经验要求">
                 <el-input class="input" v-model.number="form.requiredExperience"></el-input>
             </el-form-item>
-            <div>
-                <el-form-item id="select" v-if="form.workerRequirement=='APPOINT'" prop="nominees" label="选择工人">
-                    <el-select id="select" class="setSize" v-if="form.workerRequirement=='APPOINT'"
-                               v-model="form.nominees"
-                               multiple placeholder="请选择">
-                        <el-option v-for="item in allWorkers" :label="item.workerName" :key="item.workerId"
-                                   :value="item.workerId"></el-option>
-                    </el-select>
-                </el-form-item>
-            </div>
             <el-form-item label="收费标准" prop="rewardPerMicrotask">
                 <el-input class="input" v-model.number="form.rewardPerMicrotask"></el-input>
             </el-form-item>

@@ -71,7 +71,13 @@
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
+
+        <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+
+        </el-dialog>
     </el-container>
+
 </template>
 
 <style>
@@ -177,6 +183,8 @@
                 taskId: this.$route.params.taskId,
                 imgNames: this.$store.getters.getImgNames,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
+                dialogVisible: false,
+                wrongImg:'',            //假设返回的是wrongImg
             }
         },
         mounted() {
@@ -317,6 +325,12 @@
                         _this.imgNames.push(_this.annotation.imgName);
                         _this.annotationData.push(_this.annotation);
                     }).catch(function (error) {
+                        _this.segments = [];
+                        _this.annotation = {
+                            'imgName': _this.img,
+                            'segments': _this.segments
+                        };
+                        _this.annotationData.push(_this.annotation);
                         console.log(error);
                     })
                 }
@@ -364,6 +378,8 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
+                this.frames = this.annotation.frames;             //之前实现的有问题，应该现把frames加载，然后调用initialDraw方法
+                this.initialDraw();
             },
             /**
              * draw methods. (and tag)

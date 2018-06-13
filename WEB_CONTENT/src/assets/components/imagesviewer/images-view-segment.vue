@@ -331,7 +331,13 @@
                         _this.annotation = response.data;
                         console.log(response.data);
                         _this.annotationData.push(_this.annotation);
-                    }).catch(function (error) {
+                    }).catch(function (error) {             //FIXME:因为发起者看有一些标注是没有的，所以创建一个空对象push进去  现在开起来不知道这个逻辑可不可行
+                        _this.segments = [];
+                        _this.annotation = {
+                            'imgName': _this.img,
+                            'segments': _this.segments
+                        };
+                        _this.annotationData.push(_this.annotation);
                         console.log(error);
                     })
                 }
@@ -371,6 +377,8 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
+                this.segments = this.annotation.segments;
+                this.initialDraw();
             },
             /**
              * draw methods. (and tag)
