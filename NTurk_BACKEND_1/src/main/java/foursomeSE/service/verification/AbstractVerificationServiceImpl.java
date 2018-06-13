@@ -1,9 +1,11 @@
 package foursomeSE.service.verification;
 
+import foursomeSE.entity.BlacklistItem;
 import foursomeSE.entity.Gold;
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.communicate.EnterResponse;
+import foursomeSE.entity.communicate.Warning;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.task.Task;
@@ -13,6 +15,7 @@ import foursomeSE.entity.verification.Verification;
 import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.error.MyFailTestException;
 import foursomeSE.error.MyNotValidException;
+import foursomeSE.jpa.BlacklistJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
@@ -37,6 +40,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     protected GoldJPA goldJPA;
     protected AnnotationJPA annotationJPA;
     protected VerificationJPA verificationJPA;
+    protected BlacklistJPA blacklistJPA;
 
 
     protected String username;
@@ -44,12 +48,13 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     protected Annotation annotation;
     protected Task task;
 
-    public AbstractVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA) {
+    public AbstractVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA) {
         this.microtaskJPA = microtaskJPA;
         this.taskJPA = taskJPA;
         this.goldJPA = goldJPA;
         this.annotationJPA = annotationJPA;
         this.verificationJPA = verificationJPA;
+        this.blacklistJPA = blacklistJPA;
     }
 
     @Override
@@ -66,7 +71,14 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
         this.task = taskById(taskJPA, taskId);
 
         if (task.getIsCollecting() == 0) {
-            long haveEnter = microtaskJPA.countInspectionTimes(taskId, username, getPriorMtStt().ordinal());
+            long haveEnter;//  = microtaskJPA.countInspectionTimes(taskId, username, getPriorMtStt().ordinal());
+            BlacklistItem bli = blacklistJPA.findByUsernameAndTaskIdAndVerificationType(username, taskId, getVType());
+            if (bli == null) {
+                haveEnter = 0;
+            } else {
+                haveEnter = bli.getHaveEnter();
+            }
+
             if (haveEnter + 1 == TRAPS.get(0)) { // 感觉应该直接写0或1的
                 if (candidates.size() > 3) { // 这个为了简单，如果是最后几个，就不挖坑了
                     String img1 = goldJPA.findByTaskIdAndOrd(taskId, 0);
@@ -117,9 +129,31 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
 
         EnterResponse response = new EnterResponse();
-        ArrayList<String> imgs = candidates.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new));
-        imgs.addAll(golds);
-        response.setImgNames(imgs);
+
+        if (!candidates.isEmpty()) {
+            BlacklistItem bli = blacklistJPA.findByUsernameAndTaskIdAndVerificationType(username, taskId, getVType());
+            if (bli == null) {
+                bli = new BlacklistItem();
+                bli.setTaskId(taskId);
+                bli.setUsername(username);
+                bli.setWrong(0);
+                bli.setHaveEnter(0);
+
+                blacklistJPA.save(bli);
+            }
+
+            if (bli.getWrong() >= TRAP_FALL_TOLERANCE) {
+                response.setImgNames(null);
+            } else {
+                ArrayList<String> imgs = candidates.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new));
+                imgs.addAll(golds);
+                response.setImgNames(imgs);
+            }
+        } else {
+            response.setImgNames(new ArrayList<>());
+        }
+
+
         // TODO 打乱一下顺序
 
         return response;
@@ -137,6 +171,10 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
             // 肯定都是这个task
             // 虽然好像应该检查一下。。
             Task task = taskJPA.findByAnnotationId(verifications.getVerifications().get(0).getAnnotationId());
+
+            BlacklistItem bli = blacklistJPA.findByUsernameAndTaskIdAndVerificationType(username, task.getTaskId(), getVType());
+            bli.setHaveEnter(bli.getHaveEnter() + 1);
+            blacklistJPA.save(bli);
 
             if (task.getIsCollecting() == 1) {
                 verifications.getVerifications().forEach(v -> {
@@ -178,7 +216,16 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                 } else {
                     ArrayList<Long> failedId = diffs.stream().map(Verification::getAnnotationId)
                             .collect(Collectors.toCollection(ArrayList::new));
-                    throw new MyFailTestException(failedId);
+
+                    int haveEnter = bli.getHaveEnter();
+                    if (haveEnter != 1) {
+                        bli.setWrong(bli.getWrong() + 1);
+                        blacklistJPA.save(bli);
+                    }
+                    Warning warning = new Warning();
+                    warning.setFailedIds(failedId);
+                    warning.setForbidden(bli.getWrong() >= TRAP_FALL_TOLERANCE);
+                    throw new MyFailTestException(warning);
                 }
             }
         } else {

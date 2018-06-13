@@ -15,14 +15,15 @@ public class AbstractVerificationController {
     protected VerificationService verificationService;
 
 
-
     @RequestMapping(value = "/taskId/{taskId}", method = RequestMethod.GET)
     public ResponseEntity<?> enterVerification(@RequestHeader("Authorization") String token,
                                                @PathVariable("taskId") long taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         EnterResponse response = verificationService.enterVerification(taskId, username);
-        if (response.getImgNames().isEmpty()) {
+        if (response.getImgNames() == null) {
+            return new ResponseEntity<Object>(HttpStatus.BAD_REQUEST);
+        } else if (response.getImgNames().isEmpty()) {
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<Object>(response, HttpStatus.OK);
@@ -36,8 +37,7 @@ public class AbstractVerificationController {
         try {
             verificationService.saveVerifications(verifications, username);
         } catch (MyFailTestException e) {
-            ArrayList<Long> failedIds = e.getFailedIds();
-            return new ResponseEntity<Object>(failedIds, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<Object>(e.getWarning(), HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<Object>(HttpStatus.OK);
     }

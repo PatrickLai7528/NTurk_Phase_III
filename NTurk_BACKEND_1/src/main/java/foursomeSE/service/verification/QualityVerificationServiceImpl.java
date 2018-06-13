@@ -6,6 +6,7 @@ import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.VerificationType;
+import foursomeSE.jpa.BlacklistJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
@@ -24,8 +25,8 @@ public class QualityVerificationServiceImpl extends AbstractVerificationServiceI
     private GeneralAnnotationJPA generalAnnotationJPA;
 
 
-    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, GeneralAnnotationJPA generalAnnotationJPA) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA);
+    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, GeneralAnnotationJPA generalAnnotationJPA) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA);
         this.generalAnnotationJPA = generalAnnotationJPA;
     }
 

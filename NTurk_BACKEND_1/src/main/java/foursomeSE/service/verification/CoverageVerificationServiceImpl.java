@@ -8,6 +8,7 @@ import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.task.TaskStatus;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.VerificationType;
+import foursomeSE.jpa.BlacklistJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
@@ -24,8 +25,8 @@ import java.util.List;
 @Service
 @Qualifier("coverage")
 public class CoverageVerificationServiceImpl extends AbstractVerificationServiceImpl {
-    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA);
+    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA);
     }
 
     @Override

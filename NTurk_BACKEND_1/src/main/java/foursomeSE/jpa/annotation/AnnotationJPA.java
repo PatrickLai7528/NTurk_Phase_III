@@ -145,6 +145,8 @@ WHERE parallel < 2 - have_done
 ORDER BY have_done DESC, ord ASC
 
 
+
+
 // getSample: long microtaskId, int verificationTypeOrd
 select
     id

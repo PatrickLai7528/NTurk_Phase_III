@@ -1,15 +1,21 @@
 package foursomeSE.error;
 
+import foursomeSE.entity.communicate.Warning;
+
 import java.util.ArrayList;
 
 public class MyFailTestException extends RuntimeException {
-    private ArrayList<Long> failedIds;
+    private Warning warning;
 
-    public MyFailTestException(ArrayList<Long> failedIds) {
-        this.failedIds = failedIds;
+    public MyFailTestException(Warning warning) {
+        this.warning = warning;
     }
 
-    public ArrayList<Long> getFailedIds() {
-        return failedIds;
+    public Warning getWarning() {
+        return warning;
+    }
+
+    public void setWarning(Warning warning) {
+        this.warning = warning;
     }
 }
