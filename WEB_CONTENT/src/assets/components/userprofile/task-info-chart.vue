@@ -10,6 +10,7 @@
     import UserUtils from '../../js/utils/UserUtils.js'
 
     export default {
+        props: ["taskId","taskName"],
         data() {
             return {
 
@@ -24,7 +25,6 @@
             setLineChart() {
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById('taskInfo'));
-                let max = 0;
 
                 let data = [
                     {date: "2018/05/13", ongoing: 10, finished: 3, underReview: 7},
@@ -62,7 +62,7 @@
                     },
                     title: [{
                         left: '10%',
-                        text: "任务x进展情况",
+                        text: "任务："+this.taskName,
                         textStyle: {
                             fontSize: 20
                         }
@@ -90,7 +90,6 @@
                             lineStyle: {
                                 width: 3
                             },
-                            symbol: 'none',  //这句就是去掉点的
                             smooth: true,  //这句就是让曲线变平滑的
                             data: ongoingList
                         },
@@ -100,7 +99,6 @@
                             lineStyle: {
                                 width: 3
                             },
-                            symbol: 'none',  //这句就是去掉点的
                             smooth: true,  //这句就是让曲线变平滑的
                             data: finishedList
                         },
@@ -110,7 +108,6 @@
                             lineStyle: {
                                 width: 3
                             },
-                            symbol: 'none',  //这句就是去掉点的
                             smooth: true,  //这句就是让曲线变平滑的
                             data: underReviewList
                         }
