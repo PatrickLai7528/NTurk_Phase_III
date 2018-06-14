@@ -155,7 +155,9 @@
 				taskId: this.$route.params.taskId,
 				imageLength: 0,
 				currentPlace: 1,
-				taskDescription: ""
+				taskDescription: "",
+                imgNames: this.$store.getters.getImgNames,
+                tagsForAnnotation: this.$store.getters.getTagsForAnnotation,
 			}
 		},
 		computed: {
@@ -179,6 +181,8 @@
 				this.canvas.addEventListener("mouseup", this.canvasUp);
 				this.canvas.addEventListener("mousemove", this.canvasMove);
 				this.canvas.addEventListener("touchstart", this.canvasDown);
+                this.imgNames = this.$store.getters.getImgNames;
+                this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
 				this.getImgNames();
 				this.setCountDown();
 			})
