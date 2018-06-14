@@ -216,7 +216,8 @@
                 let header = {headers: {Authorization: this.$store.getters.getToken}};
                 this.imageLength = this.imgNames.length;
                 console.log(this.imgNames);
-                viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer, 'http://localhost:8086/frameAnnotation/taskId/', this.taskId, this.$http);
+                viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer,
+                    'http://localhost:8086/frameAnnotation/imgName/', this.$http);
                 this.viewer = new AnnotationEditor(viewer, header,
                     'http://localhost:8086/frameAnnotation/saveAnnotations/', this.$http);
                 this.viewer.drawCurrent(header, () => {

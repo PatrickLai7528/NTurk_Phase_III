@@ -57,16 +57,20 @@ let privateMethods = {
     },
     submitCurrent(annotation, callback = function () {
     }) {
-        let router, header, http;
+        let router, header, http, markingType, data = {};
         console.log("sumbit");
         console.log(annotation);
         header = privateVariables.header;
         http = privateVariables.http;
+        markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
         // data = this.getSubmitData();
+        data.annotations = [];
+        data.annotations.push(annotation);
+        data.annotations[0][markingType] = data.annotations[0][markingType][0];
         privateVariables.isLastSubmitLoading = true;
         // if (privateVariables.viewer.isCurrentAnnotationNew()) {
         router = privateVariables.postBaseUrl;
-        http.post(router, annotation, header)
+        http.post(router, data, header)
             .then((response) => {
             })
             .catch((error) => {
@@ -471,7 +475,6 @@ class AnnotationEditor {
         editedAnnotations.forEach((value, key, map) => {
             console.log("now submitting :");
             console.log(value);
-            value[markingType] = value[markingType][0];
             privateMethods.submitCurrent(value);
         });
         return true;
