@@ -165,7 +165,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     public void saveVerifications(RVerifications verifications, String username) {
         this.username = username;
 
-        if (verifications.getVerifications().size() != NUM_OF_INSPECTION_PER_REQUEST) {
+        if (verifications.getVerifications().isEmpty()) {
             throw new MyNotValidException();
         }
 

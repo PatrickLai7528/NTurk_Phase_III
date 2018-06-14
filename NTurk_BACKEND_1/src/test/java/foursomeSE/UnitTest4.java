@@ -161,6 +161,7 @@ public class UnitTest4 extends WithTheAutowired {
                 break;
             }
 
+            System.out.println("pre print: " + i[0]);
             RVerifications rvfs = rvfs(etr.getImgNames(), username);
             qualityVerificationService.saveVerifications(rvfs, username);
 
