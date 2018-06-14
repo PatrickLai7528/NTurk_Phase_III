@@ -42,6 +42,20 @@
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
             </div>
         </el-aside>
+
+        <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
+            <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+            <img v-bind:src=wrongImg alt="错误图片" height="270px" width="480px">
+            <p>这道题的问题和答案分别是：</p>
+            <p>问题：{{taskDescription}}</p>
+            <p>答案是：{{wrongAnnotation.answer}}</p>
+            <p>您认为:{{wrongAnswerPairs[0]}}</p>
+            <p>但实际上：{{wrongAnswerPairs[1]}}</p>
+            <p>您的答案对标注的质量非常关键，请您在下次的标注中更加<strong>用心</strong>和<strong>仔细</strong></p>
+            <p>我们还会<strong>继续检查</strong>您的答案，如果下次再发现问题可能会对您采取<strong>惩罚措施</strong></p>
+
+            <el-button type="primary" @click="read()">确 定</el-button>
+        </el-dialog>
     </el-container>
 </template>
 
@@ -70,11 +84,12 @@
                 isRequester: null,
                 taskType: this.$route.params.taskType,
                 taskId: this.$route.params.taskId,
-                imgNames:_this.$store.getters.getImgNames,
+                imgNames:this.$store.getters.getImgNames,
                 taskDescription: '',         //现在还需要taskDescription进行问题问答
                 wrongImg: '',
                 wrongAnnotation:{},
                 dialogVisible: false,
+                wrongAnswerPairs: [],
             }
         },
         mounted: function () {
@@ -110,6 +125,9 @@
         },
         methods:{
             //像评分和提交的组件，如果当前登陆者是发起者，是不显示的
+            read(){
+              this.dialogVisible = false;
+            },
             commitRating(){
                 //list里面的对象包含annotationId和rate
                 function Inspection(annotationId,rate){
@@ -147,6 +165,10 @@
                         }
                         else if(failedIds !== undefined || failedIds.length !== 0){    //说明这次的回答有不正确的地方
                             _this.wrongImg = failedIds[0];   //把第一条挑出来
+                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
                             _this.showDialog();     //显示错误教程
                         }
                         else if(_this.canGoon()){          //判断还能不能继续做
@@ -160,6 +182,33 @@
                 }).catch(function (error) {
                     console.log(error);
                 });
+            },
+            findIndexByImg(img){
+                for(let i = 0;i < this.number;i++){
+                    if(this.imgNames[i] === img){
+                        return i;
+                    }
+                }
+
+                return -1;
+            },
+            translateRate(rate){    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
+                if(this.taskType === 'grade'){
+                    if(rate === 0){
+                        return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
+                    }
+                    else{
+                        return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
+                    }
+                }
+                else if(this.taskType === 'coverage'){
+                    if(rate === 0){
+                        return ["这张图片还有其他可以标注的","这张图片已经没有其他可供标注的"];
+                    }
+                    else{
+                        return ["这张图片已经没有其他可供标注的","这张图片还有其他可以标注的"];
+                    }
+                }
             },
             showDialog(){
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
