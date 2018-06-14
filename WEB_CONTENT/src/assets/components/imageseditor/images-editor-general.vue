@@ -183,6 +183,7 @@
 				this.canvas.addEventListener("touchstart", this.canvasDown);
                 this.imgNames = this.$store.getters.getImgNames;
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
+                this.taskDescription = this.$store.getters.getTaskDescription;      //对于general来说，taskDescription尤其重要
 				this.getImgNames();
 				this.setCountDown();
 			})

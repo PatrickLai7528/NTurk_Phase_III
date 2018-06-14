@@ -186,6 +186,7 @@
 				this.canvas.addEventListener("touchstart", this.canvasDown);
 				this.imgNames = this.$store.getters.getImgNames;
 				this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
+                this.taskDescription = this.$store.getters.getTaskDescription;
 				this.getImgNames();
 				this.setCountDown();
 			})

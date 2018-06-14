@@ -291,9 +291,38 @@
                 let _this = this;
                 let route = "http://localhost:8086/segmentAnnotation/imgName/" + wrongImg;
                 this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                    _this.wrongAnnotation = response.data;
+                    let failedIds = response.data.failedIds;
+                    let forbidden = response.data.forbidden;
+
+                    if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                        _this.forbiddenMessage();
+                    }
+                    else if(failedIds !== undefined || failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                        _this.wrongImg = failedIds[0];   //把第一条挑出来
+                        _this.showDialog();     //显示错误教程
+                    }
+                    else if(_this.canGoon()){          //判断还能不能继续做
+                        _this.showMessage();    //能继续做，鼓励继续
+                    }
+                    else{
+                        _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                    }
+
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
                     console.log("error");
+                });
+            },
+            showDialog(){
+                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
+                this.dialogVisible = true;   //显示错误提示
+            },
+            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+
+            },
+            forbiddenMessage(){
+                this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
+                    confirmButtonText: '确定',
+                    type: 'error',
                 });
             },
             showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去

@@ -223,6 +223,7 @@
                     _this.$store.commit('changeImgNames',imgNames);
                     console.log(row.tagsForAnnotation);
                     _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
+                    _this.$store.commit('changeTaskDescription',row.taskDescription);
                     _this.taskId = taskId;
                     _this.path = path;
                 }).catch(function (error) {

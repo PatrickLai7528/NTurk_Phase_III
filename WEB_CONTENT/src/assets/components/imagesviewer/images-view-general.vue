@@ -12,11 +12,9 @@
         </el-main>
         <el-aside width="300px" style="alignment: center">
             <el-form ref="form" :model="form">
-                <el-form v-model="form.region" v-for="pair in annotationData[nowIndex].answerPairs">
-                    <el-form-item class="Q_And_A" v-bind:label="pair.question">
-                        <el-input v-model="pair.answer" disabled></el-input>
-                    </el-form-item>
-                </el-form>
+                <el-form-item class="Q_And_A" v-bind:label="taskDescription">
+                    <el-input v-model="annotationData[nowIndex]" disabled></el-input>
+                </el-form-item>
             </el-form>
             <div v-if="isRequester === false">
                 <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
@@ -70,10 +68,13 @@
                 ratings: [],           //对这个合同所有的评分数组
                 commitDisabled: 'disabled',
                 isRequester: null,
-                annotationIds: this.$store.getters.getAnnotationIds,
                 taskType: this.$route.params.taskType,
                 taskId: this.$route.params.taskId,
                 imgNames:_this.$store.getters.getImgNames,
+                taskDescription: '',         //现在还需要taskDescription进行问题问答
+                wrongImg: '',
+                wrongAnnotation:{},
+                dialogVisible: false,
             }
         },
         mounted: function () {
@@ -95,6 +96,7 @@
                 if(to.name === 'viewgeneral'){
                     this.taskId = this.$route.params.taskId;
                     this.imgNames = this.$store.getters.getImgNames;
+                    this.taskDescription = this.$store.getters.getTaskDescription;
                     this.nowIndex = 0;
                     this.number = this.imgNames.length;
                     this.percent = parseFloat(((this.nowIndex + 1) / this.number * 100).toFixed(1));
@@ -137,9 +139,39 @@
                 this.$http.post(path,
                     JSON.stringify(inspections),
                     {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
+                        let failedIds = response.data.failedIds;
+                        let forbidden = response.data.forbidden;
+
+                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                            _this.forbiddenMessage();
+                        }
+                        else if(failedIds !== undefined || failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                            _this.wrongImg = failedIds[0];   //把第一条挑出来
+                            _this.showDialog();     //显示错误教程
+                        }
+                        else if(_this.canGoon()){          //判断还能不能继续做
+                            _this.showMessage();    //能继续做，鼓励继续
+                        }
+                        else{
+                            _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                        }
+
                         _this.showMessage();
                 }).catch(function (error) {
                     console.log(error);
+                });
+            },
+            showDialog(){
+                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
+                this.dialogVisible = true;   //显示错误提示
+            },
+            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+
+            },
+            forbiddenMessage(){
+                this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
+                    confirmButtonText: '确定',
+                    type: 'error',
                 });
             },
             successMessage(){

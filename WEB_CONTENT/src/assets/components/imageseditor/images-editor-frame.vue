@@ -156,7 +156,7 @@
 				taskId: this.$route.params.taskId,
 				imageLength: 0,
 				currentPlace: 1,
-				taskDescription: "",
+				taskDescription: "",      //现在这个变得重要了
                 imgNames: this.$store.getters.imgNames,
                 tagsForAnnotation: this.$store.getters.tagsForAnnotation,
 			}
@@ -188,6 +188,7 @@
 				console.log(this.canvas);
 				this.imgNames = this.$store.getters.getImgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;         //得到任务的备选答案描述
+                this.taskDescription = this.$store.getters.getTaskDescription;
                 console.log(this.tagsForAnnotation);
 				this.getImgNames();
 				this.setCountDown();

@@ -16,6 +16,7 @@ var store = new Vuex.Store({
         token: null,
         imgNames:[],
         tagsForAnnotation:[],             //进入任务时新增的状态
+        taskDescription:'',               //任务的描述...
     },
     mutations: {
         LOG_IN(state, data) {  //登入，保存状态
@@ -53,6 +54,10 @@ var store = new Vuex.Store({
             sessionStorage.setItem('tagsForAnnotation',temp);
             state.tagsForAnnotation = newList;
         },
+        changeTaskDescription(state,description){
+            sessionStorage.setItem('taskDescription',description);
+            state.taskDescription = description;
+        }
     },
     actions: {
         logIn({commit}, data) {
@@ -97,6 +102,10 @@ var store = new Vuex.Store({
         getTagsForAnnotation(state){
             state.tagsForAnnotation = JSON.parse(sessionStorage.getItem('tagsForAnnotation'));
             return state.tagsForAnnotation;
+        },
+        getTaskDescription(state){
+            state.taskDescription = sessionStorage.getItem('taskDescription');
+            return state.taskDescription;
         }
     }
 });
