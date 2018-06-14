@@ -7,6 +7,7 @@ import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
+import foursomeSE.service.verification.VerificationService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.DBDataKeeper;
 import foursomeSE.util.DataSupplier;
@@ -36,6 +37,8 @@ public class UnitTest4 extends WithTheAutowired {
     @Autowired
     private DataSupplier dataSupplier;
 
+    private long tid;
+
     @Before
     public void before() {
         dbDataKeeper.stashAll();
@@ -55,7 +58,7 @@ public class UnitTest4 extends WithTheAutowired {
     public void test1() { // 基本就是上一个版本的测试改一改
         assertEquals(29 + 40, iterableToList(microtaskJPA.findAll()).size());
 
-        long tid = taskJPA.findByTaskName("task2").getTaskId();
+        tid = taskJPA.findByTaskName("task2").getTaskId();
 
         EnterResponse etr1 = taskService.enterTask(tid, "worker1@ex.com");
         EnterResponse etr2 = taskService.enterTask(tid, "worker2@ex.com");
@@ -141,17 +144,30 @@ public class UnitTest4 extends WithTheAutowired {
         frameAnnotationService.saveAnnotations(rats(IntStream.of(3, 4, 5, 15, 16)), "worker1@ex.com");
         // 注意到draw的时候是都可以draw的。
 
-//        int i = 10;
-//        while (true) {
-//            EnterResponse etr = qualityVerificationService.enterVerification(tid, "worker" + i + "@ex.com");
-//            assertTrue(in(IntStream.rangeClosed(1, 15)).containsAll(etr.getImgNames()));
-//
-//
-//
-//            i++;
-//        }
+        int[] i = {10};
+
+        fill(qualityVerificationService, i);
+        fill(coverageVerificationService, i);
 
     }
+
+    private void fill(VerificationService verificationService, int[] i) {
+        while (true) {
+            String username = "worker" + i[0] + "@ex.com";
+            EnterResponse etr = qualityVerificationService.enterVerification(tid, username);
+            assertTrue(in(IntStream.rangeClosed(1, 15)).containsAll(etr.getImgNames()));
+
+            if (etr.getImgNames().isEmpty()) {
+                break;
+            }
+
+            RVerifications rvfs = rvfs(etr.getImgNames(), username);
+            qualityVerificationService.saveVerifications(rvfs, username);
+
+            i[0]++;
+        }
+    }
+
 
     private RAnnotations<FrameAnnotation> rats(IntStream intStream) {
         RAnnotations<FrameAnnotation> result = new RAnnotations<>();

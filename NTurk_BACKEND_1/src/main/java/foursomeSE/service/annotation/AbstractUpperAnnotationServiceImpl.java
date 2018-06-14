@@ -176,21 +176,21 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         return result;
     }
 
-    public static void main(String[] args) {
-        System.out.println("e");
-
-        Report t = new Report();
-        t.setImgName("imgnames");
-        t.setCore(new int[] {1,2,3});
-        t.setCore("如果改成string");
-        Object o = t;
-
-        Gson gson = new Gson();
-        String s = gson.toJson(o);
-
-        System.out.println(s);
-
-    }
+//    public static void main(String[] args) {
+//        System.out.println("e");
+//
+//        Report t = new Report();
+//        t.setImgName("imgnames");
+//        t.setCore(new int[] {1,2,3});
+//        t.setCore("如果改成string");
+//        Object o = t;
+//
+//        Gson gson = new Gson();
+//        String s = gson.toJson(o);
+//
+//        System.out.println(s);
+//
+//    }
 
 }
 
