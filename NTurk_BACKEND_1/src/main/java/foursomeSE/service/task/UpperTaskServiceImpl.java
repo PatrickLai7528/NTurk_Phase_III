@@ -1,5 +1,6 @@
 package foursomeSE.service.task;
 
+import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
@@ -62,10 +63,10 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         this.microtaskJPA = microtaskJPA;
     }
 
-//    @Override
-//    public CTask getById(long id) {
-//        return sToD(taskById(taskJPA, id));
-//    }
+    @Override
+    public CTask getById(long id) {
+        return sToD(taskById(taskJPA, id));
+    }
 
     @Override
     public void add(Task task, String username) {
@@ -174,7 +175,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
             // 下面的不需要，因为反正parallel只能是0或者1，parallel就足够取代原来unfinished的状态
             // 本来加入下面的就是为了并行。但是实际上没有并行
-            // 但是但是因为太懒，还是这样写了
+            // 但是但是因为太懒（还要用另一种模式来写，比如之前的sql语句）
+            // 还是这样写了
             CriticalSection.Item item = new CriticalSection.Item();
             item.username = username;
             item.requestTime = LocalDateTime.now();
@@ -216,6 +218,12 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 ////                .collect(Collectors.toCollection(ArrayList::new));
 //    }
 
+
+    @Override
+    public Reports getJson(long taskId, String username) {
+        List<String> imgs = microtaskJPA.retrieveImgNames(taskId);
+        return null;
+    }
 
     /**
      * statistic

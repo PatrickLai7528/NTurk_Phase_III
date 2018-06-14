@@ -11,10 +11,13 @@ import foursomeSE.error.MyNotValidException;
 import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
+import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,43 +36,44 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     private WorkerJPA workerJPA;
     private MicrotaskJPA microtaskJPA;
     private AnnotationJPA annotationJPA;
+    private GoldJPA goldJPA;
 
 
-    public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA,
-                                              AbstractAnnotationJPA<T> abstractAnnotationJPA,
-                                              WorkerJPA workerJPA,
-                                              MicrotaskJPA microtaskJPA,
-                                              AnnotationJPA annotationJPA) {
+    public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<T> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
         this.contractJPA = contractJPA;
         this.abstractAnnotationJPA = abstractAnnotationJPA;
         this.workerJPA = workerJPA;
         this.microtaskJPA = microtaskJPA;
-
+        this.annotationJPA = annotationJPA;
+        this.goldJPA = goldJPA;
     }
 
-//    @Override
-//    public T getById(long id) {
-//        T t = abstractAnnotationJPA.findById(id)
-//                .orElseThrow(() -> new MyObjectNotFoundException("annotation with id " + id + " is not found"));
-//        t.setImgName(mtById(microtaskJPA, t.getMicrotaskId()).getImgName());
-//        return t;
-//    }
-
     @Override
-    public T getByImgName(String imgName) {
+    public T getByImgName(String imgName, String username) {
         Microtask mt = mtByImg(microtaskJPA, imgName);
 
+        T t;
 
-        Annotation a = annotationJPA.findLatestByImgName(imgName);
-        // 除非是第一次，不然肯定是有的。
-        if (a == null) { // 如果是第一次，直接特殊处理吧。
-            return null;
+        if (mt.getIsSample() == 1
+                && mt.getMicrotaskStatus() == MicrotaskStatus.PASSED
+                && workerJPA.findByEmailAddress(username).isPresent()) {
+            BigInteger bigInteger = goldJPA.goldAidByImgName(imgName);
+            // 这个就一定可以拿到的，不然不会发给别人pass了的。
+            // 但是如果是requester拿呢？那还是得返回最新的。worker永远不会去拿pass了的。
+            t = anttById(abstractAnnotationJPA, bigInteger.longValue());
+        } else {
+
+            BigInteger b = annotationJPA.findLatestByImgName(imgName);
+            // 除非是第一次，不然肯定是有的。
+            if (b == null) { // 如果是第一次，直接特殊处理。
+                return null;
+            }
+
+            t = anttById(abstractAnnotationJPA, b.longValue());
         }
 
-        T t = anttById(abstractAnnotationJPA, a.getAnnotationId());
-
         List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
-                mt.getMicrotaskId(), a.getCreateTime(), AnnotationStatus.PASSED
+                mt.getMicrotaskId(), t.getCreateTime(), AnnotationStatus.PASSED
         );
 
         ArrayList<Object> cores = previous.stream().map(Annotation::core).collect(Collectors.toCollection(ArrayList::new));
@@ -120,6 +124,10 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
                 mt.setParallel(0);
                 mt.setMicrotaskStatus(MicrotaskStatus.YET_TO_VERIFY_QUALITY);
                 microtaskJPA.save(mt);
+
+                CriticalSection.drawRecords
+                        .removeIf(ii -> ii.username.equals(username)
+                                && ii.microtaskId == mt.getMicrotaskId());
             });
         } else {
             throw new MyNotValidException();

@@ -2,6 +2,7 @@ package foursomeSE.jpa.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.entity.annotation.AnnotationStatus;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -12,84 +13,93 @@ import java.util.List;
 
 @Transactional
 public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
-    @Query(value = "select * from annotation\n" +
-            "where username = ?2 and microtask_id in (\n" +
-            "    select microtask_id from microtasks\n" +
-            "    where task_id = ?1\n" +
-            ")", nativeQuery = true)
-    long countByTaskIdAndUsername(long taskId, String username);
+//    @Query(value = "select * from annotation\n" +
+//            "where username = ?2 and microtask_id in (\n" +
+//            "    select microtask_id from microtasks\n" +
+//            "    where task_id = ?1\n" +
+//            ")", nativeQuery = true)
+//    long countByTaskIdAndUsername(long taskId, String username);
+
+//    @Query(value = "SELECT\n" +
+//            "  id\n" +
+//            "FROM (\n" +
+//            "       SELECT\n" +
+//            "         annotation.annotation_id AS id,\n" +
+//            "         parallel,\n" +
+//            "         (\n" +
+//            "           SELECT count(*)\n" +
+//            "           FROM inspections\n" +
+//            "           WHERE annotation.annotation_id = inspections.annotation_id\n" +
+//            "         )                        AS have_done,\n" +
+//            "         (\n" +
+//            "           SELECT ord\n" +
+//            "           FROM microtasks\n" +
+//            "           WHERE annotation.microtask_id = microtasks.microtask_id\n" +
+//            "         )                        AS ord\n" +
+//            "       FROM annotation\n" +
+//            "       WHERE microtask_id IN (\n" +
+//            "         SELECT microtasks.microtask_id\n" +
+//            "         FROM microtasks\n" +
+//            "         WHERE microtask_status = 2 -- unreviewed\n" +
+//            "               AND microtask_id IN (\n" +
+//            "           SELECT microtask_id\n" +
+//            "           FROM microtasks\n" +
+//            "           WHERE task_id = ?1\n" +
+//            "         )\n" +
+//            "       ) AND annotation_status = 0 -- reviewable\n" +
+//            "             AND username <> ?2 -- 不是他做的\n" +
+//            "             AND annotation_id NOT IN (-- 不是他评过的\n" +
+//            "         SELECT annotation_id\n" +
+//            "         FROM inspections\n" +
+//            "         WHERE username = ?2\n" +
+//            "       )\n" +
+//            "     ) AS x\n" +
+//            "WHERE parallel < 2 - have_done\n" +
+//            "ORDER BY have_done DESC, ord ASC", nativeQuery = true)
+//    List<BigInteger> getIdsByTaskId(long taskId, String username);
+
+
+//    @Modifying(clearAutomatically = true)
+    @Query(value = "SELECT annotation_id\n" +
+            "FROM annotation\n" +
+            "WHERE microtask_id IN (\n" +
+            "  SELECT microtask_id\n" +
+            "  FROM microtasks\n" +
+            "  WHERE img_name = ?1\n" +
+            ") AND create_time = ALL (SELECT max(create_time)\n" +
+            "                         FROM annotation\n" +
+            "                         WHERE microtask_id IN (\n" +
+            "                           SELECT microtask_id\n" +
+            "                           FROM microtasks\n" +
+            "                           WHERE img_name = ?1\n" +
+            "                         ))", nativeQuery = true)
+    BigInteger findLatestByImgName(String imgName);
 
     @Query(value = "SELECT\n" +
-            "  id\n" +
-            "FROM (\n" +
-            "       SELECT\n" +
-            "         annotation.annotation_id AS id,\n" +
-            "         parallel,\n" +
-            "         (\n" +
-            "           SELECT count(*)\n" +
-            "           FROM inspections\n" +
-            "           WHERE annotation.annotation_id = inspections.annotation_id\n" +
-            "         )                        AS have_done,\n" +
-            "         (\n" +
-            "           SELECT ord\n" +
-            "           FROM microtasks\n" +
-            "           WHERE annotation.microtask_id = microtasks.microtask_id\n" +
-            "         )                        AS ord\n" +
-            "       FROM annotation\n" +
-            "       WHERE microtask_id IN (\n" +
-            "         SELECT microtasks.microtask_id\n" +
-            "         FROM microtasks\n" +
-            "         WHERE microtask_status = 2 -- unreviewed\n" +
-            "               AND microtask_id IN (\n" +
-            "           SELECT microtask_id\n" +
-            "           FROM microtasks\n" +
-            "           WHERE task_id = ?1\n" +
-            "         )\n" +
-            "       ) AND annotation_status = 0 -- reviewable\n" +
-            "             AND username <> ?2 -- 不是他做的\n" +
-            "             AND annotation_id NOT IN (-- 不是他评过的\n" +
-            "         SELECT annotation_id\n" +
-            "         FROM inspections\n" +
-            "         WHERE username = ?2\n" +
-            "       )\n" +
-            "     ) AS x\n" +
-            "WHERE parallel < 2 - have_done\n" +
-            "ORDER BY have_done DESC, ord ASC", nativeQuery = true)
-    List<BigInteger> getIdsByTaskId(long taskId, String username);
-
-
-    @Query(value = "select * from annotation\n" +
-            "where microtask_id in (\n" +
-            "    select microtask_id from microtasks\n" +
-            "    where img_name = ?1\n" +
-            ") and create_time = all (\n" +
-            "    select max(create_time) from annotation\n" +
-            ")", nativeQuery = true)
-    Annotation findLatestByImgName(String imgName);
-
-    @Query(value = "select\n" +
             "    id\n" +
-            "from (\n" +
-            "    select \n" +
+            "FROM (\n" +
+            "    SELECT \n" +
             "        annotation.annotation_id,\n" +
             "        annotation.annotation_status, -- 这个好像可以按这个来排 \n" +
             "        annotation.iteration,\n" +
             "        (\n" +
-            "            select sum(rate) from verification \n" +
-            "            where verification.annotation_id = annotation.annotation_id\n" +
-            "                and verification_type = ?2\n" +
-            "        ) as rate_sum,\n" +
-            "    from annotation\n" +
-            "    where microtask_id = ?1\n" +
-            ") as A\n" +
-            "where rate_sum = 3 or rate_sum = 0\n" +
-            "order by rate_sum asc, iteration desc",
+            "            SELECT sum(rate) FROM verification \n" +
+            "            WHERE verification.annotation_id = annotation.annotation_id\n" +
+            "                AND verification_type = ?2\n" +
+            "        ) AS rate_sum,\n" +
+            "    FROM annotation\n" +
+            "    WHERE microtask_id = ?1\n" +
+            ") AS A\n" +
+            "WHERE rate_sum = 3 OR rate_sum = 0\n" +
+            "ORDER BY rate_sum ASC, iteration DESC",
             nativeQuery = true)
     List<BigInteger> getSample(long microtaskId, int verificationTypeOrd);
 
 }
 
 /*
+// findLatestByImgName
+// 这是错的，用不了
 select * from (
     select * from annotation
     where microtask_id in (
@@ -100,6 +110,20 @@ select * from (
 where  create_time = all (
     select max(create_time) from a
 )
+
+SELECT annotation_id
+FROM annotation
+WHERE microtask_id IN (
+  SELECT microtask_id
+  FROM microtasks
+  WHERE img_name = ?1
+) AND create_time = ALL (SELECT max(create_time)
+                         FROM annotation
+                         WHERE microtask_id IN (
+                           SELECT microtask_id
+                           FROM microtasks
+                           WHERE img_name = ?1
+                         ))
 
 select * from annotation
 where username = ?2 and microtask_id in (

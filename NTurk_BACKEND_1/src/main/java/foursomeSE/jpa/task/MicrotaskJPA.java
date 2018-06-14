@@ -88,18 +88,18 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             nativeQuery = true)
     Microtask findByAnnotationId(long annotation_id);
 
-    @Query(value = "select count(*) from verification\n" +
-            "where verification_status = ?3 - 1\n" +
-            "    and username = ?2\n" +
-            "    and annotation_id in (\n" +
-            "        select annotation_id from annotation\n" +
-            "        where microtask_id in (\n" +
-            "            select microtask_id from microtasks\n" +
-            "            where task_id = ?1\n" +
-            "        )\n" +
-            "    )",
-            nativeQuery = true)
-    long countInspectionTimes(long taskId, String username, int microtaskStatus);
+//    @Query(value = "select count(*) from verification\n" +
+//            "where verification_status = ?3 - 1\n" +
+//            "    and username = ?2\n" +
+//            "    and annotation_id in (\n" +
+//            "        select annotation_id from annotation\n" +
+//            "        where microtask_id in (\n" +
+//            "            select microtask_id from microtasks\n" +
+//            "            where task_id = ?1\n" +
+//            "        )\n" +
+//            "    )",
+//            nativeQuery = true)
+//    long countInspectionTimes(long taskId, String username, int microtaskStatus);
 
     @Query(value = "select * from microtasks\n" +
             "where task_id = ?1 and is_sample = 1"

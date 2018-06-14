@@ -119,6 +119,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
 
         candidates.forEach(mt -> {
             mt.setParallel(mt.getParallel() + 1);
+            microtaskJPA.save(mt);
 
             CriticalSection.Item item = new CriticalSection.Item();
             item.requestTime = LocalDateTime.now();
@@ -138,6 +139,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                 bli.setUsername(username);
                 bli.setWrong(0);
                 bli.setHaveEnter(0);
+                bli.setVerificationType(getVType());
 
                 blacklistJPA.save(bli);
             }
@@ -214,7 +216,11 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                         }
                     }
                 } else {
-                    ArrayList<Long> failedId = diffs.stream().map(Verification::getAnnotationId)
+//                    ArrayList<Long> failedId = diffs.stream().map(Verification::getAnnotationId)
+//                            .collect(Collectors.toCollection(ArrayList::new));
+
+                    ArrayList<String> failedImgNames = diffs.stream()
+                            .map(v -> microtaskJPA.findByAnnotationId(v.getAnnotationId()).getImgName())
                             .collect(Collectors.toCollection(ArrayList::new));
 
                     int haveEnter = bli.getHaveEnter();
@@ -223,7 +229,8 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                         blacklistJPA.save(bli);
                     }
                     Warning warning = new Warning();
-                    warning.setFailedIds(failedId);
+//                    warning.setFailedIds(failedId);
+                    warning.setFailedImgNames(failedImgNames);
                     warning.setForbidden(bli.getWrong() >= TRAP_FALL_TOLERANCE);
                     throw new MyFailTestException(warning);
                 }

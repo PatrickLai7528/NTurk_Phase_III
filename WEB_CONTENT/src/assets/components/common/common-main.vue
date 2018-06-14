@@ -39,7 +39,7 @@
                 <template slot-scope="scope">
                     <el-button @click="handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
                     <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')">正确性判断</el-button>
-                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')">完整性判断</el-button>
+                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')" v-if="scope.row.taskCategory !== 'GENERAL'">完整性判断</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -75,13 +75,15 @@
 
         <el-dialog class="tutorial" title="教程" :visible.sync="dialogCoverageVisible" :modal="false" top="9vh">
             <p>亲爱的用户，您接下来要进行一项简单却事关重大的任务</p>
-            <p>您仅仅需要判断其他用户的标注是否<strong>准确</strong></p>
-            <p>接下来是几张优秀的标注和不准确的标注图片，请您过目：</p>
-            <img src="../../images/tutorial.png" height="400" width="600">
-            <p>上图二的标注不够精细，<strong>没有紧紧贴合</strong>物体的轮廓，框出了一些物体之外的背景，是<strong>不能过关</strong>的标注</p>
-            <p>上图三的标注虽然尝试贴合物体的轮廓，却<strong>没有</strong>将物体<strong>完整</strong>的圈出来,同样也是<strong>不能过关</strong>的标注</p>
-            <p>图五的标注看似不错，但是它圈出了一部分假想的，却<strong>不属于</strong>该物体<strong>可见的部分</strong>,也是<strong>不能过关</strong>的标注</p>
-            <p>您的判断对最后的质量把控十分<strong>重要</strong>，请<strong>严格</strong>要求标注的质量，不吝将有问题的标注拒之门外</p>
+            <p>您仅仅需要判断该图片是否还有没有被标注的同类物品，即标注是否<strong>完整</strong></p>
+            <p>接下来是针对同一张图片的一些例子：</p>
+            <img src="../../images/have1.png" height="165" width="248">
+            <p>该图片<strong>仅仅标注</strong>了一个物品，而其他物品没有被标注出来，是<strong>不完整</strong>的标注</p>
+            <img src="../../images/have2.png" height="165" width="248">
+            <p>该图片虽然标注了不只一个物品，却<strong>没有</strong>将<strong>所有物体</strong>圈出来,同样也是<strong>不完整</strong>的标注</p>
+            <img src="../../images/haveall.png" height="165" width="248">
+            <p>在这张图片中，所有物品都被标注出来了，<strong>没有</strong>任何的<strong>遗漏</strong>，所以这张图片是<strong>合格的</strong>，能<strong>通过</strong>完整性检验的标注</p>
+            <p>您的判断对最后的质量把控十分<strong>重要</strong>，请<strong>严格</strong>判断标注是否完全，不吝将不完整的标注拒之门外</p>
             <p>我们将会随机的对您的判断进行<strong>核查</strong>，如果发现您的判断出现严重问题会对您发出<strong>警告</strong>，多次出现问题将会对您进行<strong>惩罚</strong></p>
             <p>但是不要太过担心，毕竟这只是项简单的工作，只要<strong>用心参与</strong>就不会出现问题</p>
             <h1>加油吧💪!</h1>

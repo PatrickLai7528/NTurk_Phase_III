@@ -50,6 +50,14 @@ public class TaskController {
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/taskId/{taskId}",
+    method = RequestMethod.GET)
+    public ResponseEntity<?> getTaskById(@RequestHeader("Authorization") String token,
+                                         @PathVariable("taskId") long taskId) {
+        CTask t = taskService.getById(taskId);
+        return new ResponseEntity<Object>(t, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/workerTasks",
             method = RequestMethod.GET)
     @PreAuthorize("hasRole('WORKER')")
