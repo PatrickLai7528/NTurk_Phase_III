@@ -14,8 +14,8 @@ var store = new Vuex.Store({
         userId: "",
         userType: "",
         token: null,
-        annotationIds:[],
         imgNames:[],
+        tagsForAnnotation:[],             //进入任务时新增的状态
     },
     mutations: {
         LOG_IN(state, data) {  //登入，保存状态
@@ -41,18 +41,18 @@ var store = new Vuex.Store({
             state.isLogin = false;
             state.imgNames = [];
             state.annotationIds = [];
-        },
-        changeAnnotationIds(state,newList){      //更改AnnotationIds的值
-            let temp = JSON.stringify(newList);
-            sessionStorage.setItem('annotationIds',temp);
-            state.annotationIds = newList;
+            state.tagsForAnnotation = [];
         },
         changeImgNames(state,newList){
             let temp = JSON.stringify(newList);
-            console.log(temp);
             sessionStorage.setItem('imgNames',temp);
             state.imgNames = newList;
-        }
+        },
+        changeTagsForAnnotation(state,newList){
+            let temp = JSON.stringify(newList);
+            sessionStorage.setItem('tagsForAnnotation',temp);
+            state.tagsForAnnotation = newList;
+        },
     },
     actions: {
         logIn({commit}, data) {
@@ -90,13 +90,13 @@ var store = new Vuex.Store({
             }
             return state.userType;
         },
-        getAnnotationIds(state){
-            state.annotationIds = JSON.parse(sessionStorage.getItem('annoatationIds'));
-            return state.annotationIds;
-        },
         getImgNames(state){
             state.imgNames = JSON.parse(sessionStorage.getItem('imgNames'));
             return state.imgNames;
+        },
+        getTagsForAnnotation(state){
+            state.tagsForAnnotation = JSON.parse(sessionStorage.getItem('tagsForAnnotation'));
+            return state.tagsForAnnotation;
         }
     }
 });

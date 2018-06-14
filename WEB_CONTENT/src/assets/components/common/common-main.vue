@@ -37,7 +37,7 @@
             <el-table-column prop="rewardPerMicrotask" label="单张图奖励" sortable></el-table-column>
             <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
-                    <el-button @click="handleAnnotationJump(scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
+                    <el-button @click="handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
                     <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')">正确性判断</el-button>
                     <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')">完整性判断</el-button>
                 </template>
@@ -211,7 +211,7 @@
 
                 console.log(this.tableData);
             },
-            handleAnnotationJump(taskId,path){      //处理任务中心的jump标注
+            handleAnnotationJump(row,taskId,path){      //处理任务中心的jump标注
                 let _this = this;
                 _this.dialogTutorialVisible = true;
                 _this.$http.get('http://localhost:8086/task/' + taskId, {
@@ -221,6 +221,8 @@
                 }).then(function (response) {
                     let imgNames = response.data;
                     _this.$store.commit('changeImgNames',imgNames);
+                    console.log(row.tagsForAnnotation);
+                    _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
                     _this.taskId = taskId;
                     _this.path = path;
                 }).catch(function (error) {
