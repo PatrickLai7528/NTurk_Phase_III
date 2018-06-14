@@ -31,7 +31,7 @@ class SegmentDrawingStrategy {
 	 * @returns {string}
 	 */
 	getMarkingTypeName() {
-		return "segments";
+		return "segment";
 	}
 
 	/**
@@ -56,6 +56,7 @@ class SegmentDrawingStrategy {
 			context.lineTo(polygon[p].x, polygon[p].y);
 			context.stroke();
 		}
+		context.strokeStyle = config.strokeStyle;
 		context.fillStyle = config.fillStyle;
 		context.globalAlpha = config.globalAlpha;
 		context.fill();
