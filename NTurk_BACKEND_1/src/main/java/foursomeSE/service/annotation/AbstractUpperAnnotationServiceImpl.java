@@ -68,7 +68,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 
         T t = anttById(abstractAnnotationJPA, a.getAnnotationId());
 
-        List<T> previous  = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
+        List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
                 mt.getMicrotaskId(), a.getCreateTime(), AnnotationStatus.PASSED
         );
 
@@ -95,7 +95,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
             Worker worker = userByUsername(workerJPA, username);
 
             Contract translucent = contractJPA.findByTaskIdByUsername(taskId, username);
-            if(translucent == null) {
+            if (translucent == null) {
                 Contract c = new Contract();
                 c.setTaskId(taskId);
                 c.setWorkerId(worker.getId());

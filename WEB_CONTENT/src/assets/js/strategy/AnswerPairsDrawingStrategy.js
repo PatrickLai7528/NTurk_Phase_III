@@ -12,7 +12,7 @@ class AnswerPairsDrawingStrategy {
 	 * @returns {string}
 	 */
 	getMarkingTypeName() {
-		return "answerPairs";
+		return "answerPair";
 	}
 
 	/**

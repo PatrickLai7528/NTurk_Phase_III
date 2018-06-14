@@ -1,6 +1,5 @@
 package foursomeSE.entity.communicate;
 
-import foursomeSE.entity.inspection.Inspection;
 
 import java.util.List;
 
