@@ -5,9 +5,9 @@
 var PasswordValidator = function (value) {
     // private constant
     const _MESSAGE = {
-        emptyError: "該欄不能為空",
-        lengthError: "密碼長度必须5-16个字符",
-        success: "驗證通過"
+        emptyError: "该栏不能为空",
+        lengthError: "密码长度必须5-16个字符",
+        success: "验证通过"
     };
 
     // private

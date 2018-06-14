@@ -23,7 +23,7 @@
                 >
                     {{tag}}
                 </el-tag>
-                <el-button size="small" @click="dialogFormVisible = true" style="font-size: 16px">+</el-button>
+                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px" icon="el-icon-plus"></el-button>
 
                 <el-dialog title="添加标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="500px">
                     <div style="font-size: 16px; display: inline; margin-right: 20px">标签名称</div>

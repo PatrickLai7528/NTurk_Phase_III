@@ -7,7 +7,7 @@
                     <el-form label-position="left" class="tableSlot">
                         <el-row>
                             <el-col :span="6">
-                                <el-form-item label="發起者">
+                                <el-form-item label="发起者">
                                     <span class="tableSlotSpan">{{props.row.requesterName}}</span>
                                 </el-form-item>
                             </el-col>
@@ -28,18 +28,24 @@
                              :filter-method="filterSourceHandler"></el-table-column>
             <el-table-column prop="taskCategoryChi" label="类别" sortable
                              :filters="[
-                                {text: '整體標註', value: 'GENERAL'},
-                                {text: '區域標註', value: 'FRAME'},
-                                {text: '區域劃分', value: 'SEGMENT'}]"
+                                {text: '整体标注', value: 'GENERAL'},
+                                {text: '画框标注', value: 'FRAME'},
+                                {text: '区域标注', value: 'SEGMENT'}]"
                              :filter-method="filterCategoryHandler"></el-table-column>
             <el-table-column prop="taskName" label="任务名称"></el-table-column>
             <!--<el-table-column prop="taskDescription" label="任务描述"></el-table-column>-->
             <el-table-column prop="rewardPerMicrotask" label="单张图奖励" sortable></el-table-column>
             <el-table-column fixed="right" label="操作">
                 <template slot-scope="scope">
-                    <el-button @click="handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)" type="text" size="medium">标注</el-button>
-                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')">正确性判断</el-button>
-                    <el-button type="text" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')" v-if="scope.row.taskCategory !== 'GENERAL'">完整性判断</el-button>
+                    <el-popover placement="left" trigger="hover">
+                        <p style="font-size: 16px; font-weight: bold; text-align: center;">请选择要进行的操作</p>
+                        <div style="text-align: center;">
+                            <el-button type="info" size="medium"@click="handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)" round>图片标注</el-button>
+                            <el-button type="info" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')" round>正确性判断</el-button>
+                            <el-button type="info" size="medium" @click="handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')" v-if="scope.row.taskCategory !== 'GENERAL'" round>完整性判断</el-button>
+                        </div>
+                        <el-button slot="reference" type="primary" size="medium" align="left" round>参与任务</el-button>
+                    </el-popover>
                 </template>
             </el-table-column>
         </el-table>
@@ -203,11 +209,11 @@
             translate: function () {
                 for (let i = 0; i < this.tableData.length; i++) {
                     if (this.tableData[i].taskCategory === "GENERAL") {
-                        this.tableData[i].taskCategoryChi = "整體標註";
+                        this.tableData[i].taskCategoryChi = "整体标注";
                     } else if (this.tableData[i].taskCategory === "FRAME") {
-                        this.tableData[i].taskCategoryChi = "區域標註";
+                        this.tableData[i].taskCategoryChi = "画框标注";
                     } else if (this.tableData[i].taskCategory === "SEGMENT") {
-                        this.tableData[i].taskCategoryChi = "區域劃分";
+                        this.tableData[i].taskCategoryChi = "区域标注";
                     }
                 }
 
