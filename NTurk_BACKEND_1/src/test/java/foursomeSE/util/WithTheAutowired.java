@@ -3,6 +3,7 @@ package foursomeSE.util;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.verification.Verification;
+import foursomeSE.jpa.BlacklistJPA;
 import foursomeSE.jpa.annotation.*;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.gold.GoldJPA;
@@ -45,6 +46,8 @@ public abstract class WithTheAutowired {
     protected VerificationJPA verificationJPA;
     @Autowired
     protected GoldJPA goldJPA;
+    @Autowired
+    protected BlacklistJPA blacklistJPA;
 
 
     @Autowired

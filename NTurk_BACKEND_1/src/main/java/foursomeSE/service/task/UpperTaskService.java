@@ -1,5 +1,6 @@
 package foursomeSE.service.task;
 
+import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
@@ -17,7 +18,10 @@ public interface UpperTaskService {
 //     * 如果是Requester，那么需要这个任务是他发布的（他不能以requester的身份看其他人的哪怕是新任务）
 //     * 如果是Worker，可以看到没有结束的新任务（不能是指定模式下且没指定他的），和他领取过的所有任务。（也就是getWorkerTasks和getNewTasks里规定的）
 //     * */
-//    CTask getById(long id);
+
+
+    // 前端需要在一个任务结束后判断task是否还能继续，这时就调用这个方法
+    CTask getById(long id);
 
     /**
      * task的要求:（没做）
@@ -52,6 +56,8 @@ public interface UpperTaskService {
      *
      * */
     EnterResponse enterTask(long taskId, String username);
+
+    Reports getJson(long taskId, String username);
 
 
 //    /**
