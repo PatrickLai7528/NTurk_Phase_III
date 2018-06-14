@@ -57,7 +57,7 @@ public interface UpperTaskService {
      * */
     EnterResponse enterTask(long taskId, String username);
 
-    Reports getJson(long taskId, String username);
+
 
 
 //    /**

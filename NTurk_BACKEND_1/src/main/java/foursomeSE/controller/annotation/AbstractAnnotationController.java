@@ -2,6 +2,7 @@ package foursomeSE.controller.annotation;
 
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.entity.annotation.RAnnotations;
+import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.error.MyErrorType;
 import foursomeSE.error.MyObjectNotFoundException;
 import foursomeSE.security.JwtUtil;
@@ -51,6 +52,17 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
 
         annotationService.saveAnnotations(rAnnotations, username);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/json/taskId/{taskId}",
+    method = RequestMethod.GET)
+    @PreAuthorize("hasRole('REQUESTER')")
+    public ResponseEntity<?> getJsons(@RequestHeader("Authorization") String token,
+                                      @PathVariable("taskId") long taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        Reports json = annotationService.getJson(taskId, username);
+        return new ResponseEntity<Object>(json, HttpStatus.OK);
     }
 
 

@@ -1,8 +1,12 @@
 package foursomeSE.service.annotation;
 
+import com.google.gson.Gson;
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.entity.annotation.AnnotationStatus;
+import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.annotation.RAnnotations;
+import foursomeSE.entity.communicate.report.Report;
+import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
@@ -133,6 +137,61 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
             throw new MyNotValidException();
         }
     }
+
+    @Override
+    public Reports getJson(long taskId, String username) {
+        List<String> imgs = microtaskJPA.retrieveImgNames(taskId);
+
+        ArrayList<Report> reports = new ArrayList<>();
+
+        for (String img : imgs) {
+            Microtask microtask = mtByImg(microtaskJPA, img);
+            if (microtask.getMicrotaskStatus() == MicrotaskStatus.PASSED) {
+                Report r = new Report();
+                r.setImgName(img);
+
+                BigInteger b = annotationJPA.findLatestByImgName(img);
+                // 这个方法找到的原不一定是最新的，但是在这里最新的那个一定是通过的。
+
+                T t = anttById(abstractAnnotationJPA, b.longValue());
+                List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
+                        microtask.getMicrotaskId(), t.getCreateTime(), AnnotationStatus.PASSED
+                );
+                previous.add(t);
+
+                // 先这么写。。。懒得再分一个子方法了
+                if (t instanceof GeneralAnnotation) {
+                    r.setCore(((GeneralAnnotation) t).getAnswer());
+                } else {
+                    ArrayList<Object> cores = previous.stream().map(Annotation::core).collect(Collectors.toCollection(ArrayList::new));
+                    r.setCore(cores);
+                }
+
+                reports.add(r);
+            }
+        }
+
+        Reports result = new Reports();
+        result.setReports(reports);
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("e");
+
+        Report t = new Report();
+        t.setImgName("imgnames");
+        t.setCore(new int[] {1,2,3});
+        t.setCore("如果改成string");
+        Object o = t;
+
+        Gson gson = new Gson();
+        String s = gson.toJson(o);
+
+        System.out.println(s);
+
+    }
+
 }
 
 

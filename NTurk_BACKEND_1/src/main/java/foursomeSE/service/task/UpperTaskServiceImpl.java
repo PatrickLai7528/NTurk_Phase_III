@@ -219,11 +219,6 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 //    }
 
 
-    @Override
-    public Reports getJson(long taskId, String username) {
-        List<String> imgs = microtaskJPA.retrieveImgNames(taskId);
-        return null;
-    }
 
     /**
      * statistic
