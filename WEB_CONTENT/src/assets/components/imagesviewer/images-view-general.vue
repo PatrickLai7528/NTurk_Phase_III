@@ -163,7 +163,7 @@
                         if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
                             _this.forbiddenMessage();
                         }
-                        else if(failedIds !== undefined || failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                        else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
                             _this.wrongImg = failedIds[0];   //把第一条挑出来
                             let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
                             _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);

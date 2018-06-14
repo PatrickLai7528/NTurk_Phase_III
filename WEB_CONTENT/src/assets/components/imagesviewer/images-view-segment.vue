@@ -65,6 +65,13 @@
             <canvas>
 
             </canvas>
+            <p>这道题的图片和标注如上图所示</p>
+            <p>您认为:{{wrongAnswerPairs[0]}}</p>
+            <p>但实际上：{{wrongAnswerPairs[1]}}</p>
+            <p>您的答案对标注的质量非常关键，请您在下次的标注中更加<strong>用心</strong>和<strong>仔细</strong></p>
+            <p>我们还会<strong>继续检查</strong>您的答案，如果下次再发现问题可能会对您采取<strong>惩罚措施</strong></p>
+
+            <el-button type="primary" @click="read()">确 定</el-button>
         </el-dialog>
     </el-container>
 </template>
@@ -245,6 +252,9 @@
             }
         },
         methods: {
+            read(){
+                this.dialogVisible = false;
+            },
             commitRating(){
                 //list里面的对象包含annotationId和rate
                 function Inspection(annotationId,rate){
@@ -297,8 +307,13 @@
                     if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
                         _this.forbiddenMessage();
                     }
-                    else if(failedIds !== undefined || failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                    else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
                         _this.wrongImg = failedIds[0];   //把第一条挑出来
+
+                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
                         _this.showDialog();     //显示错误教程
                     }
                     else if(_this.canGoon()){          //判断还能不能继续做
@@ -311,6 +326,33 @@
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
                     console.log("error");
                 });
+            },
+            findIndexByImg(img){
+                for(let i = 0;i < this.number;i++){
+                    if(this.imgNames[i] === img){
+                        return i;
+                    }
+                }
+
+                return -1;
+            },
+            translateRate(rate){    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
+                if(this.taskType === 'grade'){
+                    if(rate === 0){
+                        return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
+                    }
+                    else{
+                        return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
+                    }
+                }
+                else if(this.taskType === 'coverage'){
+                    if(rate === 0){
+                        return ["这张图片还有其他可以标注的","这张图片已经没有其他可供标注的"];
+                    }
+                    else{
+                        return ["这张图片已经没有其他可供标注的","这张图片还有其他可以标注的"];
+                    }
+                }
             },
             showDialog(){
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
