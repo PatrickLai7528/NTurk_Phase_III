@@ -77,9 +77,15 @@
             <canvas>
 
             </canvas>
+            <p>这道题的图片和标注如上图所示</p>
+            <p>您认为:{{wrongAnswerPairs[0]}}</p>
+            <p>但实际上：{{wrongAnswerPairs[1]}}</p>
+            <p>您的答案对标注的质量非常关键，请您在下次的标注中更加<strong>用心</strong>和<strong>仔细</strong></p>
+            <p>我们还会<strong>继续检查</strong>您的答案，如果下次再发现问题可能会对您采取<strong>惩罚措施</strong></p>
+
+            <el-button type="primary" @click="read()">确 定</el-button>
         </el-dialog>
     </el-container>
-
 </template>
 
 <style>
@@ -186,9 +192,9 @@
                 imgNames: this.$store.getters.getImgNames,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
                 dialogVisible: false,
-                wrongImg:'',            //假设返回的是wrongImg
-                wrongAnnotation:{}      //这是那个wrongImg的annotation
-
+                wrongImg:'',            //返回的是wrongImg
+                wrongAnnotation:{},      //这是那个wrongImg的annotation
+                wrongAnswerPairs: [],
             }
         },
         mounted() {
@@ -235,6 +241,9 @@
             }
         },
         methods: {
+            read(){
+                this.dialogVisible = false;
+            },
             commitRating(){
                 //list里面的对象包含annotationId和rate
                 function Inspection(annotationId,rate){
@@ -264,9 +273,69 @@
                 this.$http.post(path,
                     JSON.stringify(inspections),
                     {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                    _this.showMessage();
+                        let failedIds = response.data.failedIds;
+                        let forbidden = response.data.forbidden;
+
+                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                            _this.forbiddenMessage();
+                        }
+                        else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                            _this.wrongImg = failedIds[0];   //把第一条挑出来
+                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                            _this.showDialog();     //显示错误教程
+                        }
+                        else if(_this.canGoon()){          //判断还能不能继续做
+                            _this.showMessage();    //能继续做，鼓励继续
+                        }
+                        else{
+                            _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                        }
+
                 }).catch(function (error) {
                     console.log(error);
+                });
+            },
+            findIndexByImg(img){
+                for(let i = 0;i < this.number;i++){
+                    if(this.imgNames[i] === img){
+                        return i;
+                    }
+                }
+
+                return -1;
+            },
+            translateRate(rate){    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
+                if(this.taskType === 'grade'){
+                    if(rate === 0){
+                        return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
+                    }
+                    else{
+                        return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
+                    }
+                }
+                else if(this.taskType === 'coverage'){
+                    if(rate === 0){
+                        return ["这张图片还有其他可以标注的","这张图片已经没有其他可供标注的"];
+                    }
+                    else{
+                        return ["这张图片已经没有其他可供标注的","这张图片还有其他可以标注的"];
+                    }
+                }
+            },
+            showDialog(){
+                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
+                this.dialogVisible = true;   //显示错误提示
+            },
+            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+
+            },
+            forbiddenMessage(){
+                this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
+                    confirmButtonText: '确定',
+                    type: 'error',
                 });
             },
             successMessage(){
