@@ -70,11 +70,12 @@
                             </template >
                             <div >
                                 <div v-if = "isTagShow" v-for = "(val,index) in tagText" style = "margin-top: 0.3em" >
-                                    <el-input size = "small" placeholder = "请输入内容" v-model = "val.text" >
+                                    <el-autocomplete size = "small" placeholder = "请输入内容" v-model = "val.text"
+                                                     :fetch-suggestions = "querySearch" :disabled = val.old >
                                         <template slot = "prepend" >標註{{val.index+1}}</template >
                                         <el-button size = "mini" slot = "append" icon = "el-icon-delete"
                                                    @click = "deleteTag(index)" ></el-button >
-                                    </el-input >
+                                    </el-autocomplete >
                                 </div >
                             </div >
                         </el-collapse-item >
@@ -290,7 +291,16 @@
                         type: 'error'
                     })
                 }
-            }
+            },
+            querySearch(queryString, cb) {
+                let returnList = [];
+                console.log(this.tagsForAnnotation);
+                this.tagsForAnnotation.forEach((value, index, array) => {
+                    returnList.push({"value": value});
+                });
+                console.log(returnList);
+                cb(returnList);
+            },
         }
     }
 </script >
