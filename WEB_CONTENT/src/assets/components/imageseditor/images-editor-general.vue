@@ -76,8 +76,7 @@
                                     <!--</el-form-item >-->
                                     <!--</el-form >-->
                                 <el-autocomplete
-		                                class = "inline-input"
-		                                v-model = "state1"
+		                                v-model = "answer"
 		                                :fetch-suggestions = "querySearch"
 		                                placeholder = "请输入内容"
                                 ></el-autocomplete >
@@ -155,8 +154,8 @@
                 viewer: {},
                 canvasHtml: '<canvas id="canvas"></canvas>',
                 answers: [],
+                answer: "",
                 answerPairsDrawingStrategy: {},
-                answerChoice: [],
                 submitDisabled: "disabled",
                 contractId: this.$route.params.contractId,
                 taskId: this.$route.params.taskId,
@@ -194,6 +193,7 @@
                 this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
                 this.taskDescription = this.$store.getters.getTaskDescription;      //对于general来说，taskDescription尤其重要
+                console.log(this.tagsForAnnotation);
                 this.getImgNames();
                 this.setCountDown();
             })
@@ -238,15 +238,17 @@
             getTagText() {
             },
             next() {
-                this.viewer.setAnswerPairs(this.answers);
+                this.viewer.setAnswer(this.answer);
                 this.viewer.drawNext(() => {
+                    this.answer = "";
                     if (this.currentPlace < this.imageLength)
                         this.currentPlace++;
                 });
             },
             previous() {
-                this.viewer.setAnswerPairs(this.answers);
+                this.viewer.setAnswer(this.answer);
                 this.viewer.drawPrevious(() => {
+                    this.answer = "";
                     if (this.currentPlace > 1)
                         this.currentPlace--;
                 });
@@ -265,11 +267,11 @@
             },
             deleteTag(index) {
                 // this.viewer.forceUpdate(this.tagText);
-                this.viewer.deleteTag(index);
+                // this.viewer.deleteTag(index);
             },
             submit() {
+                this.viewer.setAnswer(this.answer);
                 if (this.viewer.submitCurrent(this.imageLength)) {
-                    this.viewer.submitCurrent(this.imageLength);
                     this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
@@ -297,10 +299,12 @@
                 }
             },
             querySearch(queryString, cb) {
-                if (this.answers)
-                    cb(this.answers);
-                else
-                    cb([])
+                let returnList = [];
+                console.log(this.tagsForAnnotation);
+                this.tagsForAnnotation.forEach((value, index, array) => {
+                    returnList.push({value: value});
+                });
+                cb(returnList);
             },
         }
     }
