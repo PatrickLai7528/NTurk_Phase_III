@@ -69,7 +69,7 @@ class FrameDrawingStrategy {
 	 * 					}
      */
     drawThis(context, frame, config) {
-        // console.log(frame);
+        console.log(frame);
         context.save();
         context.strokeStyle = config.strokeStyle;
         context.strokeRect(frame.p1.x, frame.p1.y,

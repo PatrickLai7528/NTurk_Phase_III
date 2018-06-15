@@ -38,7 +38,7 @@ let privateVariables = {
         /* canvas相關配置, 打算寫成可配置 */
         lineWidth: 5,
         strokeStyle:
-            "red",
+            "yellow",
         lineColor:
             "#000000",
         fillStyle:
