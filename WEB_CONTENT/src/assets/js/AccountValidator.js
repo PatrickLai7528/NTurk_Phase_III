@@ -6,9 +6,9 @@ var AccountValidator = function (value) {
 
     // private constants
     const _MESSAGE = {
-        emptyError: "該欄不能為空",
-        emailFormatError: "請使用郵箱",
-        success: "驗證通過"
+        emptyError: "该栏不能为空",
+        emailFormatError: "请使用邮箱",
+        success: "验证通过"
     };
 
     // private
