@@ -227,14 +227,20 @@
                         Authorization: _this.$store.getters.getToken,
                     }
                 }).then(function (response) {
-                    let imgNames = response.data;
-                    _this.$store.commit('changeImgNames',imgNames);
-                    console.log(row.tagsForAnnotation);
-                    _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
-                    _this.$store.commit('changeTaskDescription',row.taskDescription);
-                    _this.taskId = taskId;
-                    _this.path = path;
+                    if(response.status === 204){     //noContent    说明没有更多的图片可供标注
+                        _this.runOutMessage();
+                    }
+                    else{
+                        let imgNames = response.data;
+                        _this.$store.commit('changeImgNames',imgNames);
+                        console.log(row.tagsForAnnotation);
+                        _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
+                        _this.$store.commit('changeTaskDescription',row.taskDescription);
+                        _this.taskId = taskId;
+                        _this.path = path;
+                    }
                 }).catch(function (error) {
+
                     console.log(error);
                 })
             },
@@ -242,11 +248,9 @@
                 let _this = this;
                 let path = "";
                 if(type === 'grade'){
-                    _this.dialogGradingVisible = true;
                     path = 'http://localhost:8086/qualityVerification/taskId/' + taskId;  //评分的交互路径
                 }
                 else if(type === 'coverage'){
-                    _this.dialogCoverageVisible = true;
                     path = 'http://localhost:8086/coverageVerification/taskId/' + taskId;   //完整性判断的交互路径
                 }
                 else{
@@ -254,17 +258,32 @@
                 }
 
                 _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-
-                    //TODO:  因为接口没有完全写好，所以我猜测返回的是imgNames列表
-                    let imgNames = response.data;
-                    console.log(response.data);
-                    _this.$store.commit('changeImgNames',imgNames);         //在vuex中提交更改
-                    _this.taskId = taskId;
-                    _this.path = _this.routerDictionary[taskCategory];
+                    if(response.status === 204){     //noContent    说明没有更多的图片可供review
+                        _this.successMessage();
+                    }
+                    else{
+                        let imgNames = response.data;
+                        console.log(response.data);
+                        if(type === 'grade'){        //因为要先确认能进去方法再加载教程
+                            _this.dialogGradingVisible = true;
+                        }
+                        else{
+                            _this.dialogCoverageVisible = true;
+                        }
+                        _this.$store.commit('changeImgNames',imgNames);         //在vuex中提交更改
+                        _this.taskId = taskId;
+                        _this.path = _this.routerDictionary[taskCategory];
+                    }
                 }).catch(function (error) {
-                    _this.successMessage();
                     console.log(error);
                 })
+            },
+            runOutMessage(){
+                this.$notify({
+                   title: '系统提示',
+                   message: '这个任务暂时没有可供标注的图片了，换个任务试试吧^_^',
+                   type: 'success'
+                });
             },
             successMessage(){                    //这里有可能出现问题的原因是当前项目没得需要评审的任务了
                 this.$notify({
