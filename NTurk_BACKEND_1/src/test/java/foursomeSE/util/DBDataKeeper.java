@@ -1,5 +1,6 @@
 package foursomeSE.util;
 
+import foursomeSE.entity.BlacklistItem;
 import foursomeSE.entity.Gold;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
@@ -31,6 +32,7 @@ public class DBDataKeeper extends WithTheAutowired {
 
     private List<Verification> verifications;
     private List<Gold> golds;
+    private List<BlacklistItem> blacklistItems;
 
 
     // jpas messages就不测了吧
@@ -49,7 +51,7 @@ public class DBDataKeeper extends WithTheAutowired {
 
         verifications = iterableToList(verificationJPA.findAll());
         golds = iterableToList(goldJPA.findAll());
-
+        blacklistItems = iterableToList(blacklistJPA.findAll());
 
         clearAll(); // 这个是删老的
     }
@@ -70,6 +72,7 @@ public class DBDataKeeper extends WithTheAutowired {
 
         verificationJPA.saveAll(verifications);
         goldJPA.saveAll(golds);
+        blacklistJPA.saveAll(blacklistItems);
 
 //        inspectionContractJPA.saveAll(inspectionContracts);
     }
@@ -89,6 +92,7 @@ public class DBDataKeeper extends WithTheAutowired {
 
         verificationJPA.deleteAll();
         goldJPA.deleteAll();
+        blacklistJPA.deleteAll();
 
 
         // 别忘这个...

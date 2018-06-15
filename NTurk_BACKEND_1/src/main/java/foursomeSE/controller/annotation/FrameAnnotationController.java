@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FrameAnnotationController extends AbstractAnnotationController<FrameAnnotation> {
     @Override
     @Autowired
-    @Qualifier("simpleFrameAnnotationServiceImpl")
+    @Qualifier("upperFrameAnnotationServiceImpl")
     public void setAnnotationService(UpperAnnotationService<FrameAnnotation> annotationService) {
         this.annotationService = annotationService;
     }

@@ -76,20 +76,20 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
     BigInteger findLatestByImgName(String imgName);
 
     @Query(value = "SELECT\n" +
-            "    id\n" +
+            "  annotation_id\n" +
             "FROM (\n" +
-            "    SELECT \n" +
-            "        annotation.annotation_id,\n" +
-            "        annotation.annotation_status, -- 这个好像可以按这个来排 \n" +
-            "        annotation.iteration,\n" +
-            "        (\n" +
-            "            SELECT sum(rate) FROM verification \n" +
-            "            WHERE verification.annotation_id = annotation.annotation_id\n" +
-            "                AND verification_type = ?2\n" +
-            "        ) AS rate_sum,\n" +
-            "    FROM annotation\n" +
-            "    WHERE microtask_id = ?1\n" +
-            ") AS A\n" +
+            "       SELECT\n" +
+            "         annotation.annotation_id,\n" +
+            "         annotation.annotation_status, -- 这个好像可以按这个来排\n" +
+            "         annotation.iteration,\n" +
+            "         (\n" +
+            "           SELECT sum(rate) FROM verification\n" +
+            "           WHERE verification.annotation_id = annotation.annotation_id\n" +
+            "                 AND verification_type = ?2\n" +
+            "         ) AS rate_sum\n" +
+            "       FROM annotation\n" +
+            "       WHERE microtask_id = ?1\n" +
+            "     ) AS A\n" +
             "WHERE rate_sum = 3 OR rate_sum = 0\n" +
             "ORDER BY rate_sum ASC, iteration DESC",
             nativeQuery = true)
@@ -173,20 +173,20 @@ ORDER BY have_done DESC, ord ASC
 
 // getSample: long microtaskId, int verificationTypeOrd
 select
-    id
+  annotation_id
 from (
-    select
-        annotation.annotation_id,
-        annotation.annotation_status, -- 这个好像可以按这个来排
-        annotation.iteration,
-        (
-            select sum(rate) from verification
-            where verification.annotation_id = annotation.annotation_id
-                and verification_type = ?2
-        ) as rate_sum,
-    from annotation
-    where microtask_id = ?1
-) as A
+       select
+         annotation.annotation_id,
+         annotation.annotation_status, -- 这个好像可以按这个来排
+         annotation.iteration,
+         (
+           select sum(rate) from verification
+           where verification.annotation_id = annotation.annotation_id
+                 and verification_type = ?2
+         ) as rate_sum
+       from annotation
+       where microtask_id = ?1
+     ) as A
 where rate_sum = 3 or rate_sum = 0
 order by rate_sum asc, iteration desc
 

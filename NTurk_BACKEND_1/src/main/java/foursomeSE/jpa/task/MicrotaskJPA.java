@@ -16,13 +16,13 @@ import java.util.Optional;
 public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
     Optional<Microtask> findByImgName(String imgName);
 
-    @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1\n" +
-            "    and microtask_status = 0\n" +
-            "    and parallel = 0\n" +
-            "order by is_sample desc,\n" +
-            "    iteration desc,\n" +
-            "    ord asc",
+    @Query(value = "SELECT * FROM microtasks\n" +
+            "WHERE task_id = ?1\n" +
+            "    AND microtask_status = 0\n" +
+            "    AND parallel = 0\n" +
+            "ORDER BY is_sample DESC,\n" +
+            "    iteration DESC,\n" +
+            "    ord ASC",
             nativeQuery = true)
     List<Microtask> getMicroTasks(long taskId);
 
@@ -65,12 +65,12 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             "         WHERE NOT EXISTS(SELECT *\n" +
             "                          FROM annotation a1\n" +
             "                          WHERE annotation_id = latest_annotation_id\n" +
-            "                                AND username = ?2 OR EXISTS(\n" +
-            "                                    SELECT *\n" +
-            "                                    FROM verification\n" +
-            "                                    WHERE verification.annotation_id = a1.annotation_id\n" +
-            "                                          AND verification_type = ?3 - 1\n" +
-            "                                          AND username = ?2))\n" +
+            "                                AND (username = ?2 OR EXISTS(\n" +
+            "                              SELECT *\n" +
+            "                              FROM verification\n" +
+            "                              WHERE verification.annotation_id = a1.annotation_id\n" +
+            "                                    AND verification_type = ?3 - 1\n" +
+            "                                    AND username = ?2)))\n" +
             "       ) AS B\n" +
             "  WHERE B.parallel < ALL (SELECT 1 + 2 * is_collecting - have_done AS n\n" +
             "                          FROM tasks\n" +
@@ -80,10 +80,10 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             nativeQuery = true)
     List<Microtask> getForVerification(long taskId, String username, int microtaskStatusOrd);
 
-    @Query(value = "select * from microtasks\n" +
-            "where microtask_id in (\n" +
-            "    select microtask_id from annotation\n" +
-            "    where annotation_id = ?1\n" +
+    @Query(value = "SELECT * FROM microtasks\n" +
+            "WHERE microtask_id IN (\n" +
+            "    SELECT microtask_id FROM annotation\n" +
+            "    WHERE annotation_id = ?1\n" +
             ")",
             nativeQuery = true)
     Microtask findByAnnotationId(long annotation_id);
@@ -101,14 +101,15 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
 //            nativeQuery = true)
 //    long countInspectionTimes(long taskId, String username, int microtaskStatus);
 
-    @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1 and is_sample = 1"
+    @Query(value = "SELECT * FROM microtasks\n" +
+            "WHERE task_id = ?1 AND is_sample = 1\n" +
+            "ORDER BY ord ASC"
             , nativeQuery = true)
     List<Microtask> getSampling(long taskId);
 
-    @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1 and is_sample = 0\n" +
-            "order by ord asc",
+    @Query(value = "SELECT * FROM microtasks\n" +
+            "WHERE task_id = ?1 AND is_sample = 0\n" +
+            "ORDER BY ord ASC",
             nativeQuery = true)
     List<Microtask> getUnSampled(long taskId);
 
@@ -120,12 +121,12 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
 
 
     // 这个是为了
-    @Query(value = "select * from microtasks\n" +
-            "where task_id = ?1 and microtask_status <> 3",
+    @Query(value = "SELECT * FROM microtasks\n" +
+            "WHERE task_id = ?1 AND microtask_status <> 3",
             nativeQuery = true)
     List<Microtask> findByTaskIdNotPassed(long taskId);
 
-    @Query(value = "select img_name from microtasks where task_id = ?1",
+    @Query(value = "SELECT img_name FROM microtasks WHERE task_id = ?1",
             nativeQuery = true)
     List<String> retrieveImgNames(long taskId);
 }
@@ -239,12 +240,12 @@ WHERE microtask_id IN (
          WHERE NOT EXISTS(SELECT *
                           FROM annotation a1
                           WHERE annotation_id = latest_annotation_id
-                                AND username = ?2 OR EXISTS(
-                                    SELECT *
-                                    FROM verification
-                                    WHERE verification.annotation_id = a1.annotation_id
-                                          AND verification_type = ?3 - 1
-                                          AND username = ?2))
+                                AND (username = ?2 OR EXISTS(
+                              SELECT *
+                              FROM verification
+                              WHERE verification.annotation_id = a1.annotation_id
+                                    AND verification_type = ?3 - 1
+                                    AND username = ?2)))
        ) AS B
   WHERE B.parallel < ALL (SELECT 1 + 2 * is_collecting - have_done AS n
                           FROM tasks
@@ -275,6 +276,7 @@ where verification_status = ?3 - 1
 // getSampling
 select * from microtasks
 where task_id = ?1 and is_sample = 1
+order by ord asc
 
 // getUnSampled
 select * from microtasks

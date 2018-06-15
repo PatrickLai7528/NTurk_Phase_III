@@ -14,6 +14,7 @@ import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
+import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -25,15 +26,17 @@ import java.util.List;
 @Service
 @Qualifier("coverage")
 public class CoverageVerificationServiceImpl extends AbstractVerificationServiceImpl {
-    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA);
+    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService);
     }
 
     @Override
     protected void passVerification() {
         super.passVerification();
 
-        checkAndFindGold();
+        if (needToFindGold()) {
+            findGoldForFS();
+        }
         checkFinishTask();
         // 都是有可能结束了的，包括collecting还没有结束时。极端一点就是所有结果都是2/3
     }

@@ -1,6 +1,6 @@
 package foursomeSE.service.annotation;
 
-import foursomeSE.entity.annotation.FrameAnnotation;
+import foursomeSE.entity.annotation.SegmentAnnotation;
 import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-@Qualifier("simpleFrameAnnotationServiceImpl")
-public class SimpleFrameAnnotationServiceImpl extends AbstractUpperAnnotationServiceImpl<FrameAnnotation> {
-    public SimpleFrameAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<FrameAnnotation> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
+@Qualifier("simpleSegmentAnnotationServiceImpl")
+public class UpperSegmentAnnotationServiceImpl extends AbstractUpperAnnotationServiceImpl<SegmentAnnotation> {
+    public UpperSegmentAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<SegmentAnnotation> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
         super(contractJPA, abstractAnnotationJPA, workerJPA, microtaskJPA, annotationJPA, goldJPA);
     }
 }

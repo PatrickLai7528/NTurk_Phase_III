@@ -16,6 +16,7 @@ public interface MyConstants {
 
     int SAMPLE_SIZE = 15;
     int TRAP_FALL_TOLERANCE = 2;
+    int GOLD_NUM = 10;
 
     double ACCEPTED_SUM = 9;
     double ANNOTATION_PERCENT = 0.6;

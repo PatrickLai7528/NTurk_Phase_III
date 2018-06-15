@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SegmentAnnotationController extends AbstractAnnotationController<SegmentAnnotation>{
     @Override
     @Autowired
-    @Qualifier("simpleSegmentAnnotationServiceImpl")
+    @Qualifier("upperSegmentAnnotationServiceImpl")
     public void setAnnotationService(UpperAnnotationService<SegmentAnnotation> annotationService) {
         this.annotationService = annotationService;
     }

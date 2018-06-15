@@ -1,5 +1,7 @@
 package foursomeSE.entity;
 
+import foursomeSE.entity.verification.VerificationType;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,4 +21,7 @@ public class Gold {
 
     @NotNull
     public int ord;
+
+    @NotNull
+    public VerificationType verificationType;
 }
