@@ -225,6 +225,7 @@
                     this.viewer.setTagUpdateCallback(this.updateTagHtml);
                     this.viewer.setTagTextUpdateCallback(this.updateTagText);
                     this.viewer.setTagTextGettingCallback(this.getTagText);
+                    this.answer = this.viewer.getAnswer();
                 });
             },
             updateTagHtml() {
@@ -240,7 +241,7 @@
             next() {
                 this.viewer.setAnswer(this.answer);
                 this.viewer.drawNext(() => {
-                    this.answer = "";
+                    this.answer = this.viewer.getAnswer();
                     if (this.currentPlace < this.imageLength)
                         this.currentPlace++;
                 });
@@ -248,7 +249,7 @@
             previous() {
                 this.viewer.setAnswer(this.answer);
                 this.viewer.drawPrevious(() => {
-                    this.answer = "";
+                    this.answer = this.viewer.getAnswer();
                     if (this.currentPlace > 1)
                         this.currentPlace--;
                 });
@@ -302,8 +303,9 @@
                 let returnList = [];
                 console.log(this.tagsForAnnotation);
                 this.tagsForAnnotation.forEach((value, index, array) => {
-                    returnList.push({value: value});
+                    returnList.push({"value": value});
                 });
+                console.log(returnList);
                 cb(returnList);
             },
         }

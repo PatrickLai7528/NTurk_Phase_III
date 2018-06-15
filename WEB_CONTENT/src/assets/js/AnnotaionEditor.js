@@ -1,6 +1,7 @@
 import VirtualInterface from './interfaces/VirtualInterface.js'
 import DrawableInterface from './interfaces/DrawableInterface.js'
 import CanvasShareableInterface from './interfaces/CanvasShareableInterface.js'
+import Marking from "~/assets/js/annotations/Marking";
 
 let privateVariables = {
     canvas: {},
@@ -441,10 +442,16 @@ class AnnotationEditor {
     }
 
     getAnswer() {
-        let annotation, markingType;
+        let annotation, markingType, oldAnnotation;
         markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
         annotation = privateMethods.getCurrentEditedAnnotation();
-        return annotation[markingType];
+        oldAnnotation = privateVariables.viewer.shareCurrentAnnotation();
+        if (annotation[markingType].length !== 0)
+            return annotation[markingType];
+        else if (oldAnnotation[markingType].length !== 0)
+            return oldAnnotation[markingType];
+        else
+            return "";
     }
 
     setAnswer(answer) {
