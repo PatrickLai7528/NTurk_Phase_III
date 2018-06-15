@@ -41,23 +41,9 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="工人标签" prop="userTags" v-if="ruleForm.userType==='WORKER'" style="text-align: left">
-                <el-popover placement="top-end" width="300" trigger="hover">
-                    <el-tag
-                            :key="tag"
-                            v-for="tag in ruleForm.userTags"
-                            closable
-                            :disable-transitions="false"
-                            class="userTag"
-                            @close="deleteTag(tag)"
-                    >
-                        {{tag}}
-                    </el-tag>
-
-                    <el-button slot="reference" type="info" size="mini" align="left" round>...</el-button>
-                </el-popover>
-
-                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" icon="el-icon-plus"></el-button>
-                <el-dialog title="添加系统标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="600px" style="text-align: center">
+                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" round>...</el-button>
+                <el-dialog title="添加您的用户标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false"
+                           width="600px" style="text-align: center" :before-close="beforeCloseDialog">
                     <div style="max-height: 500px; overflow-y: auto">
                         <el-checkbox-group v-model="ruleForm.userTags">
                             <el-checkbox-button
@@ -89,6 +75,8 @@
 	import VirtualInterface from '../../js/interfaces/VirtualInterface.js'
 	import ValidatorInterface from '../../js/interfaces/ValidatorInterface.js'
 	import ProvinceDataUtils from '../../js/utils/ProvinceDataUtils.js'
+    import TagUtils from '../../js/utils/TagUtils.js'
+
 	export default {
 		data() {
 			let validatePassword = (rule, value, callback) => {
@@ -173,7 +161,7 @@
 					let random = Math.floor(Math.random() * (10000 - 1) + 1);
 					this.ruleForm.userIcon = "usericon_" + d.getMilliseconds().toString().substring(0, 10) + random + '.jpg';
 					this.userIconUploadURL += "/" + this.ruleForm.userIcon;
-					this.getSystemTags();
+                    this.systemTags = TagUtils.getSystemTags();
 				}
 			)
 		},
@@ -248,28 +236,15 @@
 					message: msg,
 				});
 			},
-            getSystemTags() {
-                // this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //     this.systemTags = response.data;
-                // })
-                this.systemTags =
-                    [{value: "花朵"}, {value: "学校"}, {value: "食物"}, {value: "军事"},
-                        {value: "生活"}, {value: "风景"}, {value: "自然"}, {value: "树木"},
-                        {value: "生命"}, {value: "军人"}, {value: "食品"},
-                        {value: "命运"}, {value: "天使"}, {value: "恶魔"}, {value: "骑士"},
-                        {value: "鼠标"}, {value: "iPad"}, {value: "城市"}, {value: "小草"},
-                        {value: "杯子"}, {value: "美少女"}, {value: "乡村"},
-                        {value: "路数"}, {value: "运动"}, {value: "标日"}, {value: "菜鸡"},
-                        {value: "农田"}, {value: "桌子"}, {value: "盘子"}, {value: "袋子"},
-                        {value: "辅导员"}, {value: "代码"}, {value: "辣鸡"}];
-            },
-            deleteTag(tag) {
-                this.ruleForm.userTags.splice(this.ruleForm.userTags.indexOf(tag), 1);
-            },
-            addTag(tag) {
-			    alert(tag);
-                this.ruleForm.userTags.push(tag);
-            },
+            beforeCloseDialog (done) {
+                if(this.ruleForm.userTags.length<3){
+                    alert("标签太少");
+                }
+                else{
+                    alert("已经提交");
+                    done();
+                }
+            }
 		},
 		computed: {
 			headers() {   //将获得headers放在computed计算属性中试试,将token变成store.state.token
@@ -340,5 +315,13 @@
 
     .el-checkbox-button.is-checked .el-checkbox-button__inner {
         box-shadow: 0 0 0 0 #8cc5ff!important;
+    }
+
+    .el-checkbox-button:first-child .el-checkbox-button__inner {
+        border-radius: 4px!important;
+    }
+
+    .el-checkbox-button:last-child .el-checkbox-button__inner {
+        border-radius: 4px!important;
     }
 </style>

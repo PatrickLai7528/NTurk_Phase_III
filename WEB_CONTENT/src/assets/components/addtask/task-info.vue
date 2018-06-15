@@ -93,6 +93,8 @@
 </template>
 
 <script>
+    import TagUtils from '../../js/utils/TagUtils.js'
+
     export default {
         // props: ['imageNames'],  //在提交的时候将theImg赋给imgNames数组
         data() {
@@ -155,9 +157,8 @@
         },
         mounted: function () {
             this.$nextTick(()=> {
-                this.getSystemTags();   //获得系统Tag列表
+                this.systemTags = TagUtils.getSystemTags();   //获得系统Tag列表
             });
-
         },
         methods: {
         	getImageNamesFromBus(){
@@ -305,15 +306,6 @@
                     this.questionVisible = false;
                     this.questionValue = '';
                 }
-            },
-            getSystemTags() {
-                // this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //     this.systemTags = response.data;
-                // })
-                this.systemTags =
-                        [{value: "花朵"}, {value: "运动"}, {value: "食物"}, {value: "军事"},
-                            {value: "生活"}, {value: "风景"}, {value: "自然"}, {value: "树木"},
-                            {value: "生命"}, {value: "军人"}, {value: "食品"}];
             },
             duplicateKeys(key, list) {
         	    for(let i=0;i<list.length;i++){

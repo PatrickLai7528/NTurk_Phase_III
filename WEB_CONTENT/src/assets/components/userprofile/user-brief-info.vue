@@ -11,6 +11,26 @@
                         <span class="user-brief-info-label">{{info.showName}}：{{info.value}}</span>
                     </i>
                 </div>
+                <div class="detail-info" v-if="isWorker">
+                    <i class="el-icon-menu">
+                        <span class="user-brief-info-label">用户标签：</span>
+                        <el-button size="mini" @click="dialogFormVisible = true" round>编辑</el-button>
+                        <el-dialog title="修改您的用户标签" :visible.sync="dialogFormVisible"
+                                   :modal-append-to-body="false" width="600px"
+                                   style="text-align: center" :before-close="beforeCloseDialog">
+                            <div style="max-height: 500px; overflow-y: auto">
+                                <el-checkbox-group v-model="userTags">
+                                    <el-checkbox-button
+                                            class="systemTag"
+                                            v-for="tag in systemTags"
+                                            :label="tag.value"
+                                            :key="tag.value">
+                                    </el-checkbox-button>
+                                </el-checkbox-group>
+                            </div>
+                        </el-dialog>
+                    </i>
+                </div>
             </div>
         </el-card>
     </div>
@@ -19,6 +39,7 @@
 <script>
 	import UserUtils from '../../js/utils/UserUtils.js'
 	import DateUtils from '../../js/utils/DateUtils.js'
+    import TagUtils from '../../js/utils/TagUtils.js'
 
 	export default {
 		data() {
@@ -34,7 +55,11 @@
 					credit: {iconType: "el-icon-goods", showName: "积分", value: ""},
 					experiencePoint: {iconType: "el-icon-star-on", showName: "經驗", value: ""},
 					rank: {iconType: "el-icon-view", showName: "排名", value: ""}
-				}
+				},
+				isWorker: false,
+                userTags: [],
+                systemTags: [],
+                dialogFormVisible: false
 			};
 		},
 		created() {
@@ -57,27 +82,43 @@
 				this.userName = data.nickname;
 				this.infoList.province.value = data.province;
 				this.infoList.emailAddress.value = data.emailAddress;
-				console.log("before : " + data.createTime);
 				this.infoList.createTime.value = DateUtils.simpleDateFormate(data.createTime);
-				console.log("after : " + this.infoList.createTime.value);
 				this.infoList.credit.value = data.credit;
 				this.infoList.experiencePoint.value = data.experiencePoint;
 				this.infoList.rank.value = data.rank;
+				this.isWorker = UserUtils.isWorker(this);
+
+				if(this.isWorker){
+                    this.userTags = ["食物"];
+                    this.systemTags = TagUtils.getSystemTags();
+                }
 			},
 			loadInfo() {
 				let route = "http://localhost:8086/myInfo";
 				let header = {headers: {Authorization: this.$store.getters.getToken}};
 				this.$http.get(route, header)
-					.then(this.doWhileGetInfoSuccess)
+                    .then(this.doWhileGetInfoSuccess)
 					.catch(function (error) {
 						console.log(error);
 					});
-			}
+			},
+            deleteTag(tag) {
+                this.userTags.splice(this.userTags.indexOf(tag), 1);
+            },
+            beforeCloseDialog (done) {
+                if(this.userTags.length<3){
+                    alert("标签太少");
+                }
+                else{
+                    alert("已经提交");
+                    done();
+                }
+            }
 		}
 	};
 </script>
 
-<style scoped>
+<style>
     .user-brief-info {
         height: 600px;
         font-family: Microsoft YaHei;
@@ -122,5 +163,33 @@
     .user-brief-info-label {
         font-family: Microsoft YaHei;
         padding-left: 9px;
+    }
+
+    .userTag {
+        margin: 5px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .systemTag{
+        margin: 5px;
+    }
+
+    .el-checkbox-button__inner {
+        border: 0!important;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+    }
+
+    .el-checkbox-button.is-checked .el-checkbox-button__inner {
+        box-shadow: 0 0 0 0 #8cc5ff!important;
+    }
+
+    .el-checkbox-button:first-child .el-checkbox-button__inner {
+        border-radius: 4px!important;
+    }
+
+    .el-checkbox-button:last-child .el-checkbox-button__inner {
+        border-radius: 4px!important;
     }
 </style>
