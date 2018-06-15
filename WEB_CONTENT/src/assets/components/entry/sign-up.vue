@@ -41,23 +41,9 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="工人标签" prop="userTags" v-if="ruleForm.userType==='WORKER'" style="text-align: left">
-                <el-popover placement="top-end" width="300" trigger="hover">
-                    <el-tag
-                            :key="tag"
-                            v-for="tag in ruleForm.userTags"
-                            closable
-                            :disable-transitions="false"
-                            class="userTag"
-                            @close="deleteTag(tag)"
-                    >
-                        {{tag}}
-                    </el-tag>
-
-                    <el-button slot="reference" type="info" size="mini" align="left" round>...</el-button>
-                </el-popover>
-
-                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" icon="el-icon-plus"></el-button>
-                <el-dialog title="添加系统标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="600px" style="text-align: center">
+                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" round>...</el-button>
+                <el-dialog title="添加您的用户标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false"
+                           width="600px" style="text-align: center" :before-close="beforeCloseDialog">
                     <div style="max-height: 500px; overflow-y: auto">
                         <el-checkbox-group v-model="ruleForm.userTags">
                             <el-checkbox-button
@@ -250,8 +236,14 @@
 					message: msg,
 				});
 			},
-            deleteTag(tag) {
-                this.ruleForm.userTags.splice(this.ruleForm.userTags.indexOf(tag), 1);
+            beforeCloseDialog (done) {
+                if(this.ruleForm.userTags.length<3){
+                    alert("标签太少");
+                }
+                else{
+                    alert("已经提交");
+                    done();
+                }
             }
 		},
 		computed: {

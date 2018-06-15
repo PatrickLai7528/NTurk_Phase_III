@@ -14,8 +14,8 @@
                 <div class="detail-info" v-if="isWorker">
                     <i class="el-icon-menu">
                         <span class="user-brief-info-label">用户标签：</span>
-                        <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left">编辑</el-button>
-                        <el-dialog title="修改用户标签" :visible.sync="dialogFormVisible"
+                        <el-button size="mini" @click="dialogFormVisible = true" round>编辑</el-button>
+                        <el-dialog title="修改您的用户标签" :visible.sync="dialogFormVisible"
                                    :modal-append-to-body="false" width="600px"
                                    style="text-align: center" :before-close="beforeCloseDialog">
                             <div style="max-height: 500px; overflow-y: auto">
