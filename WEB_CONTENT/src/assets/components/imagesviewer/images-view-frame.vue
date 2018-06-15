@@ -205,17 +205,10 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.number = _this.$store.getters.getImgNames.length;
+                _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                let promise = new Promise(function (resolve) {
-                    _this.loadAnnotationList();
-                    console.log(_this.imgNames);
-                    resolve();
-                });
-
-                promise.then(function () {
-                    _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
-                });
+                _this.loadAnnotationList(_this.loadImageAndAnnotation);
             });
         },
         watch:{
@@ -224,19 +217,12 @@
                     let _this = this;
                     this.taskId = this.$route.params.taskId;
                     this.ratings = [];
-                    this.imgNames = _this.$store.getters.getImgNames;
+                    this.imgNames = _this.$store.getters.getImgNames.imgNames;
                     this.nowRating = 0;
                     this.annotation = {};
                     _this.number = _this.imgNames.length;
                     _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    let promise = new Promise(function (resolve) {
-                        _this.loadAnnotationList();
-                        resolve();
-                    });
-
-                    promise.then(function () {
-                        _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
-                    });
+                    _this.loadAnnotationList(_this.loadImageAndAnnotation);
                 }
             }
         },
@@ -397,29 +383,36 @@
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
             },
-            loadAnnotationList(){            //现在加载逻辑非常简单
+            loadAnnotationList(callback){            //现在加载逻辑非常简单
                 let _this = this;
-                for(let img of this.imgNames){
-                    let route = "http://localhost:8086/frameAnnotation/imgName/" + img;
+                let whatfor = 3;
+                if(_this.taskType === 'coverage'){
+                    whatfor = 2;
+                }
+                else if(_this.taskType === 'grade'){
+                    whatfor = 1;
+                }
+
+                let flag = false;
+                for(let i = 0;i < this.imgNames.length;i++){
+                    let route = "http://localhost:8086/frameAnnotation/imgName/" + this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        //_this.annotation = response.data;
-                        console.log(response);
-                        _this.frames = [];
-                        _this.annotation = {
-                            'imgName': _this.img,
-                            'frames': _this.frames,
-                        };
-                        //TODO:这里返回值的实体名称属性还没有定下来，先todo
+                        _this.annotation = response.data;
                         _this.annotationData.push(_this.annotation);
+                        if(i === _this.imgNames.length - 1){
+                            callback();
+                        }
                     }).catch(function (error) {
-                        console.log("error");
                         _this.frames = [];
                         _this.annotation = {
-                            'imgName': _this.img,
-                            'frame': _this.frame,
+                            'imgName': _this.imgNames[i],
+                            'frame': _this.frames,
                         };
                         _this.annotationData.push(_this.annotation);
                         console.log(error);
+                        if(i === _this.imgNames.length - 1){
+                            callback()
+                        }
                     });
                 }
             },
@@ -466,8 +459,8 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
-                console.log(this.annotationData);
-                this.frames = this.annotation.frames;             //之前实现的有问题，应该现把frames加载，然后调用initialDraw方法
+                console.log(this.annotation);
+                this.frames = this.annotation.frame;             //之前实现的有问题，应该现把frames加载，然后调用initialDraw方法
                 this.initialDraw();
             },
             /**
