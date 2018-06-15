@@ -12,7 +12,7 @@ class AnswerPairsDrawingStrategy {
      * @returns {string}
      */
     getMarkingTypeName() {
-        return "answerPair";
+        return "answer";
     }
 
     /**
@@ -39,8 +39,8 @@ class AnswerPairsDrawingStrategy {
      * @returns {string}
      */
     addTag(canvas, answerPairs, index) {
-        let newTag = "index:" + index + ",question:" + answerPairs.question + ",answer:" + answerPairs.answer + ";";
-        return newTag;
+        // let newTag = "index:" + index + ",question:" + answerPairs.question + ",answer:" + answerPairs.answer + ";";
+        // return newTag;
     }
 
     /**
@@ -53,24 +53,24 @@ class AnswerPairsDrawingStrategy {
 	 * 			}
      */
     interpretTag(tags) {
-        let returnObject = [];
-        let tagArray, tagPerLine, tagElement;
-        // try {
-        if (tags)
-            return;
-        console.log(tags);
-        tagArray = tags.split(";");
-        for (tagPerLine of tagArray) {
-            if (tagPerLine === null || tagPerLine === undefined || tagPerLine === "")
-                continue;
-            tagElement = tagPerLine.split(",");
-            returnObject.push({
-                index: tagElement[0].split(":")[1],
-                question: tagElement[1].split(":")[1],
-                answer: tagElement[2].split(":")[1],
-            })
-        }
-        return returnObject;
+        // let returnObject = [];
+        // let tagArray, tagPerLine, tagElement;
+        // // try {
+        // if (tags)
+        //     return;
+        // console.log(tags);
+        // tagArray = tags.split(";");
+        // for (tagPerLine of tagArray) {
+        //     if (tagPerLine === null || tagPerLine === undefined || tagPerLine === "")
+        //         continue;
+        //     tagElement = tagPerLine.split(",");
+        //     returnObject.push({
+        //         index: tagElement[0].split(":")[1],
+        //         question: tagElement[1].split(":")[1],
+        //         answer: tagElement[2].split(":")[1],
+        //     })
+        // }
+        // return returnObject;
     }
 
     generateMarkingAfterMouseUp(e) {

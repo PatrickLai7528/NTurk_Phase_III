@@ -440,12 +440,21 @@ class AnnotationEditor {
         }
     }
 
-    setAnswerPairs(answerPairs) {
+    getAnswer() {
+        let annotation, markingType;
+        markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
+        annotation = privateMethods.getCurrentEditedAnnotation();
+        return annotation[markingType];
+    }
+
+    setAnswer(answer) {
         let annotation, markingType, currentImageName;
         currentImageName = privateVariables.viewer.shareCurrentImageName();
         markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
         annotation = privateMethods.getCurrentEditedAnnotation();
-        annotation[markingType] = answerPairs;
+        // annotation[markingType] = answer;
+        annotation[markingType] = [];
+        annotation[markingType].push(answer);
         privateVariables.editedAnnotation.set(currentImageName, annotation);
     }
 
