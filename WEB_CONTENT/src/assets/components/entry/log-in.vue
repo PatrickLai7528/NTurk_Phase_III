@@ -2,24 +2,24 @@
     <div class="logIn">
         <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px">
             <el-form-item>
-                <label class="label">密碼登錄</label>
+                <label class="label">密码登录</label>
             </el-form-item>
-            <el-form-item label="帳號" prop="account">
-                <el-input class="input" auto-complete="off" v-model="ruleForm.account" placeholder="請用郵箱登錄"></el-input>
+            <el-form-item label="账号" prop="account">
+                <el-input class="input" auto-complete="off" v-model="ruleForm.account" placeholder="请用邮箱登录"></el-input>
             </el-form-item>
             <el-form-item label="密码" prop="password">
                 <el-input class="input" type="password" v-model="ruleForm.password" auto-complete="off"
-                          placeholder="請輸入密碼"></el-input>
+                          placeholder="请输入密码"></el-input>
             </el-form-item>
             <el-form-item style="margin-bottom: 0">
                 <el-button @click="submitForm('ruleForm')"
-                           class="logInButton">登錄
+                           class="logInButton">登陆
                 </el-button>
             </el-form-item>
             <el-form-item>
-                <el-button type="text" class="otherChoice" style="padding-left: 1em;">忘記密碼</el-button>
-                <el-button type="text" class="otherChoice" @click="toSignUpPage()">免費註冊</el-button>
-                <el-button type="text" class="otherChoice">其它登錄方式</el-button>
+                <el-button type="text" class="otherChoice" style="padding-left: 1em;">忘记密码</el-button>
+                <el-button type="text" class="otherChoice" @click="toSignUpPage()">免费注册</el-button>
+                <el-button type="text" class="otherChoice">其他登录方式</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -114,7 +114,7 @@
 				this.$http(argu)
 					.then(this.doWhileLogInSuccess)
 					.catch((error) => {
-						this.showMsg("賬戶或密碼錯誤");
+						this.showMsg("行号或密码错误");
 						//console.log(error);
 					})
 			},

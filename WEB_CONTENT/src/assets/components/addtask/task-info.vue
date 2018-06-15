@@ -23,7 +23,7 @@
                 >
                     {{tag}}
                 </el-tag>
-                <el-button size="small" @click="dialogFormVisible = true" style="font-size: 16px">+</el-button>
+                <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px" icon="el-icon-plus"></el-button>
 
                 <el-dialog title="添加标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="500px">
                     <div style="font-size: 16px; display: inline; margin-right: 20px">标签名称</div>
@@ -93,6 +93,8 @@
 </template>
 
 <script>
+    import TagUtils from '../../js/utils/TagUtils.js'
+
     export default {
         // props: ['imageNames'],  //在提交的时候将theImg赋给imgNames数组
         data() {
@@ -155,9 +157,8 @@
         },
         mounted: function () {
             this.$nextTick(()=> {
-                this.getSystemTags();   //获得系统Tag列表
+                this.systemTags = TagUtils.getSystemTags();   //获得系统Tag列表
             });
-
         },
         methods: {
         	getImageNamesFromBus(){
@@ -305,15 +306,6 @@
                     this.questionVisible = false;
                     this.questionValue = '';
                 }
-            },
-            getSystemTags() {
-                // this.$http.get("http://localhost:8086/requester/allWorkers", {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //     this.systemTags = response.data;
-                // })
-                this.systemTags =
-                        [{value: "花朵"}, {value: "运动"}, {value: "食物"}, {value: "军事"},
-                            {value: "生活"}, {value: "风景"}, {value: "自然"}, {value: "树木"},
-                            {value: "生命"}, {value: "军人"}, {value: "食品"}];
             },
             duplicateKeys(key, list) {
         	    for(let i=0;i<list.length;i++){
