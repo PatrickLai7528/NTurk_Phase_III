@@ -366,11 +366,16 @@ class AnnotationEditor {
 
 
     shareTag() {
-        let currentImageName, oldTagHtml;
+        let currentImageName, oldTagHtml, resultTagHtml, currentTagHtml;
         currentImageName = privateVariables.viewer.shareCurrentImageName();
         oldTagHtml = privateVariables.viewer.shareTag();
+        currentTagHtml = privateVariables.tagHtml.get(currentImageName)
         console.log(oldTagHtml);
-        return privateVariables.tagHtml.get(currentImageName) + oldTagHtml;
+        if (currentTagHtml && "" !== currentTagHtml && 0 !== currentTagHtml.length)
+            resultTagHtml = currentTagHtml + oldTagHtml;
+        else
+            resultTagHtml = oldTagHtml;
+        return resultTagHtml;
     }
 
     shareTagText() {
