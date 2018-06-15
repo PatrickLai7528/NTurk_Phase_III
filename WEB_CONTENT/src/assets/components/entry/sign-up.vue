@@ -40,17 +40,22 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="工人标签" prop="userType" v-if="ruleForm.userType==='WORKER'" style="text-align: left">
-                <el-tag
-                        :key="tag"
-                        v-for="tag in ruleForm.userTags"
-                        closable
-                        :disable-transitions="false"
-                        class="userTag"
-                        @close="deleteTag(tag)"
-                >
-                    {{tag}}
-                </el-tag>
+            <el-form-item label="工人标签" prop="userTags" v-if="ruleForm.userType==='WORKER'" style="text-align: left">
+                <el-popover placement="top-end" width="300" trigger="hover">
+                    <el-tag
+                            :key="tag"
+                            v-for="tag in ruleForm.userTags"
+                            closable
+                            :disable-transitions="false"
+                            class="userTag"
+                            @close="deleteTag(tag)"
+                    >
+                        {{tag}}
+                    </el-tag>
+
+                    <el-button slot="reference" type="info" size="mini" align="left" round>...</el-button>
+                </el-popover>
+
                 <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" icon="el-icon-plus"></el-button>
                 <el-dialog title="添加系统标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false" width="600px" style="text-align: center">
                     <div style="max-height: 500px; overflow-y: auto">
@@ -103,6 +108,9 @@
 			let validateEmpty = (rule, value, callback) => {
 				return value === '' ? callback("该栏不能为空") : callback();
 			};
+            let validateTags = (rule, tags, callback) => {
+                return tags.length<3 ? callback("用户标签不得少于三个") : callback();
+            };
 			let validateConfirmPassword = (rule, value, callback) => {
 				return value !== this.ruleForm.password ? callback("请确定密码") : callback();
 			};
@@ -148,6 +156,9 @@
 					userType: [
 						{validator: validateEmpty, trigger: 'blur'}
 					],
+                    userTags: [
+                        {validator: validateTags, trigger: 'blur'}
+                    ],
 				},
 				isUploadIcon: false,
                 systemTags: [],
@@ -205,6 +216,7 @@
 					nickname: this.ruleForm.userName,
 					iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
 					province: this.ruleForm.province,
+                    userTags: this.ruleForm.userTags
 				}
 			},
 			doWhileSignUpSuccess(response) {
@@ -311,7 +323,7 @@
     }
 
     .userTag {
-        margin-right: 20px;
+        margin: 5px;
         font-size: 16px;
         font-weight: bold;
     }
