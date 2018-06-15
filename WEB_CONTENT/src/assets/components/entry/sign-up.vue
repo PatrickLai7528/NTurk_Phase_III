@@ -44,7 +44,21 @@
                 <el-button size="mini" @click="dialogFormVisible = true" style="font-size: 16px; align: left" round>...</el-button>
                 <el-dialog title="添加您的用户标签" :visible.sync="dialogFormVisible" :modal-append-to-body="false"
                            width="600px" style="text-align: center" :before-close="beforeCloseDialog">
-                    <div style="max-height: 500px; overflow-y: auto">
+                    <div>
+                        <el-tag
+                                :key="tag"
+                                v-for="tag in ruleForm.userTags"
+                                closable
+                                :disable-transitions="false"
+                                class="tag"
+                                @close="deleteTag(tag)"
+                                style="margin: 5px; font-size: 16px; font-weight: bold"
+                                type="success"
+                        >
+                            {{tag}}
+                        </el-tag>
+                    </div>
+                    <div class="splitLine sysTags">
                         <el-checkbox-group v-model="ruleForm.userTags">
                             <el-checkbox-button
                                     class="systemTag"
@@ -244,7 +258,10 @@
                     alert("已经提交");
                     done();
                 }
-            }
+            },
+            deleteTag(tag) {
+                this.ruleForm.userTags.splice(this.ruleForm.userTags.indexOf(tag), 1);
+            },
 		},
 		computed: {
 			headers() {   //将获得headers放在computed计算属性中试试,将token变成store.state.token
@@ -323,5 +340,21 @@
 
     .el-checkbox-button:last-child .el-checkbox-button__inner {
         border-radius: 4px!important;
+    }
+
+    .el-dialog__body {
+        padding: 10px 20px 30px 20px;
+    }
+
+    .splitLine {
+        margin-top: 10px;
+        padding-top: 10px;
+        border: 0 solid #dddddd;
+        border-top-width: 2px;
+    }
+
+    .sysTags {
+        max-height: 500px;
+        overflow-y: auto;
     }
 </style>
