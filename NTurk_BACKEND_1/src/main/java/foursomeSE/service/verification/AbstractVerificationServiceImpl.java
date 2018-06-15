@@ -199,6 +199,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                 }).collect(Collectors.toCollection(ArrayList::new));
 
                 verifications.getVerifications().removeAll(traps);
+                // 这之后verification只有非trap的verification
 
                 ArrayList<Verification> diffs = traps.stream().filter(v -> {
                     List<Verification> vs = verificationJPA.findByAnnotationIdAndVerificationType(v.getAnnotationId(), getVType());
@@ -216,6 +217,10 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                         }
                     }
                 } else {
+                    // 还是要accept一下的
+                    for (Verification v : verifications.getVerifications()) {
+                        acceptVerification(v);
+                    }
 //                    ArrayList<Long> failedId = diffs.stream().map(Verification::getAnnotationId)
 //                            .collect(Collectors.toCollection(ArrayList::new));
 

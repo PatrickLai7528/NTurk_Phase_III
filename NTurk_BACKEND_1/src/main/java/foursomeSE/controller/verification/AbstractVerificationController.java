@@ -15,7 +15,7 @@ public class AbstractVerificationController {
     protected VerificationService verificationService;
 
 
-    @RequestMapping(value = "/taskId/{taskId}/whatFor/{whatFor}", method = RequestMethod.GET)
+    @RequestMapping(value = "/taskId/{taskId}", method = RequestMethod.GET)
     public ResponseEntity<?> enterVerification(@RequestHeader("Authorization") String token,
                                                @PathVariable("taskId") long taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
