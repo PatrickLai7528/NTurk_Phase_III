@@ -347,6 +347,10 @@ class AnnotationViewer {
     forceUpdate(imageName) {
         privateVariables.isForceUpdate.set(imageName, true);
     }
+
+    drawThisAnnotation() {
+
+    }
 }
 
 export default AnnotationViewer;
