@@ -9,7 +9,8 @@
                             <span >任務描述: {{taskDescription}}</span >
                         </el-col >
                         <el-col :span = "8" style = "text-align: right" >
-                            <div v-html = "countDown" >{{countDown}}</div >
+                            <!--<div v-html = "countDown" >{{countDown}}</div >-->
+                        <div id = "countDown" ></div >
                         </el-col >
                     </el-row >
                     </div >
@@ -138,6 +139,7 @@
     import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
     import AnnotationEditor from '../../js/AnnotaionEditor.js'
     import countdown from 'light-countdown'
+    import CountDown from '../../js/countDown/CountDown.js'
 
     export default {
         data: function () {
@@ -158,6 +160,26 @@
                 imgNames: this.$store.getters.imgNames,
                 tagsForAnnotation: this.$store.getters.tagsForAnnotation,
                 tagsOfTask: this.$store.getters.tagsOfTask,
+            }
+        },
+        watch: {
+            $route: function (to, from) {      //监听路由改变
+                console.log(to.name);
+                if (to.name === 'frame') {
+                    console.log("in in in");
+                    this.canvas = document.getElementById("canvas");
+                    this.canvas.addEventListener("mousedown", this.canvasDown);
+                    this.canvas.addEventListener("mouseup", this.canvasUp);
+                    this.canvas.addEventListener("mousemove", this.canvasMove);
+                    this.canvas.addEventListener("touchstart", this.canvasDown);
+                    console.log(this.canvas);
+                    /**
+                     *  this.$store.getters.getImgNames 取得的是一個對象, 只要裡面的imgNames數組就行
+                     */
+                    this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
+                    this.getImgNames();
+                    this.setCountDown();
+                }
             }
         },
         computed: {
@@ -195,30 +217,15 @@
                 this.setCountDown();
             })
         },
-        watch: {
-            $route: function (to, from) {      //监听路由改变
-                console.log(to.name);
-                if (to.name === 'frame') {
-                    console.log("in in in");
-                    this.canvas = document.getElementById("canvas");
-                    this.canvas.addEventListener("mousedown", this.canvasDown);
-                    this.canvas.addEventListener("mouseup", this.canvasUp);
-                    this.canvas.addEventListener("mousemove", this.canvasMove);
-                    this.canvas.addEventListener("touchstart", this.canvasDown);
-                    console.log(this.canvas);
-                    /**
-                     *  this.$store.getters.getImgNames 取得的是一個對象, 只要裡面的imgNames數組就行
-                     */
-                    this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
-                    this.getImgNames();
-                    this.setCountDown();
-                }
-            }
+        beforeDestroy() {
+            this.countDown.clearTimer();
         },
         methods: {
             setCountDown() {
                 let _this = this;
-                countdown({
+                let countDown = document.querySelector("#countDown");
+                console.log(countDown);
+                this.countDown = new CountDown({
                     timeEnd: (new Date().getTime() + 900000),
                     selector: '#countDown',
                     msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
@@ -227,6 +234,7 @@
                         _this.$router.push({path: '/profile'});
                     }
                 });
+                this.countDown.init();
             },
             getImgNames() {
                 let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
