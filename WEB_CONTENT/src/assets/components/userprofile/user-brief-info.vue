@@ -121,7 +121,6 @@
             deleteTag(tag) {
                 this.userTags.splice(this.userTags.indexOf(tag), 1);
             },
-<<<<<<< HEAD
             beforeCloseDialog (done) {
                 if(this.userTags.length<3){
                     this.$message({
@@ -134,16 +133,6 @@
                         message: '修改标签成功',
                         type: 'success'
                     })
-=======
-            beforeCloseDialog(done) {
-                if (this.userTags.length < 3) {
-                    // alert("标签太少");
-                    this.message("标签太少", "error")
-                }
-                else {
-                    // alert("已经提交");
-                    this.message("已经提交", "success");
->>>>>>> f0bf65cc9df2312cd71c489534e82acd70b3be74
                     done();
                 }
             },

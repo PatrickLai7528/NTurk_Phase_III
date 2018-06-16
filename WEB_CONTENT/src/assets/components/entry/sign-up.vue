@@ -223,7 +223,6 @@
                     iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
                     province: this.ruleForm.province,
                     userTags: this.ruleForm.userTags
-<<<<<<< HEAD
 				}
 			},
 			doWhileSignUpSuccess(response) {
@@ -267,45 +266,6 @@
                         message: '添加标签成功',
                         type: 'success'
                     })
-=======
-                }
-            },
-            doWhileSignUpSuccess(response) {
-                this.showMsg("注册成功!", 'success');
-                this.$router.push({path: '/entry/login'})
-            },
-            doWhileSignUpError(error) {
-                if (error.response.status === 400) {
-                    this.showMsg("账号重名", "error");
-                } else {
-                    this.showMsg("注册失败", 'error');
-                }
-            },
-            doTheSignUp: function () {
-                let _this = this;
-                //上傳圖片
-                this.$refs.upload.submit();
-                this.$http({
-                        url: _this.decidePostUrl(),
-                        method: "POST",
-                        data: _this.decidePostData()
-                    }
-                ).then(_this.doWhileSignUpSuccess).catch(_this.doWhileSignUpError)
-            },
-            showMsg: function (msg, type) {
-                this.$notify({
-                    type: type,
-                    title: '通知',
-                    message: msg,
-                });
-            },
-            beforeCloseDialog(done) {
-                if (this.ruleForm.userTags.length < 3) {
-                    alert("标签太少");
-                }
-                else {
-                    alert("已经提交");
->>>>>>> f0bf65cc9df2312cd71c489534e82acd70b3be74
                     done();
                 }
             },

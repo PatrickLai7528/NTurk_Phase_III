@@ -231,7 +231,6 @@
             },
             handleAnnotationJump(row, taskId, path) {      //处理任务中心的jump标注
                 let _this = this;
-                _this.dialogTutorialVisible = true;
                 _this.$http.get('http://localhost:8086/task/' + taskId, {
                     headers: {
                         Authorization: _this.$store.getters.getToken,
@@ -243,7 +242,7 @@
                     else {
                         let imgNames = response.data;
                         _this.$store.commit('changeImgNames', imgNames);
-                        console.log(row.tagsForAnnotation);
+                        _this.dialogTutorialVisible = true;
                         _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
                         _this.$store.commit('changeTaskDescription',row.taskDescription);
                         _this.$store.commit('changeTagsOfTask',row.taskTags);     //暂时只有标注需要这个
