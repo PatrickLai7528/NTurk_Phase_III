@@ -1,147 +1,158 @@
-<template>
+<template >
 
-    <el-container>
-        <el-main class="wrap">
-            <div class="block">
-                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
-                             v-on:change="onIndexChange">
-                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
-                        <div id="canvasDiv">
+    <el-container >
+        <el-main class = "wrap" >
+            <div class = "block" >
+                <el-carousel id = "carousel" ref = "carousel" height = "36em" v-bind:autoplay = "false" arrow = "always"
+                             v-on:change = "onIndexChange" >
+                    <el-carousel-item id = "carouselItem" v-for = "item in imgNames.length" :key = "item" >
+                        <div id = "canvasDiv" >
                             <canvas
-                                    id="canvas"
-                                    class="fl"
+		                            id = "canvas"
+		                            class = "fl"
                             >
-                            </canvas>
-                        </div>
-                    </el-carousel-item>
-                </el-carousel>
-            </div>
-        </el-main>
-        <el-aside width="300px" style="alignment: center">
+                            </canvas >
+                        </div >
+                    </el-carousel-item >
+                </el-carousel >
+            </div >
+        </el-main >
+        <el-aside width = "300px" style = "alignment: center" >
             <!--<el-button @click="updateThisAnnotation()">更新</el-button>-->
             <!--<el-button @click="previousPictureAndUpdateThisAnnotation()">上一個</el-button>-->
             <!--<el-button @click="nextPictureAndUpdateThisAnnotation()">下一個</el-button>-->
             <!--<el-button @click="clearThisAnnotation()">清除</el-button>-->
             <!--<el-button @click="undoThisAnnotation()">UNDO</el-button>-->
-            <ul style="list-style-type:none">
-                <li>
+            <ul style = "list-style-type:none" >
+                <li >
                     <!--<el-button @click="handleCommit(nowIndex)" :disabled=submitDisabled>提交</el-button>-->
-                </li>
-                <li v-for="(val,index) in frames">
+                </li >
+                <li v-for = "(val,index) in frames" >
                     <el-popover
-                            placement="right"
-                            width="150"
-                            trigger="click"
+		                    placement = "right"
+		                    width = "150"
+		                    trigger = "click"
                     >
                         <el-input
-                                type="textarea"
-                                :rows="2"
-                                v-model="val.tag"
-                                :disabled="true"
+		                        type = "textarea"
+		                        :rows = "2"
+		                        v-model = "val.tag"
+		                        :disabled = "true"
                         >
-                        </el-input>
-                        <el-button slot="reference" class="tag">標記{{index+1}}</el-button>
-                        <el-button @click="deleteTag(index)" :disabled="true">刪除</el-button>
-                    </el-popover>
-                </li>
-            </ul>
-            <div v-if="isRequester === false">
-                <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
-                <div class="prompt text" v-if="taskType === 'coverage'">请判断标注的完整性：</div>
-                <div v-if="taskType === 'grade'">
-                    <div>
-                    <img src="../../images/good.svg" width="300" height="100">
-                    <el-radio class="text" v-model="nowRating" label="1" v-on:change="ratingChange">我觉得可以</el-radio>
-                    </div>
-                    <div class="next">
-                    <img src="../../images/bad.svg" width="300" height="100">
-                    <el-radio class="text" v-model="nowRating" label="0" v-on:change="ratingChange">我觉得不行</el-radio>
-                    </div>
-                </div>
-                <div v-if="taskType === 'coverage'">
-                    <div>
-                    <img src="../../images/continued.svg" width="300" height="100">
-                    <el-radio class="text" v-model="nowRating" label="0" v-on:change="ratingChange">还有漏网之鱼</el-radio>
-                    </div>
-                    <div class="next">
-                    <img src="../../images/done.svg" width="300" height="100">
-                    <el-radio class="text" v-model="nowRating" label="1" v-on:change="ratingChange">已经一网打尽</el-radio>
-                    </div>
-                </div>
-                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
-            </div>
-        </el-aside>
+                        </el-input >
+                        <el-button slot = "reference" class = "tag" >標記{{index+1}}</el-button >
+                        <el-button @click = "deleteTag(index)" :disabled = "true" >刪除</el-button >
+                    </el-popover >
+                </li >
+            </ul >
+            <div v-if = "isRequester === false" >
+                <div class = "prompt text" v-if = "taskType === 'grade'" >请判断该标注的正确性：</div >
+                <div class = "prompt text" v-if = "taskType === 'coverage'" >请判断标注的完整性：</div >
+                <div v-if = "taskType === 'grade'" >
+                    <div >
+                    <img src = "../../images/good.svg" width = "300" height = "100" >
+                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                              v-on:change = "ratingChange" >我觉得可以</el-radio >
+                    </div >
+                    <div class = "next" >
+                    <img src = "../../images/bad.svg" width = "300" height = "100" >
+                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                              v-on:change = "ratingChange" >我觉得不行</el-radio >
+                    </div >
+                </div >
+                <div v-if = "taskType === 'coverage'" >
+                    <div >
+                    <img src = "../../images/continued.svg" width = "300" height = "100" >
+                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                              v-on:change = "ratingChange" >还有漏网之鱼</el-radio >
+                    </div >
+                    <div class = "next" >
+                    <img src = "../../images/done.svg" width = "300" height = "100" >
+                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                              v-on:change = "ratingChange" >已经一网打尽</el-radio >
+                    </div >
+                </div >
+                <el-button id = "commit-button" :disabled = commitDisabled @click = "commitRating"
+                           type = "primary" >提交<i class = "el-icon-upload el-icon--right" ></i ></el-button >
+            </div >
+        </el-aside >
 
-        <el-dialog class="warn" title="错误提示" :visible.sync="dialogVisible" :modal="false" top="9vh">
-            <p>亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
-            <canvas>
+        <el-dialog class = "warn" title = "错误提示" :visible.sync = "dialogVisible" :modal = "false" top = "9vh" >
+            <p >亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p >
+            <div id = "canvasDiv2" >
+                <div v-html = "canvasHtml" >
+                    {{canvasHtml}}
+                </div >
+                <div v-html = "tagHtml" >{{tagHtml}}</div >
+            </div >
+            <p >这道题的图片和标注如上图所示</p >
+            <p >您认为:{{wrongAnswerPairs[0]}}</p >
+            <p >但实际上：{{wrongAnswerPairs[1]}}</p >
+            <p >您的答案对标注的质量非常关键，请您在下次的标注中更加<strong >用心</strong >和<strong >仔细</strong ></p >
+            <p >我们还会<strong >继续检查</strong >您的答案，如果下次再发现问题可能会对您采取<strong >惩罚措施</strong ></p >
 
-            </canvas>
-            <p>这道题的图片和标注如上图所示</p>
-            <p>您认为:{{wrongAnswerPairs[0]}}</p>
-            <p>但实际上：{{wrongAnswerPairs[1]}}</p>
-            <p>您的答案对标注的质量非常关键，请您在下次的标注中更加<strong>用心</strong>和<strong>仔细</strong></p>
-            <p>我们还会<strong>继续检查</strong>您的答案，如果下次再发现问题可能会对您采取<strong>惩罚措施</strong></p>
+            <el-button type = "primary" @click = "read()" >确 定</el-button >
+        </el-dialog >
+    </el-container >
+</template >
 
-            <el-button type="primary" @click="read()">确 定</el-button>
-        </el-dialog>
-    </el-container>
-</template>
-
-<style>
+<style >
     .el-carousel__item:nth-child(2n) {
-        background-color: #99a9bf;
+	    background-color: #99a9bf;
     }
 
     .el-carousel__item:nth-child(2n+1) {
-        background-color: #d3dce6;
+	    background-color: #d3dce6;
     }
 
     .fl {
-        float: left;
-        display: block;
+	    float: left;
+	    display: block;
     }
 
     #carouselItem {
-        text-align: center;
+	    text-align: center;
     }
 
     #canvas {
-        border-right: 1px #585858 solid;
-        cursor: crosshair;
-        background-color: black;
+	    border-right: 1px #585858 solid;
+	    cursor: crosshair;
+	    background-color: black;
     }
 
     #canvasDiv {
-        position: relative;
-        display: inline-block;
+	    position: relative;
+	    display: inline-block;
     }
 
     .tag {
-        background-color: #df4b26;
-        color: white;
+	    background-color: #df4b26;
+	    color: white;
     }
 
     .prompt {
-        margin-top: 250px;
+	    margin-top: 250px;
     }
 
     #commit-button {
-        margin-top: 50px;
+	    margin-top: 50px;
     }
 
-    .next{
-        margin-top: 20px;
+    .next {
+	    margin-top: 20px;
     }
 
-    .text{
-        font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
-        font-weight:600;
+    .text {
+	    font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
+	    font-weight: 600;
     }
-</style>
+</style >
 
-<script>
+<script >
     import UserUtils from '../../js/utils/UserUtils.js'
+    import ImageViewer from '../../js/ImageViewer.js'
+    import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
+
     export default {
         data() {
             return {
@@ -192,9 +203,11 @@
                 imgNames: this.$store.getters.getImgNames,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
                 dialogVisible: false,
-                wrongImg:'',            //返回的是wrongImg
-                wrongAnnotation:{},      //这是那个wrongImg的annotation
+                wrongImg: "taskPic-2018061515075768226.jpg",            //返回的是wrongImg
+                wrongAnnotation: {},      //这是那个wrongImg的annotation
                 wrongAnswerPairs: [],
+                tagHtml: '',
+                canvasHtml: '<canvas id="canvas"></canvas>',
             }
         },
         mounted() {
@@ -209,11 +222,12 @@
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
+                this.setDialogContent();
             });
         },
-        watch:{
-            $route: function (to,from) {
-                if(to.name === 'viewframe'){
+        watch: {
+            $route: function (to, from) {
+                if (to.name === 'viewframe') {
                     let _this = this;
                     this.taskId = this.$route.params.taskId;
                     this.ratings = [];
@@ -227,120 +241,193 @@
             }
         },
         methods: {
-            read(){
-                this.dialogVisible = false;
+            selectCanvas() {
+                return document.getElementById("canvas");
             },
-            commitRating(){
+            setDialogContent() {
+                let id, doIt;
+                doIt = () => {
+                    let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
+                    config = {strokeStyle: "black"};
+                    canvas = this.selectCanvas();
+                    imageNameList.push(this.wrongImg);
+                    imageViewer = new ImageViewer(canvas, imageNameList, "");
+                    imageViewer.drawCurrent();
+                    drawingStrategy = new FrameDrawingStrategy();
+                    markingType = drawingStrategy.getMarkingTypeName();
+                    this.wrongAnnotation[markingType].forEach((value, index, array) => {
+                        drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
+                    })
+                };
+                if (this.dialogVisible) {
+                    doIt();
+                } else {
+                    id = setInterval(() => {
+                        if (this.dialogVisible) {
+                            doIt();
+                            clearInterval(id);
+                        }
+                    }, 2000)
+                }
+            },
+            read() {
+                this.dialogVisible = false;
+            }
+            ,
+            commitRating() {
                 //list里面的对象包含annotationId和rate
-                function Inspection(annotationId,rate){
+                function Verification(annotationId,rate){
                     this.annotationId = annotationId;
                     this.rate = rate;
                 }
 
-                let inspections = [];   //这是最后的数组，所有的评分结果放在这个数组里
+                let verifications = [];   //这是最后的数组，所有的评分结果放在这个数组里
+
+                let data = {
+                    verifications: verifications,
+                };
+
                 console.log(this.annotationData[0]);
+
                 for(let i = 0;i < this.ratings.length;i++){
-                    let nowInspection = new Inspection(this.annotationData[i].annotationId,this.ratings[i]);
-                    inspections.push(nowInspection);
+                    let nowInspection = new Verification(this.annotationData[i].annotationId,this.ratings[i]);
+                    verifications.push(nowInspection);
                 }
 
                 let _this = this;
                 let path = '';
-                if(_this.taskType === 'coverage'){
+                if (_this.taskType === 'coverage') {
                     path = 'http://localhost:8086/coverageVerification/saveVerifications';
                 }
-                else if(_this.taskType === 'grade'){
+                else if (_this.taskType === 'grade') {
                     path = 'http://localhost:8086/qualityVerification/saveVerifications';
                 }
-                else{
-                    console.log("error");
-                }
 
+                console.log('Inspections');
+                console.log(verifications);
                 this.$http.post(path,
-                    JSON.stringify(inspections),
-                    {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                        let failedIds = response.data.failedIds;
-                        let forbidden = response.data.forbidden;
+                    JSON.stringify(data),
+                    {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
+                        console.log("response:");    //没有掉到坑里的时候什么都没有返回
 
-                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
-                            _this.forbiddenMessage();
-                        }
-                        else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
-                            _this.wrongImg = failedIds[0];   //把第一条挑出来
-                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
-                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
-
-                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                            _this.showDialog();     //显示错误教程
-                        }
-                        else if(_this.canGoon()){          //判断还能不能继续做
-                            _this.showMessage();    //能继续做，鼓励继续
+                        if(_this.canGoon() === true){
+                            console.log("in in in");
+                            _this.showMessage();
                         }
                         else{
-                            _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                            _this.$router.push({path: '/profile'});
                         }
-
                 }).catch(function (error) {
                     console.log(error);
+                    let failedIds = error.data.failedIds;
+                    let forbidden = error.data.forbidden;
+
+                    if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                        _this.forbiddenMessage();
+                    }
+                    else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                        _this.wrongImg = failedIds[0];   //把第一条挑出来
+                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                        _this.showDialog();     //显示错误教程
+                    }
+                    else if(_this.canGoon()){          //判断还能不能继续做
+                        _this.showMessage();    //能继续做，鼓励继续
+                    }
+                    else{
+                        _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                    }
+                    console.log(error);
                 });
-            },
-            findIndexByImg(img){
-                for(let i = 0;i < this.number;i++){
-                    if(this.imgNames[i] === img){
+            }
+            ,
+            findIndexByImg(img) {
+                for (let i = 0; i < this.number; i++) {
+                    if (this.imgNames[i] === img) {
                         return i;
                     }
                 }
 
                 return -1;
-            },
-            translateRate(rate){    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
-                if(this.taskType === 'grade'){
-                    if(rate === 0){
-                        return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
+            }
+            ,
+            translateRate(rate) {    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
+                if (this.taskType === 'grade') {
+                    if (rate === 0) {
+                        return ["这张图片的标注有问题，不能过关", "这张图片的标注是正确的"];
                     }
-                    else{
-                        return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
-                    }
-                }
-                else if(this.taskType === 'coverage'){
-                    if(rate === 0){
-                        return ["这张图片还有其他可以标注的","这张图片已经没有其他可供标注的"];
-                    }
-                    else{
-                        return ["这张图片已经没有其他可供标注的","这张图片还有其他可以标注的"];
+                    else {
+                        return ["这张图片的标注是正确的", "这张图片的标注有问题，不能过关"];
                     }
                 }
-            },
-            showDialog(){
+                else if (this.taskType === 'coverage') {
+                    if (rate === 0) {
+                        return ["这张图片还有其他可以标注的", "这张图片已经没有其他可供标注的"];
+                    }
+                    else {
+                        return ["这张图片已经没有其他可供标注的", "这张图片还有其他可以标注的"];
+                    }
+                }
+            }
+            ,
+            showDialog() {
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
                 this.dialogVisible = true;   //显示错误提示
             },
             canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
-
+                let _this = this;
+                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                    let taskInfo = response.data;
+                    console.log(taskInfo);
+                    if(_this.taskType === 'grade'){
+                        if(taskInfo.verifyQuality > 0){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                    else if(_this.taskType === 'coverage'){
+                        if(taskInfo.verifyCoverage > 0){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log(error);
+                });
             },
             forbiddenMessage(){
                 this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
                     confirmButtonText: '确定',
                     type: 'error',
                 });
-            },
-            successMessage(){
+            }
+            ,
+            successMessage() {
                 this.$notify({
                     title: '提交成功',
                     message: '恭喜你完成评审任务，请耐心等待系统发放奖励^_^',
                     type: 'success'
                 });
-            },
-            getWrongImgAnnotation(wrongImg){
+            }
+            ,
+            getWrongImgAnnotation(wrongImg) {
                 let _this = this;
                 let route = "http://localhost:8086/frameAnnotation/imgName/" + wrongImg;
-                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     _this.wrongAnnotation = response.data;
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
                     console.log("error");
                 });
-            },
-            showMessage(){        //显示要继续做的提示并且在点击确认后跳到下一个界面去
+            }
+            ,
+            showMessage() {        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;
                 this.$confirm('不够过瘾，再来一组^_^', '温馨提示', {
                     confirmButtonText: '确定',
@@ -348,19 +435,22 @@
                     type: 'warning'
                 }).then(() => {
                     let path = '';
-                    if(_this.taskType === 'grade'){
+                    if (_this.taskType === 'grade') {
                         path = 'http://localhost:8086/qualityVerification/taskId/' + _this.taskId;  //评分的交互路径
                     }
-                    else if(_this.taskType === 'coverage'){
+                    else if (_this.taskType === 'coverage') {
                         path = 'http://localhost:8086/coverageVerification/taskId/' + _this.taskId;   //完整性判断的交互路径
                     }
-                    else{
+                    else {
                         console.log("emmmm");
                     }
                     _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                         let imgNames = response.data;
-                        _this.$store.commit('changeImgNames',imgNames);
-                        _this.$router.push({name: 'viewframe',params:{taskId:_this.taskId,taskType:_this.taskType}});
+                        _this.$store.commit('changeImgNames', imgNames);
+                        _this.$router.push({
+                            name: 'viewframe',
+                            params: {taskId: _this.taskId, taskType: _this.taskType}
+                        });
                     }).catch(function (error) {
                         _this.successMessage();
                         _this.$router.push({path: '/profile'});
@@ -370,48 +460,51 @@
                     _this.$router.push({path: '/profile'});    //任务取消，返回任务中心
                     console.log("-1");
                 });
-            },
-            canCommit(){
-                if(this.ratings.length === this.imgNames.length){
+            }
+            ,
+            canCommit() {
+                if (this.ratings.length === this.imgNames.length) {
                     this.commitDisabled = false;
                 }
-                else{
+                else {
                     this.commitDisabled = 'disabled';
                 }
-            },
-            ratingChange: function(score){
+            }
+            ,
+            ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
-            },
-            loadAnnotationList(callback){            //现在加载逻辑非常简单
+            }
+            ,
+            loadAnnotationList(callback) {            //现在加载逻辑非常简单
                 let _this = this;
                 let whatfor = 3;
-                if(_this.taskType === 'coverage'){
+                if (_this.taskType === 'coverage') {
                     whatfor = 2;
                 }
-                else if(_this.taskType === 'grade'){
+                else if (_this.taskType === 'grade') {
                     whatfor = 1;
                 }
 
                 let flag = false;
-                for(let i = 0;i < this.imgNames.length;i++){
+                for (let i = 0; i < this.imgNames.length; i++) {
                     let route = "http://localhost:8086/frameAnnotation/imgName/" + this.imgNames[i] + "/whatFor/" + whatfor;
-                    this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        if(response.status === 204){
+                    this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                        if (response.status === 204) {
                             _this.frames = [];
                             _this.annotation = {
                                 'imgName': _this.imgNames[i],
                                 'frame': _this.frames,
                             };
                             _this.annotationData.push(_this.annotation);
-                            if(i === _this.imgNames.length - 1){
+                            if (i === _this.imgNames.length - 1) {
                                 callback()
                             }
                         }
-                        else{
+                        else {
                             let temp = response.data;
-                            if(_this.taskType === 'grade'){     //只有grade任务才牵扯变色
-                                for(let item of temp.frames){
+                            if (_this.taskType === 'grade') {     //只有grade任务才牵扯变色
+                                for (let item of temp.frames) {
                                     item.color = "#1ABC9C";   //对于过去的标注，是青色
                                 }
 
@@ -422,10 +515,11 @@
                             _this.annotation = {
                               'imgName': _this.imgNames[i],
                               'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
+                              'annotationId': temp.annotationId,            //如果是从后端读出来的就有annotationId
                             };
                             console.log(_this.annotation);
                             _this.annotationData.push(_this.annotation);
-                            if(i === _this.imgNames.length - 1){
+                            if (i === _this.imgNames.length - 1) {
                                 callback();
                             }
                         }
@@ -512,10 +606,10 @@
                 console.log(this.frames);
                 for (let i = 0; i < this.frames.length; i++) {
                     const f = this.frames[i];
-                    if(this.frames[i].color !== undefined && this.frames[i].color !== ""){    //看变色
+                    if (this.frames[i].color !== undefined && this.frames[i].color !== "") {    //看变色
                         this.context.strokeStyle = this.frames[i].color;
                     }
-                    else{
+                    else {
                         this.context.strokeStyle = this.color;
                     }
                     this.context.strokeRect(f.p1.x, f.p1.y,
@@ -528,7 +622,7 @@
                 const canvas = document.querySelector('#canvas');
                 const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";
 
-                const htmlString = "<el-tag style='background: #e5e9f2'>標記" + (index + 1) + " </el-tag>";
+                const htmlString = `<el-tag style="background: #e5e9f2">標記${index+1} </el-tag>`;
                 let div = document.createElement('div');
                 div.id = 'tag' + index;
                 div.innerHTML = htmlString;
@@ -588,4 +682,4 @@
             },
         }
     }
-</script>
+</script >

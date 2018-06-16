@@ -13,34 +13,33 @@
             </el-form-item >
 
             <el-form-item label = "任务标签" prop = "taskTags" >
-                <el-tag
-		                :key = "tag"
-		                v-for = "tag in form.taskTags"
-		                closable
-		                :disable-transitions = "false"
-		                class = "tag"
-		                @close = "tagClose(tag)"
+                <el-autocomplete
+		                v-model = "tagValue"
+		                :fetch-suggestions = "querySearch"
+		                placeholder = "请输入标签（建议使用系统推荐标签）"
+		                style = "width: 300px"
+		                @keyup.enter.native = "questionInputConfirm"
+		                @blur = "tagInputConfirm"
+		                @select = "tagInputConfirm"
                 >
-                    {{tag}}
-                </el-tag >
-                <el-button size = "mini" @click = "dialogFormVisible = true" style = "font-size: 16px"
-                           icon = "el-icon-plus" ></el-button >
-
-                <el-dialog title = "添加标签" :visible.sync = "dialogFormVisible" :modal-append-to-body = "false"
-                           width = "500px" >
-                    <div style = "font-size: 16px; display: inline; margin-right: 20px" >标签名称</div >
-                    <el-autocomplete
-		                    v-model = "tagValue"
-		                    :fetch-suggestions = "querySearch"
-		                    placeholder = "请输入标签（建议使用系统推荐标签）"
-		                    style = "width: 300px"
-		                    @keyup.enter.native = "tagInputConfirm"
-                    ></el-autocomplete >
-                    <div slot = "footer" class = "dialog-footer" >
-                        <el-button @click = "dialogFormVisible = false" >取 消</el-button >
-                        <el-button type = "primary" @click = "tagInputConfirm" >确 定</el-button >
-                    </div >
-                </el-dialog >
+                <el-button size = "mini" slot = "append" icon = "el-icon-plus"
+                           @click = "tagInputConfirm" ></el-button >
+                </el-autocomplete >
+                <el-row >
+                    <el-col >
+                        <el-tag
+		                        v-for = "tag in form.taskTags"
+		                        :key = "tag"
+		                        closable
+		                        :disable-transitions = "false"
+		                        class = "tag"
+		                        type = "info"
+		                        @close = "tagClose(tag)"
+                        >
+                        {{tag}}
+                        </el-tag >
+                    </el-col >
+                </el-row >
             </el-form-item >
 
             <el-form-item label = "任务类型" prop = "taskCategory" >
@@ -73,15 +72,18 @@
                 >
                 </el-input >
                 <el-button v-else size = "small" @click = "questionInput" style = "font-size: 16px" >+</el-button >
-                <el-row v-for = "tags in form.tagsForAnnotation" >
-                    <el-tag
-		                    type = "warning"
-		                    :key = "tags"
-		                    closable
-		                    class = "question"
-		                    @close = "questionClose(tags)" >
+                <el-row >
+                    <el-col >
+                        <el-tag
+		                        v-for = "tags in form.tagsForAnnotation"
+		                        type = "warning"
+		                        :key = "tags"
+		                        closable
+		                        class = "question"
+		                        @close = "questionClose(tags)" >
                         {{tags}}
-                    </el-tag >
+                        </el-tag >
+                    </el-col >
                 </el-row >
             </el-form-item >
             <el-form-item label = "收费标准" prop = "rewardPerMicrotask" >
@@ -282,8 +284,10 @@
                 })
             },
             badMessage(msg) {
-                this.$alert(msg, '系统警告', {
-                    confirmButtonText: '确定'
+                this.$notify({
+                    message: `<p style="font-family: Microsoft YaHei; font-size: 18px">${msg}</p>`,
+                    type: "error",
+                    dangerouslyUseHTMLString: true,
                 });
             },
             tagClose(tag) {

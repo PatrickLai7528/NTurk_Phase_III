@@ -259,11 +259,13 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     }
 
     private void acceptVerification(Verification v) {
+        setMicrotaskAndAnnotation(v);
+
         v.setVerificationType(getVType());
         v.setUsername(username);
+        v.setCreateTime(LocalDateTime.now());
+        v.setIsMajorityVoting(task.getIsCollecting());
         verificationJPA.save(v);
-
-        setMicrotaskAndAnnotation(v);
 
 
         microtask.setParallel(microtask.getParallel() - 1);

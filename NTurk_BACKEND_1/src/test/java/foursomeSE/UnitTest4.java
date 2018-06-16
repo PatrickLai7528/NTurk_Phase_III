@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -410,5 +412,16 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         List<CTask> newTasks = taskService.getNewTasks("worker1@ex.com");
         assertEquals(1, workerTasks.size());
         assertEquals(1, newTasks.size());
+
+        frameAnnotationService.saveAnnotations(rats(IntStream.rangeClosed(1, 5)), "worker1@ex.com");
+
+        Microtask mt = mtByImg(microtaskJPA, "1.jpg");
+//        List<Object[]> latestBefore = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());
+        Object[] oos = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());;
+        Object[] oo = (Object[]) oos[0];
+        BigInteger aid = (BigInteger) oo[0];
+        int aStt = Integer.parseInt(oo[1].toString());
+
+        System.out.println("ogbu");
     }
 }

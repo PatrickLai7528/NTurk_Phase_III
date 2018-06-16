@@ -1,34 +1,40 @@
 package foursomeSE.service.task;
 
+import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.communicate.report.Reports;
+import foursomeSE.entity.statistics.*;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.contract.Contract;
-import foursomeSE.entity.statistics.TaskGrowth;
-import foursomeSE.entity.statistics.TaskNum;
-import foursomeSE.entity.statistics.TaskParticipation;
-import foursomeSE.entity.statistics.TaskStatusData;
 import foursomeSE.entity.task.*;
 import foursomeSE.entity.user.Requester;
 import foursomeSE.entity.user.Worker;
+import foursomeSE.entity.verification.Verification;
+import foursomeSE.entity.verification.VerificationType;
+import foursomeSE.jpa.annotation.AnnotationJPA;
+import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.jpa.verification.VerificationJPA;
 import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static foursomeSE.service.task.TaskUtils.mtByImg;
 import static foursomeSE.service.task.TaskUtils.taskById;
 import static foursomeSE.service.user.UserUtils.userById;
 import static foursomeSE.service.user.UserUtils.userByUsername;
@@ -44,19 +50,23 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     //    private LowerContractService lowerContractService;
     private ContractJPA contractJPA;
     private TaskJPA taskJPA;
-    private MessageJPA messageJPA;
+    private AnnotationJPA annotationJPA;
+    private GeneralAnnotationJPA generalAnnotationJPA;
+    private VerificationJPA verificationJPA;
 
     private MicrotaskJPA microtaskJPA;
     private LowerContractService lowerContractService;
 
     private String username;
 
-    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, MessageJPA messageJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
+    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, AnnotationJPA annotationJPA, GeneralAnnotationJPA generalAnnotationJPA, VerificationJPA verificationJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
-        this.messageJPA = messageJPA;
+        this.annotationJPA = annotationJPA;
+        this.generalAnnotationJPA = generalAnnotationJPA;
+        this.verificationJPA = verificationJPA;
         this.microtaskJPA = microtaskJPA;
         this.lowerContractService = lowerContractService;
     }
@@ -197,36 +207,129 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         return result;
     }
 
-//    /**
-//     * inspection
-//     */
-//    @Override
-//    public List<CTask> getNewInspectionTasks(String username) {
-//        this.username = username;
-//
-//        List<Task> result = taskJPA.findByTaskStatus(TaskStatus.UNDER_REVIEW.ordinal());
-//        result.removeAll(getWorkerInspectionTasks(username));
-//
-//        return listConvert(result, this::sToD);
-//    }
-//
-//    @Override
-//    public List<CTaskForInspection> getWorkerInspectionTasks(String username) {
-//        this.username = username;
-//
-//        return taskJPA.findWorkerInspectionTasks(username)
-//                .stream()
-//                .map(this::sToD2)
-//                .collect(Collectors.toCollection(ArrayList::new));
-//
-////        return getWorkerTasks(username).stream()
-////                .filter(t -> t.getTaskStatus() == TaskStatus.UNDER_REVIEW
-////                        && t.get)
-////                .map(this::sToD2)
-////                .collect(Collectors.toCollection(ArrayList::new));
-//    }
+
+    @Override
+    public List<PHItem> PHChart(long taskId, String username) {
+        List<PHItem> result = new ArrayList<>();
+        Task task = taskById(taskJPA, taskId);
 
 
+        for (LocalDate date = task.getCreateTime().toLocalDate();
+             date.isBefore(LocalDate.now());
+             date = date.plusDays(1)) {
+
+            PHItem phItem = new PHItem();
+            phItem.date = date;
+
+
+            for (Microtask mt : microtaskJPA.findByTaskId(taskId)) {
+                Object[] oos = annotationJPA
+                        .findLatestBefore(mt.getMicrotaskId(), LocalDateTime.of(date, LocalTime.MIN));
+
+                if (oos.length == 0) {
+                    phItem.ongoing++;
+                } else {
+                    Object[] oo = (Object[]) oos[0];
+                    BigInteger aidB = (BigInteger) oo[0];
+                    long aid = aidB.longValue();
+                    int aStt = Integer.parseInt(oo[1].toString());
+
+                    if (aStt == 0) {
+                        phItem.underReview++;
+                    } else if (aStt == 2) {
+                        phItem.ongoing++;
+                    } else  // 接下来就一定是passed的了
+                        if (generalAnnotationJPA.findById(aid).isPresent()) {
+                            phItem.finished++;
+                        } else {
+                            List<Verification> cvs = verificationJPA
+                                    .findByAnnotationIdAndVerificationType(
+                                            aid, VerificationType.COVERAGE);
+
+                            if (cvs.isEmpty()) {
+                                phItem.underReview++;
+                            } else {
+                                Verification cv1 = cvs.get(0);
+                                if (cv1.getIsMajorityVoting() == 0) {
+                                    if (cv1.getRate() == 1) {
+                                        phItem.finished++;
+                                    } else {
+                                        phItem.underReview++;
+                                    }
+                                } else {
+                                    int sum = cvs.stream().mapToInt(Verification::getRate).sum();
+                                    if (cvs.size() != 3) {
+                                        phItem.underReview++;
+                                    } else if (sum >= 2) {
+                                        phItem.finished++;
+                                    } else {
+                                        phItem.underReview++;
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+
+            result.add(phItem);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<CommitItem> commitChart(long taskId, String username) {
+        List<CommitItem> result = new ArrayList<>();
+        Task task = taskById(taskJPA, taskId);
+
+        for (LocalDate date = task.getCreateTime().toLocalDate();
+             date.isBefore(LocalDate.now());
+             date = date.plusDays(1)) {
+
+            CommitItem ci = new CommitItem();
+            ci.date = date;
+            ci.DCommit = annotationJPA.findAidsBetween(
+                    taskId,
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            ).size();
+            ci.QVCommit = verificationJPA.findBetween(
+                    taskId,
+                    VerificationType.QUALITY.ordinal(),
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            ).size();
+            ci.CVCommit = verificationJPA.findBetween(
+                    taskId,
+                    VerificationType.COVERAGE.ordinal(),
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            ).size();
+
+
+            result.add(ci);
+        }
+
+        return result;
+    }
+
+    @Override
+    public Accuracy accuraccyChart(String username) {
+        Accuracy result = new Accuracy();
+
+
+
+        Worker worker = userByUsername(workerJPA, username);
+        for (LocalDate date = worker.getCreateTime().toLocalDate();
+             date.isBefore(LocalDate.now());
+             date = date.plusDays(1)) {
+
+
+
+        }
+
+        return null;
+    }
 
     /**
      * statistic
@@ -412,10 +515,6 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 //        } catch (MyObjectNotFoundException e) {
 //            return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);
 //        }
-    }
-
-    private Task dToS(CTask cTask) {
-        return new Task(cTask);
     }
 
 

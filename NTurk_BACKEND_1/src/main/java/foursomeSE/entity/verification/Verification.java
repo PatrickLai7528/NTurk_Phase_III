@@ -2,6 +2,7 @@ package foursomeSE.entity.verification;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Entity
 public class Verification {
@@ -20,6 +21,12 @@ public class Verification {
 
     @NotNull
     private VerificationType verificationType;
+
+    @NotNull
+    private LocalDateTime createTime;
+
+    @NotNull
+    private int isMajorityVoting;
 
     public long getId() {
         return id;
@@ -59,5 +66,21 @@ public class Verification {
 
     public void setVerificationType(VerificationType verificationType) {
         this.verificationType = verificationType;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public int getIsMajorityVoting() {
+        return isMajorityVoting;
+    }
+
+    public void setIsMajorityVoting(int isMajorityVoting) {
+        this.isMajorityVoting = isMajorityVoting;
     }
 }

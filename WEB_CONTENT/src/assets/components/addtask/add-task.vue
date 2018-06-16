@@ -6,10 +6,10 @@
                     <div slot = "header" class = "guide-header" >
                         <span >創建任務指南</span >
                     </div >
-                    <div style = "height: 300px" >
+                    <div style = "height: 500px" >
                         <el-steps direction = "vertical" :active = "activeAddTaskStep" >
                             <el-step :title = "addTaskStep[0].simpleDescription" :status = "addTaskStep[0].status" >
-                                <div slot = "description" >
+                                <div slot = "description" style = "font-size: 15px" >
                                     <div v-html = "addTaskStep[0].description" >
                                         {{addTaskStep[0].description}}
                                     </div >
@@ -30,9 +30,9 @@
                 <el-card class = "add-task-step" >
                     <div slot = "header" class = "add-task-step-header" >
                     <span >步驟{{activeAddTaskStep+1}}: {{addTaskStep[activeAddTaskStep].simpleDescription}}</span >
-                    <el-button class = "the-bottom-button" size = "mini" v-show = "activeAddTaskStep===1"
+                    <el-button class = "the-operation-button" size = "mini" v-show = "activeAddTaskStep===1"
                                @click = "previousStep()" >上一步</el-button >
-                    <el-button class = "the-bottom-button" size = "mini"
+                    <el-button class = "the-operation-button" size = "mini"
                                @click = "buttonClickEvent()" >{{buttonContent}}</el-button >
                     </div >
                     <div class = "add-task-content" >
@@ -42,20 +42,6 @@
                     
                 </el-card >
             </el-col >
-            <!--<el-col :span = "14" >-->
-            <!--<div class = "my-task-info" >-->
-            <!--<task-info v-bind:the-img = "imgNames" style = "display: inline-block" ></task-info >-->
-            <!--</div >-->
-            <!--</el-col >-->
-            <!--&lt;!&ndash;<transition name="el-fade-in">&ndash;&gt;-->
-            <!--&lt;!&ndash;<el-col :span="12" id="border-line">&ndash;&gt;-->
-            <!--&lt;!&ndash;</el-col>&ndash;&gt;-->
-            <!--<el-col :span = "10" >-->
-            <!--<div class = "taskimg" >-->
-            <!--<task-img-upload v-on:fileList2 = "handleAddImg" ></task-img-upload >-->
-            <!--</div >-->
-            <!--</el-col >-->
-            <!--</transition>-->
         </el-row >
     </div >
 </template >
@@ -126,7 +112,7 @@
                         simpleDescription: "填寫任務資料及要求",
                         description:
                             `
-								<div class="description_1">
+								<div">
 									<span>任務名稱: 應簡短地說明<strong style="color: #FF3B3F">任務是關於甚麼的、是怎麼樣的圖片集</strong></span><br>
 									<span>任務描述: 用於提醒工人這個任務的工作內容, 用<strong style="color: #FF3B3F">提問形式</strong>更佳</span><br>
 									<span>任務標籤: 用於推荐系統, 建議<strong style="color: #FF3B3F">使用系統內置標籤</strong></span><br>
@@ -213,6 +199,7 @@
 	    margin-bottom: 0em;
 	    height: 100%;
 	    max-height: 680px;
+	    overflow: auto;
     }
 
     .add-task-step-header {
@@ -221,12 +208,13 @@
 	    text-align: left;
     }
 
-    .the-bottom-button {
+    .the-operation-button {
 	    font-family: Microsoft YaHei;
 	    width: 8em;
-	    background: #CAFBF2;
-	    border-color: #CAFBF2;
+	    background: #EFEFEF;
+	    border-color: #EFEFEF;
+	    color: #000;
 	    /*margin: 0.5em;*/
-	    margin-left: 6em;
+	    margin-left: 3em;
     }
 </style >

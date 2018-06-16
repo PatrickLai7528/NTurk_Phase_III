@@ -119,8 +119,10 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
 //            "where microtask_status = 1 and last_request_time < ?1", nativeQuery = true)
 //    void checkUnfinished(LocalDateTime nowMinusXMinutes);
 
+    List<Microtask> findByTaskId(long taskId);
 
-    // 这个是为了
+
+    // 这个是为了检查能否完成整个任务
     @Query(value = "SELECT * FROM microtasks\n" +
             "WHERE task_id = ?1 AND microtask_status <> 3",
             nativeQuery = true)
