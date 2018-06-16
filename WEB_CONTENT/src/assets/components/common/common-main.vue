@@ -174,22 +174,21 @@
             doWhileGetTableDataSuccess(response,url) {        //赖总的编程风格很友好啊，将代码都优化了
                 console.log(response.data);
                 if(response.data.length != 0){
-                    this.tableData = this.tableData.concat(response.data);     //现在是多个response.data  用数组连接
-                }
-                for (let e of this.tableData) {
-                    e.formatEndTime = DateUtils.dateFormat(e.endTime); //将日期进行格式化
-                    if (e.capacity === 2147483647) {
-                        e.capacity = "无限制";
+                    for(let e of response.data){
+                        if(!(e in this.tableData)){
+                            this.tableData.push(e);
+                            e.source = this.sourceDictionary[url];     //添加来源
+                        }
                     }
-                    e.source = this.sourceDictionary[url];     //添加来源
                 }
+
                 this.translate();
             },
             decideGetTableDataUrl() {//现在的返回值是一个数组
                 if (this.message === "user")   //现在理论上来说应该得到我喜欢的任务，但是还没有实现
                     return ["http://localhost:8086/workerTasks"]; //用户中心得到的是以前存在的任务
                 else
-                    return ["http://localhost:8086/newTasks","http://localhost:8086/workerTasks"];
+                    return ["http://localhost:8086/workerTasks","http://localhost:8086/newTasks"];
             },
             getTableData() {
                 let header = {Authorization: this.$store.getters.getToken};
@@ -252,9 +251,6 @@
                 }
                 else if(type === 'coverage'){
                     path = 'http://localhost:8086/coverageVerification/taskId/' + taskId;   //完整性判断的交互路径
-                }
-                else{
-                    console.log("emmmm");
                 }
 
                 _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {

@@ -284,14 +284,19 @@
                 for(let img of this.imgNames){
                     let route = "http://localhost:8086/generalAnnotation/imgNames/" + img + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        _this.annotation = response.data;
-                        _this.annotationData.push(_this.annotation);
+                        if(response.status === 204){
+                            _this.annotation = {
+                                'imgName': img,
+                                'answer': '',
+                            };
+                            _this.annotationData.push(_this.annotation);
+                        }
+                        else{
+                            _this.annotation = response.data;
+                            _this.annotationData.push(_this.annotation);
+                        }
+
                     }).catch(function (error) {
-                        _this.annotation = {
-                            'imgName': img,
-                            'answer': '',
-                        };
-                        _this.annotationData.push(_this.annotation);
                         console.log(error);
                     })
                 }

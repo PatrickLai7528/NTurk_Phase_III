@@ -160,8 +160,8 @@
                             x: 0,
                             y: 0
                         },
-                        tag: ""
-                        // color: "#"
+                        tag: "",
+                        color: "",
                     }
                 ],
                 frameIndex: 0,
@@ -169,7 +169,7 @@
                 pic:
                     {}
                 ,
-                color: "#df4b26",
+                color: "#df2c2d",
                 isNew: [],
                 startPoint:
                     {
@@ -397,22 +397,40 @@
                 for(let i = 0;i < this.imgNames.length;i++){
                     let route = "http://localhost:8086/frameAnnotation/imgName/" + this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        _this.annotation = response.data;
-                        _this.annotationData.push(_this.annotation);
-                        if(i === _this.imgNames.length - 1){
-                            callback();
+                        if(response.status === 204){
+                            _this.frames = [];
+                            _this.annotation = {
+                                'imgName': _this.imgNames[i],
+                                'frame': _this.frames,
+                            };
+                            _this.annotationData.push(_this.annotation);
+                            if(i === _this.imgNames.length - 1){
+                                callback()
+                            }
+                        }
+                        else{
+                            let temp = response.data;
+                            if(_this.taskType === 'grade'){     //只有grade任务才牵扯变色
+                                for(let item of temp.frames){
+                                    item.color = "#1ABC9C";   //对于过去的标注，是青色
+                                }
+
+                                temp.frame.color = '#C0392B';
+                            }
+
+                            temp.frames.push(temp.frame);
+                            _this.annotation = {
+                              'imgName': _this.imgNames[i],
+                              'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
+                            };
+                            console.log(_this.annotation);
+                            _this.annotationData.push(_this.annotation);
+                            if(i === _this.imgNames.length - 1){
+                                callback();
+                            }
                         }
                     }).catch(function (error) {
-                        _this.frames = [];
-                        _this.annotation = {
-                            'imgName': _this.imgNames[i],
-                            'frame': _this.frames,
-                        };
-                        _this.annotationData.push(_this.annotation);
                         console.log(error);
-                        if(i === _this.imgNames.length - 1){
-                            callback()
-                        }
                     });
                 }
             },
@@ -459,8 +477,8 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
-                console.log(this.annotation);
                 this.frames = this.annotation.frame;             //之前实现的有问题，应该现把frames加载，然后调用initialDraw方法
+                console.log(this.frames);
                 this.initialDraw();
             },
             /**
@@ -489,11 +507,17 @@
                 }
                 // draw
                 this.context.drawImage(this.pic, 0, 0, this.canvasWidth, this.canvasHeight);
-                this.context.strokeStyle = this.color;
+
                 this.context.lineWidth = 5;
                 console.log(this.frames);
                 for (let i = 0; i < this.frames.length; i++) {
                     const f = this.frames[i];
+                    if(this.frames[i].color !== undefined && this.frames[i].color !== ""){    //看变色
+                        this.context.strokeStyle = this.frames[i].color;
+                    }
+                    else{
+                        this.context.strokeStyle = this.color;
+                    }
                     this.context.strokeRect(f.p1.x, f.p1.y,
                         f.p2.x - f.p1.x, f.p2.y - f.p1.y);
                     this.addTag(f, i);
