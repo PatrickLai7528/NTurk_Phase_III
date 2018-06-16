@@ -203,7 +203,7 @@
                 imgNames: this.$store.getters.getImgNames,     //可以得到所有标注的编号，再通过所有标注的编号去找到这个标注和这个标注对应的imgName
                 taskType: this.$route.params.taskType,
                 dialogVisible: false,
-                wrongImg: '',            //返回的是wrongImg
+                wrongImg: "taskPic-2018061515075768226.jpg",            //返回的是wrongImg
                 wrongAnnotation: {},      //这是那个wrongImg的annotation
                 wrongAnswerPairs: [],
                 tagHtml: '',
