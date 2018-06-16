@@ -11,38 +11,52 @@ import java.math.BigInteger;
 @Transactional
 public interface GoldJPA extends CrudRepository<Gold, Long> {
 
-    @Query(value = "SELECT img_name FROM microtasks\n" +
+    /**
+     * 这个是返回给工人img时用的
+     * */
+    @Query(value = "SELECT img_name\n" +
+            "FROM microtasks\n" +
             "WHERE microtask_id IN (\n" +
-            "    SELECT microtask_id FROM annotation\n" +
-            "    WHERE annotation_id IN (\n" +
-            "        SELECT annotation_id FROM gold\n" +
-            "        WHERE taskId = ?1 AND ord = ?2\n" +
-            "    )\n" +
+            "  SELECT microtask_id\n" +
+            "  FROM annotation\n" +
+            "  WHERE annotation_id IN (\n" +
+            "    SELECT annotation_id\n" +
+            "    FROM gold\n" +
+            "    WHERE task_id = ?1 AND ord = ?2 AND verification_type = ?3\n" +
+            "  )\n" +
             ")",
             nativeQuery = true)
-    String findByTaskIdAndOrd(long taskId, int ord);
+    String findByTaskIdAndOrdAndVerificationType(long taskId, int ord, int vTypeOrd);
 
+
+    /**
+     * 这个是当工人通过imgName找gold时用的
+     * */
     @Query(value = "SELECT annotation_id\n" +
             "FROM gold\n" +
             "WHERE annotation_id\n" +
             "      IN (SELECT annotation_id\n" +
             "          FROM annotation\n" +
             "          WHERE microtask_id IN (SELECT microtask_id\n" +
-            "                                  FROM microtasks\n" +
-            "                                  WHERE img_name = ?1))",
+            "                                 FROM microtasks\n" +
+            "                                 WHERE img_name = ?1))\n" +
+            "AND verification_type = ?2",
             nativeQuery = true)
-    BigInteger goldAidByImgName(String imgName);
+    BigInteger goldAidByImgName(String imgName, int vTypeOrd);
 }
 
 /*
 
-select img_name from microtasks
-where microtask_id in (
-    select microtask_id from annotation
-    where annotation_id in (
-        select annotation_id from gold
-        where taskId = ?1 and ord = ?2
-    )
+SELECT img_name
+FROM microtasks
+WHERE microtask_id IN (
+  SELECT microtask_id
+  FROM annotation
+  WHERE annotation_id IN (
+    SELECT annotation_id
+    FROM gold
+    WHERE task_id = ?1 AND ord = ?2 AND verification_type = ?3
+  )
 )
 
 
@@ -52,7 +66,9 @@ WHERE annotation_id
       IN (SELECT annotation_id
           FROM annotation
           WHERE microtask_id IN (SELECT microtask_id
-                                  FROM microtasks
-                                  WHERE img_name = ?1))
+                                 FROM microtasks
+                                 WHERE img_name = ?1))
+AND verification_type = ?2
+
 
  */

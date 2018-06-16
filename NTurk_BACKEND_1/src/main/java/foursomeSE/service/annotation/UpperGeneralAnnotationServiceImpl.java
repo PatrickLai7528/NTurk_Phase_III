@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("simpleGeneralAnnotationService")
-public class SimpleGeneralAnnotationServiceImpl extends AbstractUpperAnnotationServiceImpl<GeneralAnnotation> {
-    public SimpleGeneralAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<GeneralAnnotation> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
+public class UpperGeneralAnnotationServiceImpl extends AbstractUpperAnnotationServiceImpl<GeneralAnnotation> {
+    public UpperGeneralAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<GeneralAnnotation> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
         super(contractJPA, abstractAnnotationJPA, workerJPA, microtaskJPA, annotationJPA, goldJPA);
     }
 }

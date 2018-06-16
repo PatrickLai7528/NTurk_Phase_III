@@ -415,8 +415,16 @@
             },
             loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
+                let whatfor = 3;
+                if(_this.taskType === 'coverage'){
+                    whatfor = 2;
+                }
+                else if(_this.taskType === 'grade'){
+                    whatfor = 1;
+                }
+
                 for(let img of this.imgNames){
-                    let route = "http://localhost:8086/segmentAnnotation/imgName/" + img;
+                    let route = "http://localhost:8086/segmentAnnotation/imgName/" + img + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                         _this.annotation = response.data;
                         console.log(response.data);
@@ -425,7 +433,7 @@
                         _this.segments = [];
                         _this.annotation = {
                             'imgName': _this.img,
-                            'segments': _this.segments
+                            'segment': _this.segments
                         };
                         _this.annotationData.push(_this.annotation);
                         console.log(error);

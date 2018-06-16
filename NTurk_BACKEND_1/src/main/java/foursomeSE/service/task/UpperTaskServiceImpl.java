@@ -18,6 +18,7 @@ import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,21 +47,18 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private MessageJPA messageJPA;
 
     private MicrotaskJPA microtaskJPA;
+    private LowerContractService lowerContractService;
 
     private String username;
 
-    public UpperTaskServiceImpl(WorkerJPA workerJPA,
-                                RequesterJPA requesterJPA,
-                                ContractJPA contractJPA,
-                                TaskJPA taskJPA,
-                                MessageJPA messageJPA,
-                                MicrotaskJPA microtaskJPA) {
+    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, MessageJPA messageJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
         this.messageJPA = messageJPA;
         this.microtaskJPA = microtaskJPA;
+        this.lowerContractService = lowerContractService;
     }
 
     @Override
@@ -163,10 +161,20 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
     @Override
     public EnterResponse enterTask(long taskId, String username) {
+        EnterResponse result = new EnterResponse();
+
         List<Microtask> results = microtaskJPA.getMicroTasks(taskId);
+        if (results.isEmpty()) {
+            result.setImgNames(new ArrayList<>());
+            return result;
+        }
+
+        lowerContractService.recordEnterTask(taskId, username);
+
         if (results.size() > NUM_OF_MICROTASK_PER_REQUEST) {
             results = results.subList(0, NUM_OF_MICROTASK_PER_REQUEST);
         }
+
 
         results.forEach(r -> {
             r.setLastRequestTime(LocalDateTime.now());
@@ -184,7 +192,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
             CriticalSection.drawRecords.add(item);
         });
 
-        EnterResponse result = new EnterResponse();
+
         result.setImgNames(results.stream().map(Microtask::getImgName).collect(Collectors.toCollection(ArrayList::new)));
         return result;
     }

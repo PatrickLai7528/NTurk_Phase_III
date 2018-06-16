@@ -11,6 +11,7 @@ import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.user.Worker;
+import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.jpa.annotation.AbstractAnnotationJPA;
 import foursomeSE.jpa.annotation.AnnotationJPA;
@@ -18,6 +19,7 @@ import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
+import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 
@@ -53,7 +55,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     }
 
     @Override
-    public T getByImgName(String imgName, String username) {
+    public T getByImgName(String imgName, int whatFor, String  username) {
         Microtask mt = mtByImg(microtaskJPA, imgName);
 
         T t;
@@ -61,7 +63,15 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         if (mt.getIsSample() == 1
                 && mt.getMicrotaskStatus() == MicrotaskStatus.PASSED
                 && workerJPA.findByEmailAddress(username).isPresent()) {
-            BigInteger bigInteger = goldJPA.goldAidByImgName(imgName);
+            VerificationType vType;
+            if (whatFor == 1) {
+                vType = VerificationType.QUALITY;
+            } else if (whatFor == 2) {
+                vType = VerificationType.COVERAGE;
+            } else {
+                throw new MyNotValidException();
+            }
+            BigInteger bigInteger = goldJPA.goldAidByImgName(imgName, vType.ordinal());
             // 这个就一定可以拿到的，不然不会发给别人pass了的。
             // 但是如果是requester拿呢？那还是得返回最新的。worker永远不会去拿pass了的。
             t = anttById(abstractAnnotationJPA, bigInteger.longValue());
@@ -101,19 +111,6 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         if (mt0.getLastRequestTime().isAfter(LocalDateTime.now().minusMinutes(TASK_DURATION))) {
             long taskId = mt0.getTaskId();
             Worker worker = userByUsername(workerJPA, username);
-
-            Contract translucent = contractJPA.findByTaskIdByUsername(taskId, username);
-            if (translucent == null) {
-                Contract c = new Contract();
-                c.setTaskId(taskId);
-                c.setWorkerId(worker.getId());
-                c.setLastEditTime(LocalDateTime.now());
-                contractJPA.save(c);
-            } else {
-                translucent.setLastEditTime(LocalDateTime.now());
-                contractJPA.save(translucent);
-            }
-
 
             rAnnotations.getAnnotations().forEach(a -> {
                 Microtask mt = mtByImg(microtaskJPA, a.getImgName());

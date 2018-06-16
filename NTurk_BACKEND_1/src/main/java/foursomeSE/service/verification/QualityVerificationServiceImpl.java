@@ -13,6 +13,7 @@ import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
+import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,8 @@ import java.util.List;
 public class QualityVerificationServiceImpl extends AbstractVerificationServiceImpl {
     private GeneralAnnotationJPA generalAnnotationJPA;
 
-
-    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, GeneralAnnotationJPA generalAnnotationJPA) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA);
+    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService, GeneralAnnotationJPA generalAnnotationJPA) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService);
         this.generalAnnotationJPA = generalAnnotationJPA;
     }
 
@@ -36,7 +36,9 @@ public class QualityVerificationServiceImpl extends AbstractVerificationServiceI
 
         if (isGeneral()) {
             // 但是general也不用管iteration。
-            checkAndFindGold();
+            if (needToFindGold()) {
+                findGoldForGeneral();
+            }
             checkFinishTask();
         }
     }

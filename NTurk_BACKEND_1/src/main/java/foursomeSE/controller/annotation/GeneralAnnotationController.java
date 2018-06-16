@@ -12,7 +12,7 @@ public class GeneralAnnotationController extends AbstractAnnotationController<Ge
 
     @Override
     @Autowired
-    @Qualifier("simpleGeneralAnnotationServiceImpl")
+    @Qualifier("upperGeneralAnnotationServiceImpl")
     public void setAnnotationService(UpperAnnotationService<GeneralAnnotation> annotationService) {
         this.annotationService = annotationService;
     }

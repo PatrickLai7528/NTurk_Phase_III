@@ -29,13 +29,18 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
 //        }
 //    }
 
-    @RequestMapping(value = "/imgName/{imgName}",
-    method = RequestMethod.GET)
+    /**
+     * 因之前设计接口失误，加上whatFor的参数
+     * 0代表工人draw，1代表工人verifyQuality，2代表工人verifyCoverage，3代表requester查看
+     */
+    @RequestMapping(value = "/imgName/{imgName}/whatFor/{whatFor}",
+            method = RequestMethod.GET)
     public ResponseEntity<?> getByImgName(@RequestHeader("Authorization") String token,
-                                          @PathVariable("imgName") String imgName) {
+                                          @PathVariable("imgName") String imgName,
+                                          @PathVariable("whatFor") int whatFor) {
         String username = JwtUtil.getUsernameFromToken(token);
 
-        T a = annotationService.getByImgName(imgName, username);
+        T a = annotationService.getByImgName(imgName, whatFor, username);
         if (a == null) {
             return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
         }
@@ -55,7 +60,7 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
     }
 
     @RequestMapping(value = "/json/taskId/{taskId}",
-    method = RequestMethod.GET)
+            method = RequestMethod.GET)
     @PreAuthorize("hasRole('REQUESTER')")
     public ResponseEntity<?> getJsons(@RequestHeader("Authorization") String token,
                                       @PathVariable("taskId") long taskId) {
