@@ -33,11 +33,12 @@
         },
         methods: {
             setHeatMap(){
+                let data = this.getVirtualData(2018);
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById('heat'));
                 let option = {
                     title: [{
-                        left: 'center',
+                        left: '30%',
                         text: '任务参与次数',
                         textStyle: {
                             fontSize: 20
@@ -58,42 +59,71 @@
                             {min: 100, max: 325, color: '#c6e48b'},
                             {max: 100, color: '#DEDEDE'}
                         ],
-                        orient: 'horizontal',
+                        orient: 'vertical',
                         left: 'right',
                         top: 'middle',
                         textStyle: {
-                            fontSize: 14
+                            fontSize: 18
                         }
                     },
 
-                    calendar: [{
-                        //range: ['2017-06-16', '2018-06-16'],
-                        range: '2017',
-                        cellSize: ['auto', 20],
-                        splitLine: {
-                            show: false
+                    calendar: [
+                        {
+                            //range: ['2017-06-16', '2018-06-16'],
+                            range: ['2018-01-01', '2018-06-30'],
+                            cellSize: [25, 25],
+                            splitLine: {
+                                show: false
+                            },
+                            itemStyle: {
+                                borderColor: '#FFFFFF',
+                                borderWidth: 2
+                            }
                         },
-                        itemStyle: {
-                            borderColor: '#FFFFFF',
-                            borderWidth: 2
+                        {
+                            //range: ['2017-06-16', '2018-06-16'],
+                            top: 300,
+                            range: ['2018-07-01', '2018-12-31'],
+                            cellSize: [25, 25],
+                            splitLine: {
+                                show: false
+                            },
+                            itemStyle: {
+                                borderColor: '#FFFFFF',
+                                borderWidth: 2
+                            }
                         }
-                    }],
-                    series: [{
-                        type: 'heatmap',
-                        coordinateSystem: 'calendar',
-                        calendarIndex: 0,
-                        data: this.getVirtualData(2017),
-                        itemStyle: {
-                            // borderColor:"red",         //边框颜色
-                            // borderWidth: 1,              //柱条的描边宽度，默认不描边。
-                            borderType:"solid",         //柱条的描边类型，默认为实线，支持 'dashed', 'dotted'。
-                            barBorderRadius: 4,          //柱形边框圆角半径，单位px，支持传入数组分别指定柱形4个圆角半径。
-                            opacity: 1,                  //图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。
+                    ],
+                    series: [
+                        {
+                            type: 'heatmap',
+                            coordinateSystem: 'calendar',
+                            calendarIndex: 0,
+                            data: data,
+                            itemStyle: {
+                                // borderColor:"red",         //边框颜色
+                                // borderWidth: 1,              //柱条的描边宽度，默认不描边。
+                                borderType:"solid",         //柱条的描边类型，默认为实线，支持 'dashed', 'dotted'。
+                                barBorderRadius: 4,          //柱形边框圆角半径，单位px，支持传入数组分别指定柱形4个圆角半径。
+                                opacity: 1,                  //图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。
+                            }
+                        },
+                        {
+                            type: 'heatmap',
+                            coordinateSystem: 'calendar',
+                            calendarIndex: 1,
+                            data: data,
+                            itemStyle: {
+                                // borderColor:"red",         //边框颜色
+                                // borderWidth: 1,              //柱条的描边宽度，默认不描边。
+                                borderType:"solid",         //柱条的描边类型，默认为实线，支持 'dashed', 'dotted'。
+                                barBorderRadius: 4,          //柱形边框圆角半径，单位px，支持传入数组分别指定柱形4个圆角半径。
+                                opacity: 1,                  //图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。
+                            }
                         }
-                    }]
+                    ]
 
                 };
-                alert("I'm here");
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
             },

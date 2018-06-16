@@ -51,7 +51,7 @@
                         </el-col >
                     </el-row >
                 </el-tab-pane >
-                <el-tab-pane label = "我的任務" >
+                <el-tab-pane label = "我的任务" >
                     <el-row >
                         <el-col :span = "18" :offset = "3" class = "title" >
                             <span >任务参与</span >
@@ -65,10 +65,10 @@
                         </div >
                     </el-row >
                 </el-tab-pane >
-                <el-tab-pane label = "兌換中心" >
+                <el-tab-pane label = "兑换中心" >
                     <el-row >
                         <el-col :span = "18" :offset = "3" class = "title" >
-                            <span >兌換活動</span >
+                            <span >兑换活动</span >
                         </el-col >
                     </el-row >
                     <el-row class = "functionPane" >
@@ -86,7 +86,7 @@
                                             <el-input-number size = "mini" 　:min = "1"
                                                              v-model = "workerBasicExchange.counter" ></el-input-number >
                                             <el-button type = "text" class = "join-exchange-event-button"
-                                                       @click = "exchange(0)" >兌換
+                                                       @click = "exchange(0)" >兑换
                                             </el-button >
                                         </div >
                                     </el-card >
@@ -107,7 +107,7 @@
                                             <el-input-number size = "mini" 　:min = "1"
                                                              v-model = "workerQuotaExchange.counter" ></el-input-number >
                                             <el-button type = "text" class = "join-exchange-event-button"
-                                                       @click = "exchange(1)" >兌換
+                                                       @click = "exchange(1)" >兑换
                                             </el-button >
                                         </div >
                                     </el-card >
@@ -128,7 +128,7 @@
                                             <el-input-number size = "mini" 　:min = "1"
                                                              v-model = "requesterExchange.counter" ></el-input-number >
                                             <el-button type = "text" class = "join-exchange-event-button"
-                                                       @click = "exchange(2)" >兌換
+                                                       @click = "exchange(2)" >兑换
                                             </el-button >
                                         </div >
                                     </el-card >
@@ -198,23 +198,23 @@
                     createTime: ''
                 }],
                 workerBasicExchange: {
-                    name: '基本兌換',
-                    description: '1積分能兑换1元',
+                    name: '基本兑换',
+                    description: '1积分能兑换1元',
                     money: '1',
                     requiredCredit: '1',
                     counter: 0
                 },
                 workerQuotaExchange: {
-                    name: '定額兌換',
-                    description: '1000積分能兌換1500元',
+                    name: '定额兑换',
+                    description: '1000积分能兑换1500元',
                     money: '1500',
                     requiredCredit: '1000',
                     counter: 0
                 },
                 requesterExchange: {
-                    name: '基本兌換',
+                    name: '基本兑换',
                     endTime: '',
-                    description: '1元能兑换1積分',
+                    description: '1元能兑换1积分',
                     money: '1',
                     requiredCredit: '1',
                     counter: 0
