@@ -47,7 +47,7 @@
                             <el-button type = "danger" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')"
                                        round class = "default-font-style" >正确性判断</el-button >
-                            <el-button type = "error" size = "medium"
+                            <el-button type = "info" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')"
                                        v-if = "scope.row.taskCategory !== 'GENERAL'" round
                                        class = "default-font-style" >完整性判断</el-button >
@@ -334,6 +334,7 @@
 	    /*background-image: url(../../images/mainbg.jpg);*/
 	    /*background-size: auto 100%;*/
 	    height: 650px;
+	    overflow: auto;
     }
 
     .table {

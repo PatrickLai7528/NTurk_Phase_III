@@ -108,7 +108,7 @@
     .slogon {
 	    font-family: Microsoft YaHei;
 	    font-weight: lighter;
-	    color: #FFF;
+	    color: #000;
     }
 
     .el-button {

@@ -9,7 +9,8 @@
                             <span >任務描述: {{taskDescription}}</span >
                         </el-col >
                         <el-col :span = "8" style = "text-align: right" >
-                            <div v-html = "countDown" >{{countDown}}</div >
+                            <!--<div v-html = "countDown" >{{countDown}}</div >-->
+                        <div id = "countDown" ></div >
                         </el-col >
                     </el-row >
                     </div >
@@ -141,6 +142,7 @@
     import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
     import AnnotationEditor from '../../js/AnnotaionEditor.js'
     import countdown from 'light-countdown'
+    import CountDown from '../../js/countDown/CountDown.js'
 
     export default {
         data: function () {
@@ -197,12 +199,16 @@
                 this.getImgNames();
                 this.setCountDown();
             })
-        }
-        ,
+        },
+        beforeDestroy() {
+            this.countDown.clearTimer();
+        },
         methods: {
             setCountDown() {
                 let _this = this;
-                countdown({
+                let countDown = document.querySelector("#countDown");
+                console.log(countDown);
+                this.countDown = new CountDown({
                     timeEnd: (new Date().getTime() + 900000),
                     selector: '#countDown',
                     msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
@@ -211,6 +217,7 @@
                         _this.$router.push({path: '/profile'});
                     }
                 });
+                this.countDown.init();
             },
             getImgNames() {
                 let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");
