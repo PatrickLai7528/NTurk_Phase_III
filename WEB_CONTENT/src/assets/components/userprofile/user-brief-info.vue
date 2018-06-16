@@ -121,10 +121,16 @@
             },
             beforeCloseDialog (done) {
                 if(this.userTags.length<3){
-                    alert("标签太少");
+                    this.$message({
+                        message: '请至少选择三个标签',
+                        type: 'warning'
+                    })
                 }
                 else{
-                    alert("已经提交");
+                    this.$message({
+                        message: '修改标签成功',
+                        type: 'success'
+                    })
                     done();
                 }
             }
