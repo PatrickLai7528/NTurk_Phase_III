@@ -235,13 +235,14 @@
                         console.log(row.tagsForAnnotation);
                         _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
                         _this.$store.commit('changeTaskDescription',row.taskDescription);
+                        _this.$store.commit('changeTagsOfTask',row.taskTags);     //暂时只有标注需要这个
                         _this.taskId = taskId;
                         _this.path = path;
                     }
                 }).catch(function (error) {
 
                     console.log(error);
-                })
+                });
             },
             handleReviewJump(taskCategory,taskId,type){     //处理是review的jump   type为coverage或grade
                 let _this = this;

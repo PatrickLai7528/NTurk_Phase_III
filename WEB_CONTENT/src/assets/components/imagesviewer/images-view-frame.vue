@@ -309,9 +309,9 @@
                     JSON.stringify(data),
                     {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
                         console.log("response:");    //没有掉到坑里的时候什么都没有返回
-                        console.log(response);
 
-                        if(_this.canGoon()){
+                        if(_this.canGoon() === true){
+                            console.log("in in in");
                             _this.showMessage();
                         }
                         else{
@@ -381,11 +381,22 @@
                 let route = 'http://localhost:8086/taskId/' + this.taskId;
                 this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                     let taskInfo = response.data;
+                    console.log(taskInfo);
                     if(_this.taskType === 'grade'){
-                        return (taskInfo.verifyQuality > 0);
+                        if(taskInfo.verifyQuality > 0){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
                     }
                     else if(_this.taskType === 'coverage'){
-                        return (taskInfo.verifyCoverage > 0);
+                        if(taskInfo.verifyCoverage > 0){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
                     }
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
                     console.log(error);
@@ -611,7 +622,7 @@
                 const canvas = document.querySelector('#canvas');
                 const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";
 
-                const htmlString = `<el-tag style="background: #e5e9f2">標記" + (index + 1) + " </el-tag>`;
+                const htmlString = `<el-tag style="background: #e5e9f2">標記${index+1} </el-tag>`;
                 let div = document.createElement('div');
                 div.id = 'tag' + index;
                 div.innerHTML = htmlString;

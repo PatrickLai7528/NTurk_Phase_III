@@ -49,11 +49,8 @@
                             <template slot = "title" >
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
-                            <div >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
+                            <div>
+                                <el-tag size = "small" type = "success" v-for="item in tagsOfTask">{{item['name']}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -160,10 +157,9 @@
                 taskDescription: "",      //现在这个变得重要了
                 imgNames: this.$store.getters.imgNames,
                 tagsForAnnotation: this.$store.getters.tagsForAnnotation,
+                tagsOfTask: this.$store.getters.tagsOfTask,
             }
-        }
-
-        ,
+        },
         computed: {
             percent() {
                 let result, lowerLimit;
@@ -193,12 +189,32 @@
                 this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;         //得到任务的备选答案描述
                 this.taskDescription = this.$store.getters.getTaskDescription;
+                this.tagsOfTask = this.$store.getters.getTagsOfTask;
                 console.log(this.tagsForAnnotation);
                 this.getImgNames();
                 this.setCountDown();
             })
-        }
-        ,
+        },
+        watch: {
+            $route: function (to, from) {      //监听路由改变
+                console.log(to.name);
+                if (to.name === 'frame') {
+                    console.log("in in in");
+                    this.canvas = document.getElementById("canvas");
+                    this.canvas.addEventListener("mousedown", this.canvasDown);
+                    this.canvas.addEventListener("mouseup", this.canvasUp);
+                    this.canvas.addEventListener("mousemove", this.canvasMove);
+                    this.canvas.addEventListener("touchstart", this.canvasDown);
+                    console.log(this.canvas);
+                    /**
+                     *  this.$store.getters.getImgNames 取得的是一個對象, 只要裡面的imgNames數組就行
+                     */
+                    this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
+                    this.getImgNames();
+                    this.setCountDown();
+                }
+            }
+        },
         methods: {
             setCountDown() {
                 let _this = this;
@@ -279,21 +295,45 @@
             }
             ,
             submit() {
+                let _this = this;
                 if (this.viewer.submitCurrent(this.imageLength)) {
                     this.$confirm('此任務已經完成, 請問是否進行下一個?', '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                         type: 'warning'
-                    }).then(() => {
-                        // do things here;
+                    }).then(() => {                   //进行下一个任务
+                        _this.$http.get('http://localhost:8086/task/' + _this.taskId, {
+                            headers: {
+                                Authorization: _this.$store.getters.getToken,
+                            }
+                        }).then(function (response) {
+                            if(response.status === 204){     //noContent    说明没有更多的图片可供标注
+                                _this.runOutMessage();
+                            }
+                            else{
+                                let imgNames = response.data;
+                                _this.$store.commit('changeImgNames',imgNames);   //现在只需要改变imgNames就好
+                                console.log(imgNames);
+                                _this.$router.push({name: 'frame',params:{taskId:_this.taskId}});     //压入路由,虽然路由参数完全没有变化
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                        })
                     }).catch(() => {
                         this.$router.push({path: '/profile'});
                     });
                 } else {
                     this.showMessage("notDone");
                 }
-            }
-            ,
+            },
+            runOutMessage(){
+                this.$notify({
+                    title: '系统提示',
+                    message: '这个任务暂时没有可供标注的图片了，换个任务试试吧^_^',
+                    type: 'success'
+                });
+                this.$router.push({path:'/profile'});
+            },
             showMessage(type) {
                 if ("success" === type) {
                     const h = this.$createElement;

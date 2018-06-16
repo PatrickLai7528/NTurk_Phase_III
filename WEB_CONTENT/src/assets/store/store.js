@@ -17,6 +17,7 @@ var store = new Vuex.Store({
         imgNames:[],
         tagsForAnnotation:[],             //进入任务时新增的状态
         taskDescription:'',               //任务的描述...
+        tagsOfTask: [],                   //任务的标签，理论上来说后面的可以直接通过taskId到后台去取，但是现在懒得这样做了
     },
     mutations: {
         LOG_IN(state, data) {  //登入，保存状态
@@ -43,6 +44,7 @@ var store = new Vuex.Store({
             state.imgNames = [];
             state.annotationIds = [];
             state.tagsForAnnotation = [];
+            state.tagsOfTask = [];
         },
         changeImgNames(state,newList){
             let temp = JSON.stringify(newList);
@@ -57,6 +59,11 @@ var store = new Vuex.Store({
         changeTaskDescription(state,description){
             sessionStorage.setItem('taskDescription',description);
             state.taskDescription = description;
+        },
+        changeTagsOfTask(state,newList){
+            let temp = JSON.stringify(newList);
+            sessionStorage.setItem('tagsOfTask',temp);
+            state.tagsOfTask = newList;
         }
     },
     actions: {
@@ -106,6 +113,10 @@ var store = new Vuex.Store({
         getTaskDescription(state){
             state.taskDescription = sessionStorage.getItem('taskDescription');
             return state.taskDescription;
+        },
+        getTagsOfTask(state){
+            state.tagsOfTask = JSON.parse(sessionStorage.getItem('tagsOfTask'));
+            return state.tagsOfTask;
         }
     }
 });
