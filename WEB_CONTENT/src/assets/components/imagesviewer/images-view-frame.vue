@@ -232,16 +232,21 @@
             },
             commitRating(){
                 //list里面的对象包含annotationId和rate
-                function Inspection(annotationId,rate){
+                function Verification(annotationId,rate){
                     this.annotationId = annotationId;
                     this.rate = rate;
                 }
 
-                let inspections = [];   //这是最后的数组，所有的评分结果放在这个数组里
+                let verifications = [];   //这是最后的数组，所有的评分结果放在这个数组里
+
+                let data = {
+                    verifications: verifications,
+                };
+
                 console.log(this.annotationData[0]);
                 for(let i = 0;i < this.ratings.length;i++){
-                    let nowInspection = new Inspection(this.annotationData[i].annotationId,this.ratings[i]);
-                    inspections.push(nowInspection);
+                    let nowInspection = new Verification(this.annotationData[i].annotationId,this.ratings[i]);
+                    verifications.push(nowInspection);
                 }
 
                 let _this = this;
@@ -252,35 +257,44 @@
                 else if(_this.taskType === 'grade'){
                     path = 'http://localhost:8086/qualityVerification/saveVerifications';
                 }
-                else{
-                    console.log("error");
-                }
 
+                console.log('Inspections');
+                console.log(verifications);
                 this.$http.post(path,
-                    JSON.stringify(inspections),
-                    {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                        let failedIds = response.data.failedIds;
-                        let forbidden = response.data.forbidden;
+                    JSON.stringify(data),
+                    {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
+                        console.log("response:");    //没有掉到坑里的时候什么都没有返回
+                        console.log(response);
 
-                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
-                            _this.forbiddenMessage();
-                        }
-                        else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
-                            _this.wrongImg = failedIds[0];   //把第一条挑出来
-                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
-                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
-
-                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                            _this.showDialog();     //显示错误教程
-                        }
-                        else if(_this.canGoon()){          //判断还能不能继续做
-                            _this.showMessage();    //能继续做，鼓励继续
+                        if(_this.canGoon()){
+                            _this.showMessage();
                         }
                         else{
-                            _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                            _this.$router.push({path: '/profile'});
                         }
 
                 }).catch(function (error) {
+                    console.log(error);
+                    let failedIds = error.data.failedIds;
+                    let forbidden = error.data.forbidden;
+
+                    if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                        _this.forbiddenMessage();
+                    }
+                    else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
+                        _this.wrongImg = failedIds[0];   //把第一条挑出来
+                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                        _this.showDialog();     //显示错误教程
+                    }
+                    else if(_this.canGoon()){          //判断还能不能继续做
+                        _this.showMessage();    //能继续做，鼓励继续
+                    }
+                    else{
+                        _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                    }
                     console.log(error);
                 });
             },
@@ -316,7 +330,19 @@
                 this.dialogVisible = true;   //显示错误提示
             },
             canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
-
+                let _this = this;
+                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                    let taskInfo = response.data;
+                    if(_this.taskType === 'grade'){
+                        return (taskInfo.verifyQuality > 0);
+                    }
+                    else if(_this.taskType === 'coverage'){
+                        return (taskInfo.verifyCoverage > 0);
+                    }
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log(error);
+                });
             },
             forbiddenMessage(){
                 this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
@@ -422,6 +448,7 @@
                             _this.annotation = {
                               'imgName': _this.imgNames[i],
                               'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
+                              'annotationId': temp.annotationId,            //如果是从后端读出来的就有annotationId
                             };
                             console.log(_this.annotation);
                             _this.annotationData.push(_this.annotation);
