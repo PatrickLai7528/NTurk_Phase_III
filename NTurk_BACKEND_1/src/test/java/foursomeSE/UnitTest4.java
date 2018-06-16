@@ -406,7 +406,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
 
     // 这个就是测一下getWorkerTasks和getNewTasks
     @Test
-    public void test2() {
+    public void test2() throws InterruptedException {
         EnterResponse response = taskService.enterTask(tid, "worker1@ex.com");
         List<CTask> workerTasks = taskService.getWorkerTasks("worker1@ex.com");
         List<CTask> newTasks = taskService.getNewTasks("worker1@ex.com");
@@ -415,13 +415,14 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
 
         frameAnnotationService.saveAnnotations(rats(IntStream.rangeClosed(1, 5)), "worker1@ex.com");
 
+        Thread.sleep(2000);
+
         Microtask mt = mtByImg(microtaskJPA, "1.jpg");
-//        List<Object[]> latestBefore = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());
         Object[] oos = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());;
         Object[] oo = (Object[]) oos[0];
         BigInteger aid = (BigInteger) oo[0];
         int aStt = Integer.parseInt(oo[1].toString());
 
-        System.out.println("ogbu");
+//        System.out.println("ogbu");
     }
 }

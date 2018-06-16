@@ -317,9 +317,18 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     public Accuracy accuraccyChart(String username) {
         Accuracy result = new Accuracy();
 
+        long countPass = annotationJPA.countPass();
+        long countFail = annotationJPA.countFail();
+
+        if (countPass + countFail == 0) {
+            result.average = 0;
+        } else {
+            result.average = (countPass / (countPass + countFail));
+        }
 
 
         Worker worker = userByUsername(workerJPA, username);
+        int currentAccuracy = 0;
         for (LocalDate date = worker.getCreateTime().toLocalDate();
              date.isBefore(LocalDate.now());
              date = date.plusDays(1)) {

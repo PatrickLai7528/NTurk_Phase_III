@@ -11,7 +11,6 @@ import foursomeSE.jpa.message.MessageJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
-import foursomeSE.service.task.FinishTaskService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

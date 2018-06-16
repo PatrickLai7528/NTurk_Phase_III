@@ -99,6 +99,14 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             nativeQuery = true)
     List<BigInteger> findAidsBetween(long taskId, LocalDateTime floor, LocalDateTime roof);
 
+    @Query(value = "SELECT count(*) FROM annotation WHERE annotation_status = 1",
+            nativeQuery = true)
+    long countPass();
+
+    @Query(value = "SELECT count(*) FROM annotation WHERE annotation_status = 2",
+            nativeQuery = true)
+    long countFail();
+
     @Query(value = "SELECT\n" +
             "  annotation_id\n" +
             "FROM (\n" +
