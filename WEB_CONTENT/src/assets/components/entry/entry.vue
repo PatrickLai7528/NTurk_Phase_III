@@ -101,7 +101,7 @@
 	    padding-left: 1em;
 	    /*background: #CAFBF2;*/
 	    opacity: 0.6;
-	    background-color: #FF3B3F;
+	    background-color: #CAFBF2;
 	    margin-bottom: 1em;
     }
 

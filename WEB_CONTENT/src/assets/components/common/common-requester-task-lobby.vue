@@ -25,9 +25,9 @@
                         <p style = "font-size: 16px; font-weight: bold; text-align: center;"
                            class = "default-font-style" >请选择要查看的任务信息</p >
                         <div style = "text-align: center;" >
-                            <el-button type = "info" size = "medium" @click = "showChart(scope.row)"
+                            <el-button type = "success" size = "medium" @click = "showChart(scope.row)"
                                        round class = "default-font-style" > 统计信息 </el-button >
-                            <el-button type = "success" size = "medium" @click = "handleClick(scope.row)"
+                            <el-button type = "error" size = "medium" @click = "handleClick(scope.row)"
                                        round class = "default-font-style" > 标注结果 </el-button >
                         </div >
 
