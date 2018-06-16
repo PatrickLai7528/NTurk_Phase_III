@@ -25,9 +25,11 @@
                         <p style = "font-size: 16px; font-weight: bold; text-align: center;"
                            class = "default-font-style" >请选择要查看的任务信息</p >
                         <div style = "text-align: center;" >
-                            <el-button type = "success" size = "medium" @click = "showChart(scope.row)"
-                                       round class = "default-font-style" > 统计信息 </el-button >
-                            <el-button type = "error" size = "medium" @click = "handleClick(scope.row)"
+                            <el-button type = "primary" size = "medium" @click = "showInfoChart(scope.row)"
+                                       round class = "default-font-style" > 任务历史 </el-button >
+                            <el-button type = "warning" size = "medium" @click = "showParticipationChart(scope.row)"
+                                       round class = "default-font-style" > 参与情况 </el-button >
+                            <el-button type = "success" size = "medium" @click = "handleClick(scope.row)"
                                        round class = "default-font-style" > 标注结果 </el-button >
                         </div >
 
@@ -43,6 +45,11 @@
                 <task-info-chart :taskId = "taskIdOfChart" :taskName = "taskNameOfChart" ></task-info-chart >
             </div >
         </el-dialog >
+        <el-dialog :visible.sync = "dialogFormVisible2" :modal-append-to-body = "false" width = "1000px" >
+            <div v-if = "dialogFormVisible2" >
+                <task-partici-chart :taskId = "taskIdOfChart" :taskName = "taskNameOfChart" :taskCategory = "taskCategoryOfChart" ></task-partici-chart >
+            </div >
+        </el-dialog >
     </div >
 </template >
 
@@ -50,11 +57,13 @@
     import DateUtils from '../../js/utils/DateUtils.js'
     import userCharts from '../userprofile/user-charts.vue'
     import taskInfoChart from '../userprofile/task-info-chart.vue'
+    import taskParticiChart from '../userprofile/task-partici-chart.vue'
 
     export default {
         components: {
             userCharts,
-            taskInfoChart
+            taskInfoChart,
+            taskParticiChart
         },
         props: ['message'],
         data() {
@@ -75,8 +84,10 @@
                 temPath: '',
                 routerPath: [],
                 dialogFormVisible: false,
+                dialogFormVisible2: false,
                 taskIdOfChart: null,
-                taskNameOfChart: null
+                taskNameOfChart: null,
+                taskCategoryOfChart: null
             }
         },
         mounted: function () {
@@ -134,10 +145,16 @@
                     params: {taskId: row.taskId, taskType: 'requester'}
                 });
             },
-            showChart(row) {
+            showInfoChart(row) {
                 this.taskIdOfChart = row.taskId;
                 this.taskNameOfChart = row.taskName;
                 this.dialogFormVisible = true;
+            },
+            showParticipationChart(row) {
+                this.taskIdOfChart = row.taskId;
+                this.taskNameOfChart = row.taskName;
+                this.taskCategoryOfChart = row.taskCategory;
+                this.dialogFormVisible2 = true;
             },
             filterStatus(value, row) {    //根据合同状态筛选
                 return row.taskStatus === value;

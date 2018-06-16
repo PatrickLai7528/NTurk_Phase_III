@@ -44,10 +44,10 @@
                             <el-button type = "success" size = "medium"
                                        @click = "handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)"
                                        round class = "default-font-style" >图片标注</el-button >
-                            <el-button type = "danger" size = "medium"
+                            <el-button type = "warning" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')"
                                        round class = "default-font-style" >正确性判断</el-button >
-                            <el-button type = "info" size = "medium"
+                            <el-button type = "danger" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')"
                                        v-if = "scope.row.taskCategory !== 'GENERAL'" round
                                        class = "default-font-style" >完整性判断</el-button >
@@ -231,7 +231,6 @@
             },
             handleAnnotationJump(row, taskId, path) {      //处理任务中心的jump标注
                 let _this = this;
-                _this.dialogTutorialVisible = true;
                 _this.$http.get('http://localhost:8086/task/' + taskId, {
                     headers: {
                         Authorization: _this.$store.getters.getToken,
@@ -243,7 +242,7 @@
                     else {
                         let imgNames = response.data;
                         _this.$store.commit('changeImgNames', imgNames);
-                        console.log(row.tagsForAnnotation);
+                        _this.dialogTutorialVisible = true;
                         _this.$store.commit('changeTagsForAnnotation',row.tagsForAnnotation);
                         _this.$store.commit('changeTaskDescription',row.taskDescription);
                         _this.$store.commit('changeTagsOfTask',row.taskTags);     //暂时只有标注需要这个

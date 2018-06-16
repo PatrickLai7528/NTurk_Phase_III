@@ -218,27 +218,18 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                if(this.isRequester === false){
+                    _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                }
+                else{
+                    _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
+                }
+
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
                 this.setDialogContent();
             });
-        },
-        watch: {
-            $route: function (to, from) {
-                if (to.name === 'viewframe') {
-                    let _this = this;
-                    this.taskId = this.$route.params.taskId;
-                    this.ratings = [];
-                    this.imgNames = _this.$store.getters.getImgNames.imgNames;
-                    this.nowRating = 0;
-                    this.annotation = {};
-                    _this.number = _this.imgNames.length;
-                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                }
-            }
         },
         methods: {
             selectCanvas() {
@@ -308,37 +299,25 @@
                 this.$http.post(path,
                     JSON.stringify(data),
                     {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
-                        console.log("response:");    //没有掉到坑里的时候什么都没有返回
+                        console.log(response);    //现在交互有一定的改变，如果掉到坑里也还是正常返回
+                        let res = response.data;
+                        let forbidden = res.forbidden;
 
-                        if(_this.canGoon() === true){
-                            console.log("in in in");
-                            _this.showMessage();
+                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                            _this.forbiddenMessage();
+                        }
+                        else if(res.failedImgNames !== undefined && res.failedImgNames.length !== 0){    //说明这次的回答有不正确的地方
+                            _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
+                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+
+                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                            _this.showDialog();     //显示错误教程
                         }
                         else{
-                            _this.$router.push({path: '/profile'});
+                            _this.canGoon(_this.showMessage);
                         }
                 }).catch(function (error) {
-                    console.log(error);
-                    let failedIds = error.data.failedIds;
-                    let forbidden = error.data.forbidden;
-
-                    if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
-                        _this.forbiddenMessage();
-                    }
-                    else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
-                        _this.wrongImg = failedIds[0];   //把第一条挑出来
-                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
-                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
-
-                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                        _this.showDialog();     //显示错误教程
-                    }
-                    else if(_this.canGoon()){          //判断还能不能继续做
-                        _this.showMessage();    //能继续做，鼓励继续
-                    }
-                    else{
-                        _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
-                    }
                     console.log(error);
                 });
             }
@@ -370,32 +349,31 @@
                         return ["这张图片已经没有其他可供标注的", "这张图片还有其他可以标注的"];
                     }
                 }
-            }
-            ,
+            },
             showDialog() {
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
                 this.dialogVisible = true;   //显示错误提示
             },
-            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+            canGoon(callback1){
                 let _this = this;
                 let route = 'http://localhost:8086/taskId/' + this.taskId;
                 this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                     let taskInfo = response.data;
-                    console.log(taskInfo);
+                    console.log(taskInfo.verifyQuality);
                     if(_this.taskType === 'grade'){
-                        if(taskInfo.verifyQuality > 0){
-                            return true;
+                        if(taskInfo.verifyQuality > 0) {
+                            callback1();
                         }
                         else{
-                            return false;
+                            _this.$router.push({path: '/profile'});
                         }
                     }
                     else if(_this.taskType === 'coverage'){
                         if(taskInfo.verifyCoverage > 0){
-                            return true;
+                            callback1();
                         }
                         else{
-                            return false;
+                            _this.$router.push({path: '/profile'});
                         }
                     }
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
@@ -407,26 +385,19 @@
                     confirmButtonText: '确定',
                     type: 'error',
                 });
-            }
-            ,
+            },
             successMessage() {
                 this.$notify({
                     title: '提交成功',
                     message: '恭喜你完成评审任务，请耐心等待系统发放奖励^_^',
                     type: 'success'
                 });
-            }
-            ,
+            },
             getWrongImgAnnotation(wrongImg) {
                 let _this = this;
-                let route = "http://localhost:8086/frameAnnotation/imgName/" + wrongImg;
-                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                    _this.wrongAnnotation = response.data;
-                }).catch(function (error) {                 //理论上来说不会出现这种情况
-                    console.log("error");
-                });
-            }
-            ,
+                let index = _this.findIndexByImg(wrongImg);
+                _this.wrongAnnotation = _this.annotationData[index];        //不用再去后台拿一遍了
+            },
             showMessage() {        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;
                 this.$confirm('不够过瘾，再来一组^_^', '温馨提示', {
@@ -441,16 +412,11 @@
                     else if (_this.taskType === 'coverage') {
                         path = 'http://localhost:8086/coverageVerification/taskId/' + _this.taskId;   //完整性判断的交互路径
                     }
-                    else {
-                        console.log("emmmm");
-                    }
+
                     _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                         let imgNames = response.data;
                         _this.$store.commit('changeImgNames', imgNames);
-                        _this.$router.push({
-                            name: 'viewframe',
-                            params: {taskId: _this.taskId, taskType: _this.taskType}
-                        });
+                        location.reload();
                     }).catch(function (error) {
                         _this.successMessage();
                         _this.$router.push({path: '/profile'});
@@ -460,8 +426,7 @@
                     _this.$router.push({path: '/profile'});    //任务取消，返回任务中心
                     console.log("-1");
                 });
-            }
-            ,
+            },
             canCommit() {
                 if (this.ratings.length === this.imgNames.length) {
                     this.commitDisabled = false;
@@ -469,8 +434,7 @@
                 else {
                     this.commitDisabled = 'disabled';
                 }
-            }
-            ,
+            },
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
@@ -486,6 +450,8 @@
                     whatfor = 1;
                 }
 
+                console.log(_this.imgNames);
+
                 let flag = false;
                 for (let i = 0; i < this.imgNames.length; i++) {
                     let route = "http://localhost:8086/frameAnnotation/imgName/" + this.imgNames[i] + "/whatFor/" + whatfor;
@@ -496,8 +462,9 @@
                                 'imgName': _this.imgNames[i],
                                 'frame': _this.frames,
                             };
-                            _this.annotationData.push(_this.annotation);
-                            if (i === _this.imgNames.length - 1) {
+                            _this.$set(_this.annotationData,i,_this.annotation);
+                            _this.annotationData[i] = _this.annotation;
+                            if (_this.allLoad()) {
                                 callback()
                             }
                         }
@@ -512,20 +479,40 @@
                             }
 
                             temp.frames.push(temp.frame);
+
+                            if(_this.taskType !== 'grade'){         //这里要注意非grade的逻辑是一样的
+                                for(let item of temp.frames){
+                                    item.color = '#C0392B';
+                                }
+                            }
+
                             _this.annotation = {
                               'imgName': _this.imgNames[i],
                               'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
                               'annotationId': temp.annotationId,            //如果是从后端读出来的就有annotationId
                             };
                             console.log(_this.annotation);
-                            _this.annotationData.push(_this.annotation);
-                            if (i === _this.imgNames.length - 1) {
+                            _this.$set(_this.annotationData,i,_this.annotation);
+                            if (_this.allLoad()) {
                                 callback();
                             }
                         }
                     }).catch(function (error) {
                         console.log(error);
                     });
+                }
+            },
+            allLoad(){
+                if(this.annotationData.length !== this.imgNames.length){
+                    return false;
+                }
+
+                for(let i = 0;i < this.annotationData.length;i++){
+                    if(this.annotationData[i] === undefined){
+                        return false;
+                    }
+
+                    return true;
                 }
             },
             onIndexChange: function (newIndex, oldIndex) {
