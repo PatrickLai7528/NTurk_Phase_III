@@ -44,10 +44,10 @@
                             <el-button type = "success" size = "medium"
                                        @click = "handleAnnotationJump(scope.row,scope.row.taskId,scope.row.taskCategory)"
                                        round class = "default-font-style" >图片标注</el-button >
-                            <el-button type = "danger" size = "medium"
+                            <el-button type = "warning" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'grade')"
                                        round class = "default-font-style" >正确性判断</el-button >
-                            <el-button type = "info" size = "medium"
+                            <el-button type = "danger" size = "medium"
                                        @click = "handleReviewJump(scope.row.taskCategory,scope.row.taskId,'coverage')"
                                        v-if = "scope.row.taskCategory !== 'GENERAL'" round
                                        class = "default-font-style" >完整性判断</el-button >
