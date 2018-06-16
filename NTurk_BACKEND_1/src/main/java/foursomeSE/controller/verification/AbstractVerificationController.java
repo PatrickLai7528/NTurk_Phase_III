@@ -29,7 +29,7 @@ public class AbstractVerificationController {
         return new ResponseEntity<Object>(response, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/saveVerifications", method = RequestMethod.GET)
+    @RequestMapping(value = "/saveVerifications", method = RequestMethod.POST)
     public ResponseEntity<?> saveVerifications(@RequestHeader("Authorization") String token,
                                                @RequestBody RVerifications verifications) {
         String username = JwtUtil.getUsernameFromToken(token);
