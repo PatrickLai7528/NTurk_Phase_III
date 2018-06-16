@@ -121,14 +121,18 @@
             deleteTag(tag) {
                 this.userTags.splice(this.userTags.indexOf(tag), 1);
             },
-            beforeCloseDialog(done) {
-                if (this.userTags.length < 3) {
-                    // alert("标签太少");
-                    this.message("标签太少", "error")
+            beforeCloseDialog (done) {
+                if(this.userTags.length<3){
+                    this.$message({
+                        message: '请至少选择三个标签',
+                        type: 'warning'
+                    })
                 }
-                else {
-                    // alert("已经提交");
-                    this.message("已经提交", "success");
+                else{
+                    this.$message({
+                        message: '修改标签成功',
+                        type: 'success'
+                    })
                     done();
                 }
             },

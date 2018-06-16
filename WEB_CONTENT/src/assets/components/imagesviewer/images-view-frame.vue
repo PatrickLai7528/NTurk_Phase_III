@@ -218,27 +218,19 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                if(this.isRequester === false){
+                    _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                }
+                else{
+                    _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
+                }
+
+                console.log(_this.imgNames);
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
                 this.setDialogContent();
             });
-        },
-        watch: {
-            $route: function (to, from) {
-                if (to.name === 'viewframe') {
-                    let _this = this;
-                    this.taskId = this.$route.params.taskId;
-                    this.ratings = [];
-                    this.imgNames = _this.$store.getters.getImgNames.imgNames;
-                    this.nowRating = 0;
-                    this.annotation = {};
-                    _this.number = _this.imgNames.length;
-                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                }
-            }
         },
         methods: {
             selectCanvas() {
@@ -308,15 +300,9 @@
                 this.$http.post(path,
                     JSON.stringify(data),
                     {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
-                        console.log("response:");    //没有掉到坑里的时候什么都没有返回
+                        console.log(response);    //现在交互有一定的改变，如果掉到坑里也还是正常返回
 
-                        if(_this.canGoon() === true){
-                            console.log("in in in");
-                            _this.showMessage();
-                        }
-                        else{
-                            _this.$router.push({path: '/profile'});
-                        }
+                       //_this.canGoon(_this.showMessage);
                 }).catch(function (error) {
                     console.log(error);
                     let failedIds = error.data.failedIds;
@@ -333,12 +319,10 @@
                         _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
                         _this.showDialog();     //显示错误教程
                     }
-                    else if(_this.canGoon()){          //判断还能不能继续做
-                        _this.showMessage();    //能继续做，鼓励继续
-                    }
                     else{
-                        _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                        _this.canGoon(_this.showMessage);
                     }
+
                     console.log(error);
                 });
             }
@@ -376,26 +360,26 @@
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
                 this.dialogVisible = true;   //显示错误提示
             },
-            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+            canGoon(callback1){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
                 let _this = this;
                 let route = 'http://localhost:8086/taskId/' + this.taskId;
                 this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                     let taskInfo = response.data;
-                    console.log(taskInfo);
+                    console.log(taskInfo.verifyQuality);
                     if(_this.taskType === 'grade'){
-                        if(taskInfo.verifyQuality > 0){
-                            return true;
+                        if(taskInfo.verifyQuality > 0) {
+                            callback1();
                         }
                         else{
-                            return false;
+                            _this.$router.push({path: '/profile'});
                         }
                     }
                     else if(_this.taskType === 'coverage'){
                         if(taskInfo.verifyCoverage > 0){
-                            return true;
+                            callback1();
                         }
                         else{
-                            return false;
+                            _this.$router.push({path: '/profile'});
                         }
                     }
                 }).catch(function (error) {                 //理论上来说不会出现这种情况
@@ -447,10 +431,7 @@
                     _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                         let imgNames = response.data;
                         _this.$store.commit('changeImgNames', imgNames);
-                        _this.$router.push({
-                            name: 'viewframe',
-                            params: {taskId: _this.taskId, taskType: _this.taskType}
-                        });
+                        location.reload();
                     }).catch(function (error) {
                         _this.successMessage();
                         _this.$router.push({path: '/profile'});
@@ -486,6 +467,8 @@
                     whatfor = 1;
                 }
 
+                console.log(_this.imgNames);
+
                 let flag = false;
                 for (let i = 0; i < this.imgNames.length; i++) {
                     let route = "http://localhost:8086/frameAnnotation/imgName/" + this.imgNames[i] + "/whatFor/" + whatfor;
@@ -512,6 +495,13 @@
                             }
 
                             temp.frames.push(temp.frame);
+
+                            if(_this.taskType !== 'grade'){         //这里要注意非grade的逻辑是一样的
+                                for(let item of temp.frames){
+                                    item.color = '#C0392B';
+                                }
+                            }
+
                             _this.annotation = {
                               'imgName': _this.imgNames[i],
                               'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
