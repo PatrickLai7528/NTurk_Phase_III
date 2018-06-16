@@ -100,7 +100,7 @@
 	    padding-right: 1em;
 	    padding-left: 1em;
 	    /*background: #CAFBF2;*/
-	    opacity: 0.6;
+	    opacity: 0.5;
 	    background-color: #CAFBF2;
 	    margin-bottom: 1em;
     }
