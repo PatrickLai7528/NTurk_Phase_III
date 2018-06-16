@@ -213,6 +213,7 @@
 	    margin-bottom: 0em;
 	    height: 100%;
 	    max-height: 680px;
+        overflow: auto;
     }
 
     .add-task-step-header {
@@ -229,4 +230,5 @@
 	    /*margin: 0.5em;*/
 	    margin-left: 6em;
     }
+
 </style >
