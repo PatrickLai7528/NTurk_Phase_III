@@ -156,6 +156,14 @@ class SegmentDrawingStrategy {
 			return false;
 		}
 	}
+
+	hasPluralMarking(){
+		return true;
+	}
+
+	getPluralMarkingTypeName(){
+	    return "segments"
+    }
 }
 
 export default SegmentDrawingStrategy;

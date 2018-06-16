@@ -50,8 +50,9 @@
                             <template slot = "title" >
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
-                            <div>
-                                <el-tag size = "small" type = "success" v-for="item in tagsOfTask">{{item['name']}}</el-tag >
+                            <div >
+                                <el-tag size = "small" type = "success"
+                                        v-for = "item in tagsOfTask" >{{item['name']}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -217,6 +218,9 @@
                 this.setCountDown();
             })
         },
+        /**
+         * 在destroy之前把計時器刪除
+         */
         beforeDestroy() {
             this.countDown.clearTimer();
         },
@@ -315,14 +319,14 @@
                                 Authorization: _this.$store.getters.getToken,
                             }
                         }).then(function (response) {
-                            if(response.status === 204){     //noContent    说明没有更多的图片可供标注
+                            if (response.status === 204) {     //noContent    说明没有更多的图片可供标注
                                 _this.runOutMessage();
                             }
-                            else{
+                            else {
                                 let imgNames = response.data;
-                                _this.$store.commit('changeImgNames',imgNames);   //现在只需要改变imgNames就好
+                                _this.$store.commit('changeImgNames', imgNames);   //现在只需要改变imgNames就好
                                 console.log(imgNames);
-                                _this.$router.push({name: 'frame',params:{taskId:_this.taskId}});     //压入路由,虽然路由参数完全没有变化
+                                _this.$router.push({name: 'frame', params: {taskId: _this.taskId}});     //压入路由,虽然路由参数完全没有变化
                             }
                         }).catch(function (error) {
                             console.log(error);
@@ -334,13 +338,13 @@
                     this.showMessage("notDone");
                 }
             },
-            runOutMessage(){
+            runOutMessage() {
                 this.$notify({
                     title: '系统提示',
                     message: '这个任务暂时没有可供标注的图片了，换个任务试试吧^_^',
                     type: 'success'
                 });
-                this.$router.push({path:'/profile'});
+                this.$router.push({path: '/profile'});
             },
             showMessage(type) {
                 if ("success" === type) {

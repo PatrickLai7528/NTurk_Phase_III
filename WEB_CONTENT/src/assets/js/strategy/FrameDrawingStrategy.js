@@ -140,6 +140,14 @@ class FrameDrawingStrategy {
             return false;
         }
     }
+
+    hasPluralMarking(){
+        return true;
+    }
+
+    getPluralMarkingTypeName(){
+        return "frames";
+    }
 }
 
 export default FrameDrawingStrategy;
