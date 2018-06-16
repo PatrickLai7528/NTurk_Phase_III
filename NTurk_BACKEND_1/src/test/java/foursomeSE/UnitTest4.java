@@ -2,7 +2,6 @@ package foursomeSE;
 
 import foursomeSE.entity.BlacklistItem;
 import foursomeSE.entity.Frame;
-import foursomeSE.entity.Gold;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.RAnnotations;
 import foursomeSE.entity.communicate.EnterResponse;
@@ -11,6 +10,7 @@ import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
 import foursomeSE.entity.verification.VerificationType;
+import foursomeSE.error.MyFailTestException;
 import foursomeSE.service.verification.QualityVerificationServiceImpl;
 import foursomeSE.service.verification.VerificationService;
 import foursomeSE.util.*;
@@ -198,7 +198,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
 
         enterDrawAndFinish("worker1@ex.com");
         enterDrawAndFinish("worker2@ex.com");
-        enterDrawAndFinish("worker1@ex.com");
+        enterDrawAndFinish("worker3@ex.com");
         // 这之后应当做到31.jpg
 
 
@@ -209,8 +209,54 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         etr2 = qualityVerificationService.enterVerification(tid, "worker2@ex.com");
         assertEquals(in(IntStream.of(16, 17, 1, 2, 3)), etr2.getImgNames());
 
+        RVerifications rvfs = rvfs(etr1.getImgNames(), IntStream.of(1, 1, 1, 0, 0), VerificationType.QUALITY, "worker1@ex.com");
+        testFallQV(rvfs, IntStream.of(2, 3), "worker1@ex.com");
 
+        FQV(etr2.getImgNames(), IntStream.of(1, 1, 1, 1, 1), "worker2@ex.com");
 
+        etr2 = qualityVerificationService.enterVerification(tid, "worker2@ex.com");
+        assertEquals(in(IntStream.of(18, 19, 20, 4, 5)), etr2.getImgNames());
+        failQV(etr2.getImgNames(), "worker2@ex.com");
+
+        etr2 = coverageVerificationService.enterVerification(tid, "worker2@ex.com");
+        assertEquals(in(IntStream.of(16, 17, 1, 3, 4)), etr2.getImgNames());
+        FCV(etr2.getImgNames(), IntStream.of(0, 0, 1, 0, 0), "worker2@ex.com");
+
+        etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
+        assertEquals(in(IntStream.of(24, 25, 26, 4, 5)), etr1.getImgNames());
+        rvfs = rvfs(etr1.getImgNames(), IntStream.of(0, 0, 0, 1, 0), VerificationType.QUALITY, "worker1@ex.com");
+        testFallQV(rvfs, IntStream.of(5), "worker1@ex.com" );
+
+        etr2 = taskService.enterTask(tid, "worker2@ex.com");
+        assertEquals(in(IntStream.of(16, 17, 32, 33, 34)), etr2.getImgNames());
+        frameAnnotationService.saveAnnotations(rats(etr2.getImgNames()), "worker2@ex.com");
+
+        enterDrawAndFinish("worker3@ex.com");
+
+        etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
+        assertEquals(in(IntStream.of(16, 17, 27, 28, 7)), etr1.getImgNames());
+        FQV(etr1.getImgNames(), IntStream.of(1, 1, 1, 1, 0), "worker1@ex.com");
+
+        FrameAnnotation fa = frameAnnotationService.getByImgName("16.jpg", 2, "worker15@ex.com");// username瞎叫的
+        assertEquals(1, fa.getIteration());
+
+        etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
+        assertEquals(in(IntStream.of(29, 30, 31, 32, 33)), etr1.getImgNames());
+        FQV(etr1.getImgNames(), IntStream.of(0, 0, 0, 0, 0), "worker1@ex.com");
+
+        etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
+        assertEquals(in(IntStream.of(34, 35, 36, 37, 8)), etr1.getImgNames());
+        rvfs = rvfs(etr1.getImgNames(), IntStream.of(0, 0, 0, 0, 0), VerificationType.QUALITY, "worker1@ex.com");
+        testForbidQV(rvfs, IntStream.of(8), "worker1@ex.com");
+
+        etr2 = qualityVerificationService.enterVerification(tid, "worker2@ex.com");
+        assertEquals(in(IntStream.of(18, 19, 20, 4, 5)), etr2.getImgNames());
+
+        assertTrue(CriticalSection.drawRecords.isEmpty());
+        assertEquals(3, CriticalSection.qualityVerificationRecords.size());
+        assertTrue(CriticalSection.coverageVerificationRecords.isEmpty());
+
+        failQV(etr2.getImgNames(), "worker2@ex.com");
     }
 
     private void fill(VerificationService verificationService, int[] i) {
@@ -252,6 +298,59 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
                     .removeIf(ii -> ii.username.equals(username)
                             && ii.microtaskId == m.getMicrotaskId());
         }
+    }
+
+    private void failQV(ArrayList<String> imgs, String username) {
+        for (String img : imgs) {
+            Microtask m = mtByImg(microtaskJPA, img);
+            m.setParallel(m.getParallel() - 1);
+            microtaskJPA.save(m);
+
+            CriticalSection.qualityVerificationRecords
+                    .removeIf(ii -> ii.username.equals(username)
+                            && ii.microtaskId == m.getMicrotaskId());
+        }
+    }
+
+    private void FQV(ArrayList<String> imgNames, IntStream intStream, String username) {
+        FV(VerificationType.QUALITY, imgNames, intStream, username);
+    }
+
+    private void FCV(ArrayList<String> imgNames, IntStream intStream, String username) {
+        FV(VerificationType.COVERAGE, imgNames, intStream, username);
+    }
+
+    private void FV(VerificationType vt, ArrayList<String> imgNames, IntStream intStream, String username) {
+        VerificationService verificationService = vt == VerificationType.QUALITY ?
+                qualityVerificationService : coverageVerificationService;
+
+        RVerifications rvfs = rvfs(imgNames, intStream, vt, username);
+        verificationService.saveVerifications(rvfs, username);
+    }
+
+    private void testFallQV(RVerifications rvfs, IntStream ints, String username) {
+        boolean ex = false;
+        try {
+            qualityVerificationService.saveVerifications(rvfs, username);
+        } catch (MyFailTestException e) {
+            assertEquals(in(ints), e.getWarning().getFailedImgNames());
+            ex = true;
+        }
+        assertTrue(ex);
+    }
+
+    private void testForbidQV(RVerifications rvfs, IntStream ints, String username) {
+        boolean ex = false;
+        try {
+            qualityVerificationService.saveVerifications(rvfs, username);
+        } catch (MyFailTestException e) {
+            assertEquals(in(ints), e.getWarning().getFailedImgNames());
+            assertTrue(e.getWarning().isForbidden());
+            ex = true;
+        }
+        assertTrue(ex);
+
+        assertEquals(null, qualityVerificationService.enterVerification(tid, username).getImgNames());
     }
 
     private RAnnotations<FrameAnnotation> rats(IntStream intStream) {
@@ -303,6 +402,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
     }
 
 
+    // 这个就是测一下getWorkerTasks和getNewTasks
     @Test
     public void test2() {
         EnterResponse response = taskService.enterTask(tid, "worker1@ex.com");
