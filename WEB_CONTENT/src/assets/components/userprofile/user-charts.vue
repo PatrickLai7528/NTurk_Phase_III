@@ -14,6 +14,9 @@
                 <el-tab-pane label="得分情况" v-if="isWorker">
                     <div id="pointChart" class="charts"></div>
                 </el-tab-pane>
+                <el-tab-pane label="热力图测试">
+                    <div id="heat" class="charts"></div>
+                </el-tab-pane>
             </el-tabs>
         </el-main>
     </el-container>
@@ -41,9 +44,90 @@
                     this.setWaveGraph('frame', '画框标注发布数', null, 'rgb(245, 105, 57)');
                     this.setWaveGraph('segment', '区域标注发布数', null, 'rgb(198, 38, 47)');
                 }
+                this.setHeatMap();
             })
         },
         methods: {
+            setHeatMap(){
+                let echarts = require('echarts');
+                let myChart = echarts.init(document.getElementById('heat'));
+                let option = {
+                    title: [{
+                        left: 'center',
+                        text: '任务参与次数',
+                        textStyle: {
+                            fontSize: 20
+                        }
+                    }],
+                    tooltip: {
+                        formatter: '{c}次',
+                        textStyle: {
+                            fontSize: 16
+                        }
+                    },
+                    visualMap: {
+                        type: 'piecewise',
+                        pieces: [
+                            {min: 775, color: '#196127'},
+                            {min: 550, max: 775, color: '#239a3b'},
+                            {min: 325, max: 550, color: '#7bc96f'},
+                            {min: 100, max: 325, color: '#c6e48b'},
+                            {max: 100, color: '#DEDEDE'}
+                        ],
+                        orient: 'horizontal',
+                        left: 'right',
+                        top: 'middle',
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    },
+
+                    calendar: [{
+                        //range: ['2017-06-16', '2018-06-16'],
+                        range: '2017',
+                        cellSize: ['auto', 20],
+                        splitLine: {
+                            show: false
+                        },
+                        itemStyle: {
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2
+                        }
+                    }],
+                    series: [{
+                        type: 'heatmap',
+                        coordinateSystem: 'calendar',
+                        calendarIndex: 0,
+                        data: this.getVirtualData(2017),
+                        itemStyle: {
+                            // borderColor:"red",         //边框颜色
+                            // borderWidth: 1,              //柱条的描边宽度，默认不描边。
+                            borderType:"solid",         //柱条的描边类型，默认为实线，支持 'dashed', 'dotted'。
+                            barBorderRadius: 4,          //柱形边框圆角半径，单位px，支持传入数组分别指定柱形4个圆角半径。
+                            opacity: 1,                  //图形透明度。支持从 0 到 1 的数字，为 0 时不绘制该图形。
+                        }
+                    }]
+
+                };
+                alert("I'm here");
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+            },
+            getVirtualData(year) {
+                let echarts = require('echarts');
+                year = year || '2017';
+                let date = +echarts.number.parseDate(year + '-01-01');
+                let end = +echarts.number.parseDate((+year + 1) + '-01-01');
+                let dayTime = 3600 * 24 * 1000;
+                let data = [];
+                for (let time = date; time < end; time += dayTime) {
+                    data.push([
+                        echarts.format.formatTime('yyyy-MM-dd', time),
+                        Math.floor(Math.random() * 1000)
+                    ]);
+                }
+                return data;
+            },
             setWaveGraph(elementID, title, route, color) {
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById(elementID));
@@ -134,6 +218,7 @@
                         },
                         symbol:'none',  //这句就是去掉点的
                         smooth: true,  //这句就是让曲线变平滑的
+                        smoothMonotone: 'none',
                         areaStyle: {
                             color: {
                                 type: 'linear',
@@ -175,6 +260,8 @@
                     {date: "2018-05-20", userPoint: 9, average: 5},
                     {date: "2018-05-23", userPoint: 4, average: 5},
                     {date: "2018-05-25", userPoint: 6, average: 5},
+                    {date: "2018-05-26", userPoint: 3, average: 5},
+                    {date: "2018-05-27", userPoint: 3, average: 5},
                     {date: "2018-05-28", userPoint: 3, average: 5},
                     {date: "2018-05-31", userPoint: 2, average: 5},
                     {date: "2018-06-01", userPoint: 5, average: 5},
@@ -232,6 +319,7 @@
                             },
                             z: 2,
                             smooth: true,  //这句就是让曲线变平滑的
+                            smoothMonotone: 'none',
                             data: userPointList
                         },
                         {
@@ -243,6 +331,7 @@
                             z: 1,
                             symbol: 'none',
                             smooth: true,  //这句就是让曲线变平滑的
+                            smoothMonotone: 'none',
                             data: average
                         }
                     ]
