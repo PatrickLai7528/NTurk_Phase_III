@@ -313,8 +313,7 @@
                 } else {
                     return 'even-row';
                 }
-            }
-            ,
+            },
         }
     }
 </script>
@@ -323,7 +322,7 @@
     .main {
         padding-left: 3em;
         padding-right: 3em;
-        padding-top: 5em;
+        padding-top: 2em;
         font-family: Microsoft YaHei;
         /*background-image: url(../../images/mainbg.jpg);*/
         /*background-size: auto 100%;*/

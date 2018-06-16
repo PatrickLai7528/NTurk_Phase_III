@@ -23,7 +23,7 @@
 
 <style>
     #user-profile {
-        margin-top: 5em;
+        margin-top: 2em;
         width: 100%;
     }
 
