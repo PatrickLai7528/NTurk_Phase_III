@@ -137,7 +137,7 @@
                         </el-col >
                     </el-row >
                 </el-tab-pane >
-                <el-tab-pane label = "用户图表" >
+                <el-tab-pane label = "统计信息" v-if="isWorker">
                     <el-row >
                         <el-col :span = "18" :offset = "3" class = "title" >
                             <span >统计信息</span >
