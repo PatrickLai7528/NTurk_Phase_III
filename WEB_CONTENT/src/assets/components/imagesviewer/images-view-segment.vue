@@ -217,14 +217,7 @@
                 this.imgNames = this.$store.getters.getImgNames;
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                let promise = new Promise(function (resolve) {
-                    _this.loadAnnotationList();
-                    resolve();
-                });
-
-                promise.then(function () {
-                    _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
-                });
+                _this.loadAnnotationList(_this.loadImageAndAnnotation);
             });
         },
         watch:{                        //路由参数变化重新加载界面
@@ -240,14 +233,7 @@
                     this.annotationData = [];
                     _this.number = _this.imgNames.length;
                     _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    let promise = new Promise(function (resolve) {
-                        _this.loadAnnotationList();
-                        resolve();
-                    });
-
-                    promise.then(function () {
-                        _this.loadImageAndAnnotation();            //使用promise处理从后端取得和加载的同步关系
-                    });
+                    _this.loadAnnotationList(_this.loadImageAndAnnotation);
                 }
             }
         },
@@ -413,7 +399,7 @@
                 this.ratings[this.nowIndex] = score;
                 this.canCommit();
             },
-            loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
+            loadAnnotationList(callback){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
                 let whatfor = 3;
                 if(_this.taskType === 'coverage'){
@@ -423,19 +409,46 @@
                     whatfor = 1;
                 }
 
-                for(let img of this.imgNames){
-                    let route = "http://localhost:8086/segmentAnnotation/imgName/" + img + "/whatFor/" + whatfor;
+                for(let i = 0;i < _this.imgNames.length;i++){
+                    let route = "http://localhost:8086/segmentAnnotation/imgName/" + _this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
-                        _this.annotation = response.data;
-                        console.log(response.data);
-                        _this.annotationData.push(_this.annotation);
+                        if(_this.response.status === 204){
+                            _this.segments = [];
+                            _this.annotation = {
+                                'imgName': _this.imgNames[i],
+                                'segment': _this.segments
+                            };
+                            _this.annotationData.push(_this.annotation);
+
+                            if(i === _this.imgNames.length - 1){
+                                callback();
+                            }
+                        }
+                        else{
+                            let temp = response.data;
+
+                            if(_this.taskType === 'grade'){
+                                for(let item of temp.segments){
+                                    item.color = '#64bc67'
+                                }
+
+                                temp.segment.color = '#C0392B';
+                            }
+
+                            temp.segments.push(temp.segment);
+
+                            _this.annotation = {
+                              'imgName': _this.imgNames[i],
+                              'segment': temp.segments,
+                            };
+
+                            _this.annotationData.push(_this.annotation);
+                            if(i === _this.imgNames.length - 1){
+                                callback();
+                            }
+                        }
+
                     }).catch(function (error) {             //FIXME:因为发起者看有一些标注是没有的，所以创建一个空对象push进去  现在开起来不知道这个逻辑可不可行
-                        _this.segments = [];
-                        _this.annotation = {
-                            'imgName': _this.img,
-                            'segment': _this.segments
-                        };
-                        _this.annotationData.push(_this.annotation);
                         console.log(error);
                     })
                 }
@@ -475,7 +488,7 @@
              * */
             loadAnnotation() {
                 this.annotation = this.annotationData[this.nowIndex];
-                this.segments = this.annotation.segments;
+                this.segments = this.annotation.segment;
                 this.initialDraw();
             },
             /**
@@ -502,13 +515,20 @@
                 this.context.drawImage(this.pic, 0, 0, this.config.width, this.config.height);
                 for (let i = 0; i < this.segments.length; i++) {
                     const s = this.segments[i];
-                    this.config.lineColor = s.color;
-                    this.context.lineStyle = this.config.color;
+                    // this.config.lineColor = s.color;
+                    // this.context.lineStyle = this.config.color;
                     this.context.lineWidth = this.config.lineWidth;
+                    if(this.segments[i].color !== undefined && this.segments[i].color !== ''){
+                        this.context.strokeStyle = this.segments[i].color;
+                    }
+                    else{
+                        this.context.strokeStyle = this.color;
+                    }
+                    
                     this.drawArea(s.polygon);
                     this.addTag(s, i);
                 }
-                this.context.strokeStyle = this.color;
+                // this.context.strokeStyle = this.color;
             },
             drawArea(polygon) {
                 this.context.save();
