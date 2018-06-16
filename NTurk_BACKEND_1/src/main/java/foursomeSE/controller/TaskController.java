@@ -1,11 +1,8 @@
 package foursomeSE.controller;
 
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.statistics.TaskGrowth;
-import foursomeSE.entity.statistics.TaskParticipation;
-import foursomeSE.entity.statistics.TaskStatusData;
+import foursomeSE.entity.statistics.*;
 import foursomeSE.entity.task.CTask;
-import foursomeSE.entity.statistics.TaskNum;
 import foursomeSE.entity.task.Task;
 import foursomeSE.error.MyErrorType;
 import foursomeSE.error.MyNotValidException;
@@ -51,7 +48,7 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/taskId/{taskId}",
-    method = RequestMethod.GET)
+            method = RequestMethod.GET)
     public ResponseEntity<?> getTaskById(@RequestHeader("Authorization") String token,
                                          @PathVariable("taskId") long taskId) {
         CTask t = taskService.getById(taskId);
@@ -104,7 +101,8 @@ public class TaskController {
 
     @RequestMapping(value = "/task/{taskId}",
             method = RequestMethod.GET)
-    public ResponseEntity<?> enterTask(@RequestHeader("Authorization") String token, @PathVariable("taskId") long taskId) {
+    public ResponseEntity<?> enterTask(@RequestHeader("Authorization") String token,
+                                       @PathVariable("taskId") long taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         EnterResponse enterResponse = taskService.enterTask(taskId, username);
@@ -114,6 +112,25 @@ public class TaskController {
         return new ResponseEntity<>(enterResponse, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/requesterTasks/taskChart",
+            method = RequestMethod.POST)
+    public ResponseEntity<?> taskChart(@RequestHeader("Authorization") String token,
+                                       @RequestBody int taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        List<PHItem> ph = taskService.PHChart(taskId, username);
+        return new ResponseEntity<Object>(ph, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "userProfile/requester/charts/",
+            method = RequestMethod.POST)
+    public ResponseEntity<?> CommitChart(@RequestHeader("Authorization") String token,
+                                         @RequestBody int taskId) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        List<CommitItem> cis = taskService.commitChart(taskId, username);
+        return new ResponseEntity<Object>(cis, HttpStatus.OK);
+    }
 
 
     /**
@@ -123,6 +140,7 @@ public class TaskController {
     @RequestMapping(value = "/admin/overview/taskNum",
             method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN')")
+
     public ResponseEntity<List<TaskNum>> getTaskNum() {
         return new ResponseEntity<>(taskService.getTaskNums(), HttpStatus.OK);
     }

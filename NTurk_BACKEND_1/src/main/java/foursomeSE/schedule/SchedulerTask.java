@@ -3,14 +3,15 @@ package foursomeSE.schedule;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
-import foursomeSE.service.task.FinishTaskService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,22 +19,18 @@ import static foursomeSE.service.task.TaskUtils.mtById;
 
 @Component
 public class SchedulerTask implements MyConstants {
-    private FinishTaskService finishTaskService;
     private MicrotaskJPA microtaskJPA;
-    private AnnotationJPA annotationJPA;
 
-    public SchedulerTask(FinishTaskService finishTaskService,
-                         MicrotaskJPA microtaskJPA,
-                         AnnotationJPA annotationJPA) {
-        this.finishTaskService = finishTaskService;
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+    public SchedulerTask(MicrotaskJPA microtaskJPA) {
         this.microtaskJPA = microtaskJPA;
-        this.annotationJPA = annotationJPA;
     }
 
     @Scheduled(fixedRate = 6000)
     public void reportCurrentTime() {
-        finishTaskService.checkTask(); // 这个现在除了打个时间也没用了
-//        checkMicroTask();
+        System.out.println("现在时间：" + dateFormat.format(new Date()));
+
         check(CriticalSection.qualityVerificationRecords);
         check(CriticalSection.coverageVerificationRecords);
         check(CriticalSection.drawRecords);

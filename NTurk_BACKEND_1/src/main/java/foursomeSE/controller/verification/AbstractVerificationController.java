@@ -37,7 +37,7 @@ public class AbstractVerificationController {
         try {
             verificationService.saveVerifications(verifications, username);
         } catch (MyFailTestException e) {
-            return new ResponseEntity<Object>(e.getWarning(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<Object>(e.getWarning(), HttpStatus.OK);
         }
         return new ResponseEntity<Object>(HttpStatus.OK);
     }

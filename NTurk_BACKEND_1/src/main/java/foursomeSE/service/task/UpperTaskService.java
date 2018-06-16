@@ -1,13 +1,10 @@
 package foursomeSE.service.task;
 
 import foursomeSE.entity.communicate.report.Reports;
+import foursomeSE.entity.statistics.*;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.statistics.TaskGrowth;
-import foursomeSE.entity.statistics.TaskNum;
-import foursomeSE.entity.statistics.TaskParticipation;
-import foursomeSE.entity.statistics.TaskStatusData;
 import foursomeSE.entity.task.Task;
 
 import java.util.List;
@@ -71,7 +68,18 @@ public interface UpperTaskService {
 //    List<CTaskForInspection> getWorkerInspectionTasks(String username);
 
     /**
-     * Statistics
+     * new statistics
+     * */
+
+    List<PHItem> PHChart(long taskId, String username);
+
+    List<CommitItem> commitChart(long taskId, String username);
+
+    Accuracy accuraccyChart(String username);
+
+
+    /**
+     * old statistics
      */
     List<TaskNum> getTaskNums();
 

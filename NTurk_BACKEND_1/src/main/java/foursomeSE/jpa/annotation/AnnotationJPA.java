@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import javax.transaction.Transactional;
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
 //    List<BigInteger> getIdsByTaskId(long taskId, String username);
 
 
-//    @Modifying(clearAutomatically = true)
+    //    @Modifying(clearAutomatically = true)
     @Query(value = "SELECT annotation_id\n" +
             "FROM annotation\n" +
             "WHERE microtask_id IN (\n" +
@@ -74,6 +75,29 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             "                           WHERE img_name = ?1\n" +
             "                         ))", nativeQuery = true)
     BigInteger findLatestByImgName(String imgName);
+
+    @Query(value = "SELECT\n" +
+            "  a1.annotation_id,\n" +
+            "  a1.annotation_status\n" +
+            "FROM annotation a1\n" +
+            "WHERE create_time < ?2\n" +
+            "      AND microtask_id = ?1\n" +
+            "      AND NOT exists(SELECT *\n" +
+            "                     FROM annotation a2\n" +
+            "                     WHERE a2.create_time < ?2\n" +
+            "                           AND a1.microtask_id = ?1\n" +
+            "                           AND a2.create_time > a1.create_time)",
+            nativeQuery = true)
+    Object[] findLatestBefore(long microtaskId, LocalDateTime localDateTime);
+
+    @Query(value = "SELECT annotation_id\n" +
+            "FROM annotation\n" +
+            "WHERE microtask_id IN (SELECT microtasks.microtask_id\n" +
+            "                       FROM microtasks\n" +
+            "                       WHERE task_id = ? 1)\n" +
+            "      AND create_time > ?2 AND create_time < ?3",
+            nativeQuery = true)
+    List<BigInteger> findAidsBetween(long taskId, LocalDateTime floor, LocalDateTime roof);
 
     @Query(value = "SELECT\n" +
             "  annotation_id\n" +
@@ -190,4 +214,24 @@ from (
 where rate_sum = 3 or rate_sum = 0
 order by rate_sum asc, iteration desc
 
+// findLatestBefore
+SELECT
+  a1.annotation_id,
+  a1.annotation_status
+FROM annotation a1
+WHERE create_time < ?2
+      AND microtask_id = ?1
+      AND NOT exists(SELECT *
+                     FROM annotation a2
+                     WHERE a2.create_time < ?2
+                           AND a1.microtask_id = ?1
+                           AND a2.create_time > a1.create_time)
+
+// findAidsBetween
+SELECT annotation_id
+FROM annotation
+WHERE microtask_id IN (SELECT microtasks.microtask_id
+                       FROM microtasks
+                       WHERE task_id = ? 1)
+      AND create_time > ?2 AND create_time < ?3
  */

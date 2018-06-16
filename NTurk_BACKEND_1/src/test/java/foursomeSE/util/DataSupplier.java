@@ -27,7 +27,7 @@ public class DataSupplier extends WithTheAutowired {
 
     public void mockWorkers() {
         List<Worker> result = new ArrayList<>();
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 50; i++) {
             Worker w = new Worker(); // 没iconName
             w.setCreateTime(LocalDateTime.now().minusDays(100));
             w.setEmailAddress("worker" + i + "@ex.com");
