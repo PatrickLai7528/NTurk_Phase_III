@@ -39,21 +39,21 @@
                 <div v-if = "taskType === 'grade'" >
                     <div >
                         <img src = "../../images/good.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" label = "1" >我觉得可以</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" label = "1" v-on:change="ratingChange">我觉得可以</el-radio >
                     </div >
                     <div class = "next" >
                         <img src = "../../images/bad.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" label = "2" >我觉得不行</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" label = "0" v-on:change="ratingChange">我觉得不行</el-radio >
                     </div >
                 </div >
                 <div v-if = "taskType === 'coverage'" >
                     <div >
                         <img src = "../../images/continued.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" label = "1" >还有漏网之鱼</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" label = "0" v-on:change="ratingChange">还有漏网之鱼</el-radio >
                     </div >
                     <div class = "next" >
                         <img src = "../../images/done.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" label = "2" >已经一网打尽</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" label = "1" v-on:change="ratingChange">已经一网打尽</el-radio >
                     </div >
                 </div >
                 <el-button id = "commit-button" :disabled = commitDisabled @click = "commitRating"
@@ -213,6 +213,7 @@
                 wrongImg: '',
                 canvasHtml: '<canvas id="canvas"></canvas>',
                 tagHtml: '',
+                wrongAnswerPairs: [],
             }
         },
         mounted() {
@@ -233,25 +234,8 @@
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                _this.setDialogContent();
+                //_this.setDialogContent();
             });
-        },
-        watch: {                        //路由参数变化重新加载界面
-            $route: function (to, from) {
-                if (to.name === 'viewsegment') {
-                    let _this = this;
-                    this.taskId = this.$route.params.taskId;
-                    this.taskType = this.$route.params.taskType;
-                    this.ratings = [];
-                    this.imgNames = this.$store.getters.getImgNames;
-                    this.nowRating = 0;
-                    this.annotation = {};
-                    this.annotationData = [];
-                    _this.number = _this.imgNames.length;
-                    _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
-                    _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                }
-            }
         },
         methods: {
             selectCanvas() {
@@ -314,23 +298,23 @@
                     verifications: verifications,
                 };
 
-                this.$http.post(path,
+                console.log(data);
+                _this.$http.post(path,
                     JSON.stringify(data),
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            Authorization: this.$store.getters.getToken
+                            Authorization: _this.$store.getters.getToken
                         }
                     }).then(function (response) {
                         let res = response.data;
-                        let failedIds = res.failedIds;
                         let forbidden = res.forbidden;
 
                         if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
                             _this.forbiddenMessage();
                         }
-                        else if(failedIds !== undefined && failedIds.length !== 0){    //说明这次的回答有不正确的地方
-                            _this.wrongImg = failedIds[0];   //把第一条挑出来
+                        else if(res.failedImgNames !== undefined && res.failedImgNames.length !== 0){    //说明这次的回答有不正确的地方
+                            _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
                             let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
                             _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
 
@@ -460,6 +444,7 @@
             },
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
+                console.log(this.ratings);
                 this.canCommit();
             },
             loadAnnotationList(callback) {            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
@@ -475,7 +460,7 @@
                 for (let i = 0; i < _this.imgNames.length; i++) {
                     let route = "http://localhost:8086/segmentAnnotation/imgName/" + _this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
-                        if (_this.response.status === 204) {
+                        if (response.status === 204) {
                             _this.segments = [];
                             _this.annotation = {
                                 'imgName': _this.imgNames[i],
@@ -633,7 +618,7 @@
                 const canvas = document.querySelector('#canvas');
                 const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";
 
-                const htmlString = `<el-tag style="background: #e5e9f2">標記" + (index + 1) + " </el-tag>`;
+                const htmlString = `<el-tag style="background: #e5e9f2">標記${index+1}</el-tag>`;
                 let div = document.createElement('div');
                 div.id = 'div' + index;
                 div.innerHTML = htmlString;

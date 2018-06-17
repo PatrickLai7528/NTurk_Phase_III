@@ -272,12 +272,38 @@
                         type: 'warning'
                     }).then(() => {
                         // do things here;
+                        let _this = this;
+                        _this.$http.get('http://localhost:8086/task/' + _this.taskId, {
+                            headers: {
+                                Authorization: _this.$store.getters.getToken,
+                            }
+                        }).then(function (response) {
+                            if (response.status === 204) {     //noContent    说明没有更多的图片可供标注
+                                _this.runOutMessage();
+                            }
+                            else {
+                                let imgNames = response.data;
+                                _this.$store.commit('changeImgNames', imgNames);   //现在只需要改变imgNames就好
+                                location.reload();
+                            }
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+
                     }).catch(() => {
                         this.$router.push({path: '/profile'});
                     });
                 } else {
                     this.showMessage("notDone");
                 }
+            },
+            runOutMessage() {
+                this.$notify({
+                    title: '系统提示',
+                    message: '这个任务暂时没有可供标注的图片了，换个任务试试吧^_^',
+                    type: 'success'
+                });
+                this.$router.push({path: '/profile'});
             },
             showMessage(type) {
                 if ("success" === type) {
