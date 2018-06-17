@@ -110,6 +110,7 @@
             //像评分和提交的组件，如果当前登陆者是发起者，是不显示的
             read(){
               this.dialogVisible = false;
+              this.$router.push({path:'/profile'});
             },
             commitRating(){
                 //list里面的对象包含annotationId和rate
@@ -248,6 +249,7 @@
                 for(let i = 0;i < _this.imgNames.length;i++){
                     let route = "http://localhost:8086/generalAnnotation/imgName/" + _this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                        console.log(response);
                         if(response.status === 204){
                             _this.annotation = {
                                 'imgName': _this.imgNames[i],

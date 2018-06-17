@@ -50,8 +50,8 @@
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
                             <div >
-                                <el-tag size = "small" type = "success"
-                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
+                                <el-tag size = "small" type = "primary"
+                                        v-for = "item in tagsOfTask" class="tags">{{item}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -131,6 +131,10 @@
 	    font-size: 18px;
     }
 
+    .tags{
+        margin-left: 15px;
+    }
+
     #canvas {
 	    border-right: 1px #585858 solid;
 	    cursor: crosshair;
@@ -192,7 +196,7 @@
                 this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
                 this.taskDescription = this.$store.getters.getTaskDescription;      //对于general来说，taskDescription尤其重要
-                //this.tagsOfTask = this.$store.getters.getTagsOfTask;  TODO: 等待后端加上tags
+                this.tagsOfTask = this.$store.getters.getTagsOfTask;
                 console.log(this.tagsForAnnotation);
                 this.getImgNames();
                 this.setCountDown();
