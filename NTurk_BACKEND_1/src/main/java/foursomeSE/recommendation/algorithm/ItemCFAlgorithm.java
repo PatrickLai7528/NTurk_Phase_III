@@ -170,7 +170,7 @@ public class ItemCFAlgorithm {
         for(Record record: recordList){
             if(userID==record.userID){
                 int taskID = record.taskID;
-                int score = record.score;
+                double score = record.score;
 
                 // 这里计算旧的平均得分和新得分的平均值
                 // 如果用户对于一个任务做了多次，就说明是打回重做，这样计算得分的话最新一次的得分权重最高
