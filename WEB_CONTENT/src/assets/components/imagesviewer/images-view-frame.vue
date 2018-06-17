@@ -313,6 +313,7 @@
 
                             _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
                             _this.showDialog();     //显示错误教程
+                            _this.setDialogContent();
                         }
                         else{
                             _this.canGoon(_this.showMessage);
