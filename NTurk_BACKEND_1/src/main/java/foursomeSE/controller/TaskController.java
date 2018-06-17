@@ -133,12 +133,21 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/userProfile/worker/charts/point",
-    method = RequestMethod.POST)
+            method = RequestMethod.GET)
     public ResponseEntity<?> accuracyChart(@RequestHeader("Authorization") String token) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         Accuracy accuracy = taskService.accuraccyChart(username);
         return new ResponseEntity<Object>(accuracy, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/userProfile/worker/charts/heat",
+        method = RequestMethod.GET)
+    public ResponseEntity<?> heatChart(@RequestHeader("Authorization") String token) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        List<Heat> heatChart = taskService.heatChart(username);
+        return new ResponseEntity<Object>(heatChart, HttpStatus.OK);
     }
 
 

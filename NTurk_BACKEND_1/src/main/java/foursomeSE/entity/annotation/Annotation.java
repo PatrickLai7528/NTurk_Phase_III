@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Annotation { // 先没有abstract，可能也许和annotationJPA冲突
+public abstract class Annotation { // 先没有abstract，可能也许和annotationJPA冲突
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long annotationId;
@@ -97,6 +97,8 @@ public class Annotation { // 先没有abstract，可能也许和annotationJPA冲
         return null;
     }
 
-    public void setCore(ArrayList<Object> list) {
+    public abstract void setCore(Object core);
+
+    public void setCores(ArrayList<Object> list) {
     }
 }

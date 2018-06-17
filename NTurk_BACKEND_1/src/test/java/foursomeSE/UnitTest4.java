@@ -59,7 +59,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
     @After
     public void after() {
 //        dbDataKeeper.reclaimAll();
-//        dbDataKeeper.clearAll();
+        dbDataKeeper.clearAll();
     }
 
     @Test
@@ -225,9 +225,9 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         FCV(etr2.getImgNames(), IntStream.of(0, 0, 1, 0, 0), "worker2@ex.com");
 
         etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
-        assertEquals(in(IntStream.of(24, 25, 26, 4, 5)), etr1.getImgNames());
+        assertEquals(in(IntStream.of(22, 23, 24, 4, 5)), etr1.getImgNames());
         rvfs = rvfs(etr1.getImgNames(), IntStream.of(0, 0, 0, 1, 0), VerificationType.QUALITY, "worker1@ex.com");
-        testFallQV(rvfs, IntStream.of(5), "worker1@ex.com" );
+        testFallQV(rvfs, IntStream.of(5), "worker1@ex.com");
 
         etr2 = taskService.enterTask(tid, "worker2@ex.com");
         assertEquals(in(IntStream.of(16, 17, 32, 33, 34)), etr2.getImgNames());
@@ -236,18 +236,18 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         enterDrawAndFinish("worker3@ex.com");
 
         etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
-        assertEquals(in(IntStream.of(16, 17, 27, 28, 7)), etr1.getImgNames());
+        assertEquals(in(IntStream.of(16, 17, 22, 23, 7)), etr1.getImgNames());
         FQV(etr1.getImgNames(), IntStream.of(1, 1, 1, 1, 0), "worker1@ex.com");
 
         FrameAnnotation fa = frameAnnotationService.getByImgName("16.jpg", 2, "worker15@ex.com");// username瞎叫的
         assertEquals(1, fa.getIteration());
 
         etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
-        assertEquals(in(IntStream.of(29, 30, 31, 32, 33)), etr1.getImgNames());
+        assertEquals(in(IntStream.of(24, 25, 26, 27, 28)), etr1.getImgNames());
         FQV(etr1.getImgNames(), IntStream.of(0, 0, 0, 0, 0), "worker1@ex.com");
 
         etr1 = qualityVerificationService.enterVerification(tid, "worker1@ex.com");
-        assertEquals(in(IntStream.of(34, 35, 36, 37, 8)), etr1.getImgNames());
+        assertEquals(in(IntStream.of(29, 30, 31, 32, 8)), etr1.getImgNames());
         rvfs = rvfs(etr1.getImgNames(), IntStream.of(0, 0, 0, 0, 0), VerificationType.QUALITY, "worker1@ex.com");
         testForbidQV(rvfs, IntStream.of(8), "worker1@ex.com");
 
@@ -367,6 +367,10 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         assertEquals(null, qualityVerificationService.enterVerification(tid, username).getImgNames());
     }
 
+    private void FD(ArrayList<String> imgs, String username) {
+        frameAnnotationService.saveAnnotations(rats(imgs), username);
+    }
+
     private RAnnotations<FrameAnnotation> rats(IntStream intStream) {
         RAnnotations<FrameAnnotation> result = new RAnnotations<>();
         result.setAnnotations(intStream.mapToObj(i -> {
@@ -429,7 +433,8 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         Thread.sleep(2000);
 
         Microtask mt = mtByImg(microtaskJPA, "1.jpg");
-        Object[] oos = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());;
+        Object[] oos = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());
+        ;
         Object[] oo = (Object[]) oos[0];
         BigInteger aid = (BigInteger) oo[0];
         int aStt = Integer.parseInt(oo[1].toString());
@@ -464,7 +469,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         String username = "worker2@ex.com";
         EnterResponse etr = qualityVerificationService.enterVerification(tid, username);
         assertEquals(in(IntStream.of(16, 17, 1, 2, 3)), etr.getImgNames());
-        testFailFQV(etr.getImgNames(), IntStream.of(0, 0, 0, 0, 0), IntStream.of(1,2,3), username);
+        testFailFQV(etr.getImgNames(), IntStream.of(0, 0, 0, 0, 0), IntStream.of(1, 2, 3), username);
 
         etr = qualityVerificationService.enterVerification(tid, username);
         assertEquals(in(IntStream.of(16, 17, 18, 4, 5)), etr.getImgNames());
@@ -473,6 +478,44 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         username = "worker3@ex.com";
         etr = qualityVerificationService.enterVerification(tid, username);
         assertEquals(in(IntStream.of(16, 17, 1, 2, 3)), etr.getImgNames());
+    }
 
+    @Test
+    public void test4() {
+        // 又是一个简单test，但是感觉可能又能找到问题。
+
+        for (int i = 0; i < 4; i++) {
+            enterDrawAndFinish("worker1@ex.com");
+        }
+
+        for (int i = 2; i <= 4; i++) {
+            String username = "worker" + i + "@ex.com";
+            for (int j = 0; j < 3; j++) {
+                EnterResponse etr = qualityVerificationService.enterVerification(tid, username);
+                FQV(etr.getImgNames(), IntStream.of(1, 1, 1, 1, 1), username);
+            }
+        }
+
+        for (int i = 2; i <= 4; i++) {
+            String username = "worker" + i + "@ex.com";
+
+            for (int j = 0; j < 3; j++) {
+                EnterResponse etr = coverageVerificationService.enterVerification(tid, username);
+                FCV(etr.getImgNames(), IntStream.of(0, 0, 0, 0, 0), username);
+            }
+        }
+
+        String username = "worker1@ex.com";
+        EnterResponse etr = taskService.enterTask(tid, username);
+        assertEquals(in(IntStream.of(1, 2, 3, 4, 5)), etr.getImgNames());
+        FD(etr.getImgNames(), username);
+
+        etr = taskService.enterTask(tid, username);
+        assertEquals(in(IntStream.of(6, 7, 8, 9, 10)), etr.getImgNames());
+
+        etr = taskService.enterTask(tid, username);
+        assertEquals(in(IntStream.of(11, 12, 13, 14, 15)), etr.getImgNames());
+
+        // 再经过一堆人画了这五张就又可以画了。。
     }
 }

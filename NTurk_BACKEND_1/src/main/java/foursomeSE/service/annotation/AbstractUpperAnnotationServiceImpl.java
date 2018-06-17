@@ -1,13 +1,11 @@
 package foursomeSE.service.annotation;
 
-import com.google.gson.Gson;
 import foursomeSE.entity.annotation.Annotation;
 import foursomeSE.entity.annotation.AnnotationStatus;
 import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.annotation.RAnnotations;
 import foursomeSE.entity.communicate.report.Report;
 import foursomeSE.entity.communicate.report.Reports;
-import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.user.Worker;
@@ -19,7 +17,6 @@ import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.user.WorkerJPA;
-import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
 
@@ -27,11 +24,9 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static foursomeSE.service.annotation.AnnotationUtils.anttById;
-import static foursomeSE.service.task.TaskUtils.mtById;
 import static foursomeSE.service.task.TaskUtils.mtByImg;
 import static foursomeSE.service.user.UserUtils.userByUsername;
 
@@ -45,7 +40,11 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     private GoldJPA goldJPA;
 
 
-    public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA, AbstractAnnotationJPA<T> abstractAnnotationJPA, WorkerJPA workerJPA, MicrotaskJPA microtaskJPA, AnnotationJPA annotationJPA, GoldJPA goldJPA) {
+    public AbstractUpperAnnotationServiceImpl(ContractJPA contractJPA,
+                                              AbstractAnnotationJPA<T> abstractAnnotationJPA,
+                                              WorkerJPA workerJPA, MicrotaskJPA microtaskJPA,
+                                              AnnotationJPA annotationJPA,
+                                              GoldJPA goldJPA) {
         this.contractJPA = contractJPA;
         this.abstractAnnotationJPA = abstractAnnotationJPA;
         this.workerJPA = workerJPA;
@@ -57,10 +56,10 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     @Override
     public T getByImgName(String imgName, int whatFor, String  username) {
         Microtask mt = mtByImg(microtaskJPA, imgName);
+        T t; // t是最新的那个antt / gold的那个antt
 
-        T t;
 
-        if (mt.getIsSample() == 1
+        if (mt.getIsSample() == 1 // 如果是worker在看一个完成了的microtask，那么一定是gold。其实不需要看是不是isSample了。
                 && mt.getMicrotaskStatus() == MicrotaskStatus.PASSED
                 && workerJPA.findByEmailAddress(username).isPresent()) {
             VerificationType vType;
@@ -76,7 +75,6 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
             // 但是如果是requester拿呢？那还是得返回最新的。worker永远不会去拿pass了的。
             t = anttById(abstractAnnotationJPA, bigInteger.longValue());
         } else {
-
             BigInteger b = annotationJPA.findLatestByImgName(imgName);
             // 除非是第一次，不然肯定是有的。
             if (b == null) { // 如果是第一次，直接特殊处理。
@@ -86,13 +84,25 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
             t = anttById(abstractAnnotationJPA, b.longValue());
         }
 
+
         List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
                 mt.getMicrotaskId(), t.getCreateTime(), AnnotationStatus.PASSED
         );
-
         ArrayList<Object> cores = previous.stream().map(Annotation::core).collect(Collectors.toCollection(ArrayList::new));
-        t.setCore(cores);
 
+
+        if (t.getAnnotationStatus() == AnnotationStatus.FAILED) {
+            t.setCore(null);
+        } else if (t.getAnnotationStatus() == AnnotationStatus.REVIEWABLE) {
+            if (whatFor == 3) {
+                t.setCore(null);
+            }
+        } else if (t.getAnnotationStatus() == AnnotationStatus.PASSED) {
+            cores.add(t.core());
+            t.setCore(null);
+        }
+
+        t.setCores(cores);
         return t;
     }
 
@@ -135,6 +145,8 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         }
     }
 
+    // 写成这样实在是脑残了，
+    // 明明就是找一下所有的passed，干吗需要区分最新的还是不是最新的。。
     @Override
     public Reports getJson(long taskId, String username) {
         List<String> imgs = microtaskJPA.retrieveImgNames(taskId);
@@ -149,17 +161,18 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 
                 BigInteger b = annotationJPA.findLatestByImgName(img);
                 // 这个方法找到的原不一定是最新的，但是在这里最新的那个一定是通过的。
-
                 T t = anttById(abstractAnnotationJPA, b.longValue());
-                List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
-                        microtask.getMicrotaskId(), t.getCreateTime(), AnnotationStatus.PASSED
-                );
-                previous.add(t);
+
 
                 // 先这么写。。。懒得再分一个子方法了
                 if (t instanceof GeneralAnnotation) {
                     r.setCore(((GeneralAnnotation) t).getAnswer());
                 } else {
+                    List<T> previous = abstractAnnotationJPA.findByMicrotaskIdAndCreateTimeBeforeAndAnnotationStatus(
+                            microtask.getMicrotaskId(), t.getCreateTime(), AnnotationStatus.PASSED
+                    );
+                    previous.add(t);
+
                     ArrayList<Object> cores = previous.stream().map(Annotation::core).collect(Collectors.toCollection(ArrayList::new));
                     r.setCore(cores);
                 }
@@ -178,8 +191,8 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
 //
 //        Report t = new Report();
 //        t.setImgName("imgnames");
-//        t.setCore(new int[] {1,2,3});
-//        t.setCore("如果改成string");
+//        t.setCores(new int[] {1,2,3});
+//        t.setCores("如果改成string");
 //        Object o = t;
 //
 //        Gson gson = new Gson();

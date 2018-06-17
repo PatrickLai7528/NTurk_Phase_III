@@ -132,11 +132,7 @@ public interface MicrotaskJPA extends CrudRepository<Microtask, Long> {
             nativeQuery = true)
     List<String> retrieveImgNames(long taskId);
 
-    @Query(value = "SELECT count(*)\n" +
-            "FROM verification\n" +
-            "WHERE username = ?1 AND create_time > ?2 AND create_time < ?3",
-            nativeQuery = true)
-    long countUserDidBetween(String username, LocalDateTime floor, LocalDateTime roof);
+
 }
 
 /*
