@@ -92,6 +92,10 @@ class AnswerPairsDrawingStrategy {
             return false;
         }
     }
+
+    hasPluralMarking(){
+        return false;
+    }
 }
 
 export default AnswerPairsDrawingStrategy;

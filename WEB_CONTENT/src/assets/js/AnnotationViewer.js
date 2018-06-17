@@ -75,16 +75,25 @@ let privateMethods = {
         privateVariables.isLastAnnotationLoading = true; // 標記位, 開始加載
         privateVariables.http.get(url, header)
             .then((response) => {
-                let oldAnnotation, markingType, temp;
+                let oldAnnotation, markingType, temp, pluralMarking;
                 markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
                 temp = response.data[markingType];
-                console.log(temp);
+                // console.log(temp);
                 oldAnnotation = response.data;
                 oldAnnotation[markingType] = [];
                 oldAnnotation[markingType].push(temp);
-                console.log("in then");
+                // console.log("in then");
                 // console.log(response);
-                console.log(oldAnnotation);
+                // console.log(oldAnnotation);
+                if (privateVariables.markingDrawingStrategy.hasPluralMarking()) {
+                    pluralMarking = oldAnnotation[privateVariables.markingDrawingStrategy.getPluralMarkingTypeName()];
+                    if (pluralMarking && !pluralMarking instanceof Array) {
+                        throw new Error("Plural Marking is not Array");
+                    }
+                    pluralMarking.forEach((value, index, array) => {
+                        oldAnnotation[markingType].push(value);
+                    })
+                }
                 privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), oldAnnotation);
                 privateVariables.isCurrentAnnotationNew = false;
             })

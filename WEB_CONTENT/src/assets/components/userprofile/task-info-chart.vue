@@ -7,8 +7,6 @@
 </template>
 
 <script>
-    import UserUtils from '../../js/utils/UserUtils.js'
-
     export default {
         props: ["taskId","taskName"],
         data() {
