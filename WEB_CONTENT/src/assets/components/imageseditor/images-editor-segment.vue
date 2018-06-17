@@ -50,10 +50,8 @@
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
                             <div >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
+                                <el-tag size = "small" type = "success"
+                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -161,6 +159,7 @@
                 taskDescription: "",
                 imgNames: this.$store.getters.getImgNames,
                 tagsForAnnotation: this.$store.getters.getTagsForAnnotation,
+                tagsOfTask: this.$store.getters.getTagsOfTask,
             }
         },
         computed: {
@@ -191,6 +190,7 @@
                 this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
                 this.taskDescription = this.$store.getters.getTaskDescription;
+                this.tagsOfTask = this.$store.getters.getTagsOfTask;
                 this.getImgNames();
                 this.setCountDown();
             })

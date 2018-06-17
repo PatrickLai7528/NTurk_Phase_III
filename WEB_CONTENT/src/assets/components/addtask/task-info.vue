@@ -86,12 +86,6 @@
                     </el-col >
                 </el-row >
             </el-form-item >
-            <el-form-item label = "收费标准" prop = "rewardPerMicrotask" >
-                <el-input class = "input" v-model.number = "form.rewardPerMicrotask" ></el-input >
-            </el-form-item >
-            <!--<el-form-item >-->
-            <!--<el-button class = "finishButton" @click = "onSubmit('form')" >完成</el-button >-->
-            <!--</el-form-item >-->
         </el-form >
     </div >
 </template >
@@ -132,7 +126,6 @@
                     // valid only if taskType = general
                     questions: [],
                     nominees: [],//要求的工人
-                    rewardPerMicrotask: 0,     //对于每张图片的收费标准
                     taskTags: [],
                     haveAnswer: '',            //是否提供内置答案
                     tagsForAnnotation: [],     //如果提供内置答案，采用内置答案
@@ -223,7 +216,6 @@
                     workerRequirement: this.form.workerRequirement,
                     rewardStrategy: this.form.rewardStrategy,
                     imgNames: this.form.imgNames,
-                    rewardPerMicrotask: this.form.rewardPerMicrotask,
                     requiredExperience: this.form.requiredExperience,
                     createTime: this.form.createTime,
                     requesterId: this.form.requesterId,

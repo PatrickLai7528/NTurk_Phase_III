@@ -15,8 +15,6 @@ import signUp from './assets/components/entry/sign-up.vue'
 // 新增任務
 import addTask from './assets/components/addtask/add-task.vue'
 // 關於我們
-import requesterLobby from './assets/components/common/common-requester-lobby.vue'
-//requester的查看某个任务的lobby界面
 import imagesViewGeneral from './assets/components/imagesviewer/images-view-general.vue'
 //requester查看general标注界面
 import imagesViewSegment from './assets/components/imagesviewer/images-view-segment.vue'
@@ -79,11 +77,6 @@ const routes = [
                 component:requesterTaskLobby,
                 name:'requestertasklobby',
             },
-            {
-                path:'requesterlobby/:taskId',
-                component:requesterLobby,
-                name:'requesterlobby',
-            }
         ],
         meta: {
             requireAuth: true,  // 添加该字段，表示进入这个路由是需要登录的

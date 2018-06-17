@@ -171,7 +171,6 @@
 
 <script >
 	import taskLobby from '../common/common-main.vue'
-    import requesterLobby from '../common/common-requester-lobby.vue'
     import UserUtils from '../../js/utils/UserUtils.js'
     import DateUtils from '../../js/utils/DateUtils.js'
     import TranslateUtils from '../../js/utils/TranslateUtils.js'
@@ -181,7 +180,6 @@
         name: "",
         components: {
             taskLobby,
-            requesterLobby,
             userCharts
         },
         data() {
