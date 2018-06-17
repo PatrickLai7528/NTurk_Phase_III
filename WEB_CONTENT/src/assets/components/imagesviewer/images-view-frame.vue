@@ -51,24 +51,24 @@
                 <div v-if = "taskType === 'grade'" >
                     <div >
                     <img src = "../../images/good.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                    <el-radio class = "text" v-model = "nowRating" :label = "1"
                               v-on:change = "ratingChange" >我觉得可以</el-radio >
                     </div >
                     <div class = "next" >
                     <img src = "../../images/bad.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                    <el-radio class = "text" v-model = "nowRating" :label = "0"
                               v-on:change = "ratingChange" >我觉得不行</el-radio >
                     </div >
                 </div >
                 <div v-if = "taskType === 'coverage'" >
                     <div >
                     <img src = "../../images/continued.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                    <el-radio class = "text" v-model = "nowRating" :label = "0"
                               v-on:change = "ratingChange" >还有漏网之鱼</el-radio >
                     </div >
                     <div class = "next" >
                     <img src = "../../images/done.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                    <el-radio class = "text" v-model = "nowRating" :label = "1"
                               v-on:change = "ratingChange" >已经一网打尽</el-radio >
                     </div >
                 </div >
