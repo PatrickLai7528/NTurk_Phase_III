@@ -247,7 +247,7 @@
             selectCanvas() {
                 return document.getElementById("canvas");
             },
-            setDialogContent() {
+            setDialogContent(annotation) {
                 // let id, doIt;
                 // doIt = () => {
                 let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
@@ -258,20 +258,9 @@
                 imageViewer.drawCurrent();
                 drawingStrategy = new SegmentDrawingStrategy();
                 markingType = drawingStrategy.getMarkingTypeName();
-                this.wrongAnnotation[markingType].forEach((value, index, array) => {
+                annotation[markingType].forEach((value, index, array) => {
                     drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
                 });
-                // };
-                // if (this.dialogVisible) {
-                //     doIt();
-                // } else {
-                //     id = setInterval(() => {
-                //         if (this.dialogVisible) {
-                //             doIt();
-                //             clearInterval(id);
-                //         }
-                //     }, 2000)
-                // }
             },
             read() {
                 this.dialogVisible = false;
@@ -325,7 +314,8 @@
                         _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
 
                         _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                        _this.showDialog();     //显示错误教程
+                        _this.wrongAnnotation = _this.annotationData[wrongIndex];    //把wrongAnnotation找到
+                        _this.showDialog(_this.wrongAnnotation);     //显示错误教程
                     }
                     else {
                         _this.canGoon(_this.showMessage);
@@ -361,9 +351,9 @@
                     }
                 }
             },
-            showDialog() {
-                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
+            showDialog(annotation) {
                 this.dialogVisible = true;   //显示错误提示
+                this.setDialogContent(annotation);
             },
             canGoon(callback1) {
                 let _this = this;
@@ -403,11 +393,6 @@
                     message: '恭喜你完成评审任务，请耐心等待系统发放奖励^_^',
                     type: 'success'
                 });
-            },
-            getWrongImgAnnotation(wrongImg) {
-                let _this = this;
-                let index = _this.findIndexByImg(wrongImg);
-                _this.wrongAnnotation = _this.annotationData[index];        //不用再去后台拿一遍了
             },
             showMessage() {        //显示要继续做的提示并且在点击确认后跳到下一个界面去
                 let _this = this;

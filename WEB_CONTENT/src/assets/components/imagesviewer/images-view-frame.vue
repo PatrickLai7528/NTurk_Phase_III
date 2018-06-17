@@ -235,7 +235,7 @@
             selectCanvas() {
                 return document.getElementById("canvas");
             },
-            setDialogContent() {
+            setDialogContent(annotation) {
                 // let id, doIt;
                 // doIt = () => {
                 let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
@@ -246,7 +246,7 @@
                 imageViewer.drawCurrent();
                 drawingStrategy = new FrameDrawingStrategy();
                 markingType = drawingStrategy.getMarkingTypeName();
-                this.wrongAnnotation[markingType].forEach((value, index, array) => {
+                annotation[markingType].forEach((value, index, array) => {
                     drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
                 })
                 // };
@@ -316,8 +316,9 @@
                         let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
                         _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
 
+                        _this.wrongAnnotation = _this.annotationData[wrongIndex];
                         _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                        _this.showDialog();     //显示错误教程
+                        _this.showDialog(_this.wrongAnnotation);     //显示错误教程
                     }
                     else {
                         _this.canGoon(_this.showMessage);
@@ -355,10 +356,9 @@
                     }
                 }
             },
-            showDialog() {
-                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
+            showDialog(annotation) {
                 this.dialogVisible = true;   //显示错误提示
-                this.setDialogContent();
+                this.setDialogContent(annotation);
             },
             canGoon(callback1) {
                 let _this = this;
