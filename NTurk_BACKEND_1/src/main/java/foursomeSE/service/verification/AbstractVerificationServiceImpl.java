@@ -219,7 +219,13 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                 } else {
                     // 还是要accept一下的
                     for (Verification v : verifications.getVerifications()) {
-                        acceptVerification(v);
+                        setMicrotaskAndAnnotation(v);
+
+                        microtask.setParallel(microtask.getParallel() - 1);
+                        microtaskJPA.save(microtask);
+
+                        getRecords().removeIf(ii -> ii.username.equals(username) && ii.microtaskId == microtask.getMicrotaskId());
+
                     }
 //                    ArrayList<Long> failedId = diffs.stream().map(Verification::getAnnotationId)
 //                            .collect(Collectors.toCollection(ArrayList::new));

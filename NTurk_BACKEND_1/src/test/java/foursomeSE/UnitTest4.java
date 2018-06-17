@@ -330,6 +330,18 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         verificationService.saveVerifications(rvfs, username);
     }
 
+    private void testFailFQV(ArrayList<String> imgs, IntStream input, IntStream traps, String username) {
+        boolean exception = false;
+        try {
+            FQV(imgs, input, username);
+        } catch (MyFailTestException e) {
+            assertEquals(in(traps), e.getWarning().getFailedImgNames());
+            exception = true;
+        }
+
+        assertTrue(exception);
+    }
+
     private void testFallQV(RVerifications rvfs, IntStream ints, String username) {
         boolean ex = false;
         try {
@@ -403,7 +415,6 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         return intStream.mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
     }
 
-
     // 这个就是测一下getWorkerTasks和getNewTasks
     @Test
     public void test2() throws InterruptedException {
@@ -424,5 +435,44 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         int aStt = Integer.parseInt(oo[1].toString());
 
 //        System.out.println("ogbu");
+    }
+
+    @Test
+    public void test3() {
+        // 一个简单测试，没想到之前竟然没
+        for (int i = 0; i < 4; i++) {
+            enterDrawAndFinish("worker1@ex.com");
+        }
+
+        for (int i = 2; i <= 4; i++) {
+            String username = "worker" + i + "@ex.com";
+            for (int j = 0; j < 3; j++) {
+                EnterResponse etr = qualityVerificationService.enterVerification(tid, username);
+                FQV(etr.getImgNames(), IntStream.of(1, 1, 1, 1, 1), username);
+            }
+        }
+
+        for (int i = 2; i <= 4; i++) {
+            String username = "worker" + i + "@ex.com";
+
+            for (int j = 0; j < 3; j++) {
+                EnterResponse etr = coverageVerificationService.enterVerification(tid, username);
+                FCV(etr.getImgNames(), IntStream.of(1, 1, 1, 1, 1), username);
+            }
+        }
+
+        String username = "worker2@ex.com";
+        EnterResponse etr = qualityVerificationService.enterVerification(tid, username);
+        assertEquals(in(IntStream.of(16, 17, 1, 2, 3)), etr.getImgNames());
+        testFailFQV(etr.getImgNames(), IntStream.of(0, 0, 0, 0, 0), IntStream.of(1,2,3), username);
+
+        etr = qualityVerificationService.enterVerification(tid, username);
+        assertEquals(in(IntStream.of(16, 17, 18, 4, 5)), etr.getImgNames());
+        testFailFQV(etr.getImgNames(), IntStream.of(0, 0, 0, 0, 0), IntStream.of(4, 5), username);
+
+        username = "worker3@ex.com";
+        etr = qualityVerificationService.enterVerification(tid, username);
+        assertEquals(in(IntStream.of(16, 17, 1, 2, 3)), etr.getImgNames());
+
     }
 }

@@ -328,12 +328,56 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
 
         Worker worker = userByUsername(workerJPA, username);
-        int currentAccuracy = 0;
+        double currentAccuracy = 0;
         for (LocalDate date = worker.getCreateTime().toLocalDate();
              date.isBefore(LocalDate.now());
              date = date.plusDays(1)) {
 
+            AccuracyItem ai = new AccuracyItem();
+            ai.date = date;
 
+            long countUserPass = annotationJPA.countUserPassBetween(
+                    username,
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            );
+
+            long countUserFail = annotationJPA.countUserFailBetween(
+                    username,
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            );
+
+            if (countUserFail + countUserPass == 0) {
+                ai.point = currentAccuracy;
+            } else {
+                ai.point = currentAccuracy
+                        = (countUserPass / (countUserPass + countUserFail));
+            }
+
+            result.items.add(ai);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<Heat> heatChart(String username) {
+        Worker worker = userByUsername(workerJPA, username);
+
+        for (LocalDate date = worker.getCreateTime().toLocalDate();
+             date.isBefore(LocalDate.now());
+             date = date.plusDays(1)) {
+
+            Heat heat = new Heat();
+
+            heat.date = date;
+
+            long ac = annotationJPA.countUserDidBetween(
+                    username,
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            );
 
         }
 
