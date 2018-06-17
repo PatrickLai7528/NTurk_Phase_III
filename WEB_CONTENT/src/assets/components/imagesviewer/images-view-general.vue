@@ -13,7 +13,7 @@
         <el-aside width="300px" style="alignment: center">
             <el-form ref="form" :model="form">
                 <el-form-item class="Q_And_A" v-bind:label="taskDescription">
-                    <el-input v-model="annotationData[nowIndex]" disabled></el-input>
+                    <el-input v-model="annotationData[nowIndex].answer" disabled></el-input>
                 </el-form-item>
             </el-form>
             <div v-if="isRequester === false">
@@ -98,8 +98,8 @@
                     _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
                 }
 
-                _this.imgNames = _this.$store.getters.getImgNames;
                 _this.number = _this.imgNames.length;
+                console.log(_this.imgNames);
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.taskDescription = _this.$store.getters.getTaskDescription;     //加载任务描述
                 console.log(_this.$store.getters.getTaskDescription);
@@ -178,7 +178,7 @@
             },
             canGoon(callback1){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
                 let _this = this;
-                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                let route = 'http://localhost:8086/get/taskId/' + this.taskId;
                 this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let taskInfo = response.data;
                     console.log(taskInfo.verifyQuality);     //在这里只有verifyQuality
@@ -230,7 +230,7 @@
                 });
             },
             canCommit(){
-                if(this.ratings.length === this.tableData.imgNames.length){
+                if(this.ratings.length === this.imgNames.length){
                     this.commitDisabled = false;
                 }
                 else{
@@ -246,7 +246,7 @@
                 }
 
                 for(let i = 0;i < _this.imgNames.length;i++){
-                    let route = "http://localhost:8086/generalAnnotation/imgNames/" + _this.imgNames[i] + "/whatFor/" + whatfor;
+                    let route = "http://localhost:8086/generalAnnotation/imgName/" + _this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                         if(response.status === 204){
                             _this.annotation = {
@@ -276,9 +276,11 @@
                 this.nowIndex = newIndex;
                 this.nowRating = 5;
                 this.commitDisabled = 'disabled';
+                this.canCommit();
             },
             ratingChange: function(score){
                 this.ratings[this.nowIndex] = score;
+                console.log(this.ratings);
                 this.canCommit();
             },
         }
@@ -308,7 +310,7 @@
         font-size: 18px;
         line-height: 40px;
         margin: 30px;
-        padding-top: 80%;
+        padding-top: 20%;
     }
 
     .pic {
