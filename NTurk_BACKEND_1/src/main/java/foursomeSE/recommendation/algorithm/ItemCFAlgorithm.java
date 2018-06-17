@@ -56,9 +56,9 @@ public class ItemCFAlgorithm {
          * 关于相似矩阵归一化，参见《推荐系统实践》P58
          * */
         Map<Integer, Set<Integer>> invertedList = new HashMap<>(userNumber);
-        int[] taskCount = new int[taskNumber];
+        Map<Integer, Integer> taskCount = new HashMap<>(taskNumber);
         Table<Integer, Integer, Double> spareMatrix = HashBasedTable.create();
-        double maxWij = 0;
+        Map<Integer, Double> maxWij = new HashMap<>();
 
         // 对ArrayList初始化
         for(User user: userList){
@@ -71,7 +71,7 @@ public class ItemCFAlgorithm {
             int userID = record.userID;
             int taskID = record.taskID;
             invertedList.get(userID).add(taskID);
-            taskCount[taskID]++;
+            taskCount.compute(taskID, (k, v) -> (v == null) ? 1 : v + 1);
         }
 
         // 根据倒排表来更新稀疏矩阵
@@ -111,9 +111,13 @@ public class ItemCFAlgorithm {
             int i = data.getRowKey();
             int j = data.getColumnKey();
             double value = data.getValue();
-            double newValue = value / (Math.sqrt(taskCount[i] * taskCount[j]));
+            double newValue = value / (Math.sqrt(taskCount.get(i) * taskCount.get(j)));
             W.put(i, j, newValue);
-            maxWij = maxWij<newValue ? newValue : maxWij;
+            if(maxWij.containsKey(i)){
+                maxWij.compute(i, (k, v) -> (newValue >= v) ? newValue : v);
+            } else {
+                maxWij.put(i, newValue);
+            }
         }
 
         /*
@@ -125,7 +129,7 @@ public class ItemCFAlgorithm {
             int i = data.getRowKey();
             int j = data.getColumnKey();
             double value = data.getValue();
-            double newValue = value / maxWij;
+            double newValue = value / maxWij.get(i);
             W.put(i, j, newValue);
         }
         return W;
