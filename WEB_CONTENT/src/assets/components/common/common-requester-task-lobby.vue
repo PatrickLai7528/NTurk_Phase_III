@@ -31,6 +31,8 @@
                                        round class = "default-font-style" > 参与情况 </el-button >
                             <el-button type = "success" size = "medium" @click = "handleClick(scope.row)"
                                        round class = "default-font-style" > 标注结果 </el-button >
+                            <el-button type = "info" size = "medium" @click = "handleDownload(scope.row)"
+                                       round class = "default-font-style" > 导出数据 </el-button>
                         </div >
 
                         <el-button slot = "reference" type = "primary" size = "medium" align = "left"
@@ -87,7 +89,8 @@
                 dialogFormVisible2: false,
                 taskIdOfChart: null,
                 taskNameOfChart: null,
-                taskCategoryOfChart: null
+                taskCategoryOfChart: null,
+                typePath: [],    //下载时的路径
             }
         },
         mounted: function () {
@@ -96,6 +99,9 @@
                 _this.routerPath['GENERAL'] = 'viewgeneral';
                 _this.routerPath['FRAME'] = 'viewframe';
                 _this.routerPath['SEGMENT'] = 'viewsegment';         //现在不存在两级目录了，直接通过task-lobby看标注结果
+                _this.typePath['GENERAL'] = 'generalAnnotation';
+                _this.typePath['FRAME'] = 'frameAnnotation';
+                _this.typePath['SEGMENT'] = 'segmentAnnotation';
                 _this.setUpBusEvent();
                 _this.getAll();
             })
@@ -132,6 +138,21 @@
                 let tem = new Date(oldDate).getTime();
                 let ans = new Date(tem).format("yyyy-MM-dd hh:mm:ss");
                 return ans;
+            },
+            handleDownload(row){
+                let way = this.typePath[row.taskCategory];
+                let path = "http://localhost:8086/" + way + "/json/taskId/" + row.taskId;
+                this.$http.get(path, {headers: {Authorization: this.$store.getters.getToken}}).then(function (response) {
+
+                    let blob = new Blob([JSON.stringify(response.data)], { type: 'application/json' });
+                    let link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = row.taskCategory + '_' + row.taskId + '.json';
+                    link.click();
+
+                }).catch(function (error) {
+                    console.log(error);
+                });
             },
             handleClick(row) {
                 //点击任务进入该任务的合同列表

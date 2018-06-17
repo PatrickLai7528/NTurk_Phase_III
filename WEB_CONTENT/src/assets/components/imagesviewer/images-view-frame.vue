@@ -465,6 +465,7 @@
                         }
                         else {
                             let temp = response.data;
+                            console.log(response.data);
                             if (_this.taskType === 'grade') {     //只有grade任务才牵扯变色
                                 for (let item of temp.frames) {
                                     item.color = "#1ABC9C";   //对于过去的标注，是青色
@@ -473,7 +474,9 @@
                                 temp.frame.color = '#C0392B';
                             }
 
-                            temp.frames.push(temp.frame);
+                            if(temp.frame !== null && temp.frame !== undefined){
+                                temp.frames.push(temp.frame);
+                            }
 
                             if (_this.taskType !== 'grade') {         //这里要注意非grade的逻辑是一样的
                                 for (let item of temp.frames) {

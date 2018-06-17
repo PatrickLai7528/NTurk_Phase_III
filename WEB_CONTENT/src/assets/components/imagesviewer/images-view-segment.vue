@@ -473,7 +473,10 @@
                                 temp.segment.color = '#C0392B';
                             }
 
-                            temp.segments.push(temp.segment);
+                            if(temp.segment !== null && temp.segment !== undefined){
+                                temp.segments.push(temp.segment);
+                            }
+
 
                             if (_this.taskType !== 'grade') {         //这里要注意非grade的逻辑是一样的
                                 for (let item of temp.segments) {
