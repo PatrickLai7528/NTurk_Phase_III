@@ -248,7 +248,7 @@
                 if (imgNum === 0) {
                     this.badMessage("请添加图片！");
                 } else {
-                    await this.uploadImageSet();
+                    await this.uploadImageSet(imgNum);
                     await this.getImageNamesFromBus();
                     this.setUpFormData();
 
@@ -270,11 +270,11 @@
                 //this.uploadImageSet();
                 this.$router.push({path: '/profile'});
             },
-            uploadImageSet() {
+            uploadImageSet(imgNum) {
                 // 上傳圖片
                 this.$bus.$emit("uploadImageSet");
                 return new Promise(resolve => {
-                    setTimeout(() => resolve(), 1000);
+                    setTimeout(() => resolve(), imgNum * 100);
                 });
             },
             messageHandler() {

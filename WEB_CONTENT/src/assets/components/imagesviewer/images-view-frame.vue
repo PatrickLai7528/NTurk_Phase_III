@@ -51,24 +51,24 @@
                 <div v-if = "taskType === 'grade'" >
                     <div >
                     <img src = "../../images/good.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                    <el-radio class = "text" v-model = "nowRating" :label = "1"
                               v-on:change = "ratingChange" >我觉得可以</el-radio >
                     </div >
                     <div class = "next" >
                     <img src = "../../images/bad.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                    <el-radio class = "text" v-model = "nowRating" :label = "0"
                               v-on:change = "ratingChange" >我觉得不行</el-radio >
                     </div >
                 </div >
                 <div v-if = "taskType === 'coverage'" >
                     <div >
                     <img src = "../../images/continued.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "0"
+                    <el-radio class = "text" v-model = "nowRating" :label = "0"
                               v-on:change = "ratingChange" >还有漏网之鱼</el-radio >
                     </div >
                     <div class = "next" >
                     <img src = "../../images/done.svg" width = "300" height = "100" >
-                    <el-radio class = "text" v-model = "nowRating" label = "1"
+                    <el-radio class = "text" v-model = "nowRating" :label = "1"
                               v-on:change = "ratingChange" >已经一网打尽</el-radio >
                     </div >
                 </div >
@@ -218,17 +218,17 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                if(this.isRequester === false){
+                if (this.isRequester === false) {
                     _this.imgNames = _this.$store.getters.getImgNames.imgNames;
                 }
-                else{
+                else {
                     _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
                 }
 
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                this.setDialogContent();
+                // this.setDialogContent();
             });
         },
         methods: {
@@ -236,30 +236,30 @@
                 return document.getElementById("canvas");
             },
             setDialogContent() {
-                let id, doIt;
-                doIt = () => {
-                    let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
-                    config = {strokeStyle: "black"};
-                    canvas = this.selectCanvas();
-                    imageNameList.push(this.wrongImg);
-                    imageViewer = new ImageViewer(canvas, imageNameList, "");
-                    imageViewer.drawCurrent();
-                    drawingStrategy = new FrameDrawingStrategy();
-                    markingType = drawingStrategy.getMarkingTypeName();
-                    this.wrongAnnotation[markingType].forEach((value, index, array) => {
-                        drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
-                    })
-                };
-                if (this.dialogVisible) {
-                    doIt();
-                } else {
-                    id = setInterval(() => {
-                        if (this.dialogVisible) {
-                            doIt();
-                            clearInterval(id);
-                        }
-                    }, 2000)
-                }
+                // let id, doIt;
+                // doIt = () => {
+                let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
+                config = {strokeStyle: "black"};
+                canvas = this.selectCanvas();
+                imageNameList.push(this.wrongImg);
+                imageViewer = new ImageViewer(canvas, imageNameList, "");
+                imageViewer.drawCurrent();
+                drawingStrategy = new FrameDrawingStrategy();
+                markingType = drawingStrategy.getMarkingTypeName();
+                this.wrongAnnotation[markingType].forEach((value, index, array) => {
+                    drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
+                })
+                // };
+                // if (this.dialogVisible) {
+                //     doIt();
+                // } else {
+                //     id = setInterval(() => {
+                //         if (this.dialogVisible) {
+                //             doIt();
+                //             clearInterval(id);
+                //         }
+                //     }, 2000)
+                // }
             },
             read() {
                 this.dialogVisible = false;
@@ -267,7 +267,7 @@
             ,
             commitRating() {
                 //list里面的对象包含annotationId和rate
-                function Verification(annotationId,rate){
+                function Verification(annotationId, rate) {
                     this.annotationId = annotationId;
                     this.rate = rate;
                 }
@@ -280,8 +280,8 @@
 
                 console.log(this.annotationData[0]);
 
-                for(let i = 0;i < this.ratings.length;i++){
-                    let nowInspection = new Verification(this.annotationData[i].annotationId,this.ratings[i]);
+                for (let i = 0; i < this.ratings.length; i++) {
+                    let nowInspection = new Verification(this.annotationData[i].annotationId, this.ratings[i]);
                     verifications.push(nowInspection);
                 }
 
@@ -298,25 +298,30 @@
                 console.log(verifications);
                 this.$http.post(path,
                     JSON.stringify(data),
-                    {headers: {'Content-Type': 'application/json',Authorization:_this.$store.getters.getToken}}).then(function (response){
-                        console.log(response);    //现在交互有一定的改变，如果掉到坑里也还是正常返回
-                        let res = response.data;
-                        let forbidden = res.forbidden;
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: _this.$store.getters.getToken
+                        }
+                    }).then(function (response) {
+                    console.log(response);    //现在交互有一定的改变，如果掉到坑里也还是正常返回
+                    let res = response.data;
+                    let forbidden = res.forbidden;
 
-                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
-                            _this.forbiddenMessage();
-                        }
-                        else if(res.failedImgNames !== undefined && res.failedImgNames.length !== 0){    //说明这次的回答有不正确的地方
-                            _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
-                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
-                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+                    if (forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                        _this.forbiddenMessage();
+                    }
+                    else if (res.failedImgNames !== undefined && res.failedImgNames.length !== 0) {    //说明这次的回答有不正确的地方
+                        _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
+                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
 
-                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                            _this.showDialog();     //显示错误教程
-                        }
-                        else{
-                            _this.canGoon(_this.showMessage);
-                        }
+                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                        _this.showDialog();     //显示错误教程
+                    }
+                    else {
+                        _this.canGoon(_this.showMessage);
+                    }
                 }).catch(function (error) {
                     console.log(error);
                 });
@@ -353,26 +358,27 @@
             showDialog() {
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
                 this.dialogVisible = true;   //显示错误提示
+                this.setDialogContent();
             },
-            canGoon(callback1){
+            canGoon(callback1) {
                 let _this = this;
                 let route = 'http://localhost:8086/taskId/' + this.taskId;
-                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let taskInfo = response.data;
                     console.log(taskInfo.verifyQuality);
-                    if(_this.taskType === 'grade'){
-                        if(taskInfo.verifyQuality > 0) {
+                    if (_this.taskType === 'grade') {
+                        if (taskInfo.verifyQuality > 0) {
                             callback1();
                         }
-                        else{
+                        else {
                             _this.$router.push({path: '/profile'});
                         }
                     }
-                    else if(_this.taskType === 'coverage'){
-                        if(taskInfo.verifyCoverage > 0){
+                    else if (_this.taskType === 'coverage') {
+                        if (taskInfo.verifyCoverage > 0) {
                             callback1();
                         }
-                        else{
+                        else {
                             _this.$router.push({path: '/profile'});
                         }
                     }
@@ -380,7 +386,7 @@
                     console.log(error);
                 });
             },
-            forbiddenMessage(){
+            forbiddenMessage() {
                 this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
                     confirmButtonText: '确定',
                     type: 'error',
@@ -437,6 +443,7 @@
             },
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
+                this.rating = 5;
                 this.canCommit();
             }
             ,
@@ -462,7 +469,7 @@
                                 'imgName': _this.imgNames[i],
                                 'frame': _this.frames,
                             };
-                            _this.$set(_this.annotationData,i,_this.annotation);
+                            _this.$set(_this.annotationData, i, _this.annotation);
                             _this.annotationData[i] = _this.annotation;
                             if (_this.allLoad()) {
                                 callback()
@@ -480,19 +487,19 @@
 
                             temp.frames.push(temp.frame);
 
-                            if(_this.taskType !== 'grade'){         //这里要注意非grade的逻辑是一样的
-                                for(let item of temp.frames){
+                            if (_this.taskType !== 'grade') {         //这里要注意非grade的逻辑是一样的
+                                for (let item of temp.frames) {
                                     item.color = '#C0392B';
                                 }
                             }
 
                             _this.annotation = {
-                              'imgName': _this.imgNames[i],
-                              'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
-                              'annotationId': temp.annotationId,            //如果是从后端读出来的就有annotationId
+                                'imgName': _this.imgNames[i],
+                                'frame': temp.frames,        //这里先这样进行加工，等变色方法出来了再说
+                                'annotationId': temp.annotationId,            //如果是从后端读出来的就有annotationId
                             };
                             console.log(_this.annotation);
-                            _this.$set(_this.annotationData,i,_this.annotation);
+                            _this.$set(_this.annotationData, i, _this.annotation);
                             if (_this.allLoad()) {
                                 callback();
                             }
@@ -502,13 +509,13 @@
                     });
                 }
             },
-            allLoad(){
-                if(this.annotationData.length !== this.imgNames.length){
+            allLoad() {
+                if (this.annotationData.length !== this.imgNames.length) {
                     return false;
                 }
 
-                for(let i = 0;i < this.annotationData.length;i++){
-                    if(this.annotationData[i] === undefined){
+                for (let i = 0; i < this.annotationData.length; i++) {
+                    if (this.annotationData[i] === undefined) {
                         return false;
                     }
 
@@ -518,7 +525,7 @@
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
                 this.loadWhenChange(newIndex);
-                this.nowRating = 0;
+                this.nowRating = 5;
                 this.commitDisabled = 'disabled';
             },
             loadWhenChange(newIndex) {
@@ -609,7 +616,7 @@
                 const canvas = document.querySelector('#canvas');
                 const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";
 
-                const htmlString = `<el-tag style="background: #e5e9f2">標記${index+1} </el-tag>`;
+                const htmlString = `<el-tag style="background: #e5e9f2">標記${index + 1} </el-tag>`;
                 let div = document.createElement('div');
                 div.id = 'tag' + index;
                 div.innerHTML = htmlString;
