@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
@@ -44,10 +45,10 @@ public class Task {
 //    @OneToMany(orphanRemoval = true)
 //    @JoinColumn(name = "task_id")
     @Transient
-    private ArrayList<String> taskTagNames = new ArrayList<>();
+    private List<String> taskTags = new ArrayList<>();
 
     @Transient
-    private ArrayList<String> imgNames;
+    private List<String> imgNames;
 
     @NotNull
     private TaskStatus taskStatus; // NN
@@ -186,19 +187,19 @@ public class Task {
         this.isCollecting = isCollecting;
     }
 
-    public ArrayList<String> getImgNames() {
+    public List<String> getTaskTags() {
+        return taskTags;
+    }
+
+    public void setTaskTags(List<String> taskTags) {
+        this.taskTags = taskTags;
+    }
+
+    public List<String> getImgNames() {
         return imgNames;
     }
 
-    public void setImgNames(ArrayList<String> imgNames) {
+    public void setImgNames(List<String> imgNames) {
         this.imgNames = imgNames;
-    }
-
-    public ArrayList<String> getTaskTagNames() {
-        return taskTagNames;
-    }
-
-    public void setTaskTagNames(ArrayList<String> taskTagNames) {
-        this.taskTagNames = taskTagNames;
     }
 }

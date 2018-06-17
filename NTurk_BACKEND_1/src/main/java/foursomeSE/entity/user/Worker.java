@@ -2,12 +2,18 @@ package foursomeSE.entity.user;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import java.util.List;
 
 import static foursomeSE.util.ConvenientFunctions.setSameFields;
 
 @Entity
 @Table(name = "workers")
 public class Worker extends MyUser {
+    @Transient
+    public List<String> userTags;
+
     public Worker() {
     }
 

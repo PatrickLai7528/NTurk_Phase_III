@@ -1,13 +1,20 @@
 package foursomeSE.entity.tag;
 
+
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 
-//@Entity
+@Entity
 public class TagAndWorker {
-//    @NotNull
+    @Id
+    @GeneratedValue
+    public long id;
+
+    @NotNull
     public String tagName;
 
-//    @NotNull
+    @NotNull
     public String username;
 }

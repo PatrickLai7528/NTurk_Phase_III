@@ -47,7 +47,7 @@ public class TaskController {
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/taskId/{taskId}",
+    @RequestMapping(value = "/get/taskId/{taskId}",
             method = RequestMethod.GET)
     public ResponseEntity<?> getTaskById(@RequestHeader("Authorization") String token,
                                          @PathVariable("taskId") long taskId) {

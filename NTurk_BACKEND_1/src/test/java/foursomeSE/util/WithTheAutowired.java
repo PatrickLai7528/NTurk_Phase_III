@@ -7,6 +7,8 @@ import foursomeSE.jpa.BlacklistJPA;
 import foursomeSE.jpa.annotation.*;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.gold.GoldJPA;
+import foursomeSE.jpa.tag.TagAndTaskJPA;
+import foursomeSE.jpa.tag.TagAndWorkerJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
@@ -48,6 +50,10 @@ public abstract class WithTheAutowired {
     protected GoldJPA goldJPA;
     @Autowired
     protected BlacklistJPA blacklistJPA;
+    @Autowired
+    protected TagAndTaskJPA tagAndTaskJPA;
+    @Autowired
+    protected TagAndWorkerJPA tagAndWorkerJPA;
 
 
     @Autowired

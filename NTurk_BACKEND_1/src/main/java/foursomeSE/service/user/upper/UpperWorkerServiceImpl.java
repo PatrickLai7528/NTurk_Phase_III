@@ -12,9 +12,9 @@ import foursomeSE.entity.user.Worker;
 import foursomeSE.error.MyNotValidException;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.tag.TagAndWorkerJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.UserJPA;
-import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.util.ConvenientFunctions;
 import org.springframework.stereotype.Service;
 
@@ -36,14 +36,13 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
     private ContractJPA contractJPA;
     //private LowerTaskService lowerTaskService;
     private TaskJPA taskJPA;
+    private TagAndWorkerJPA tagAndWorkerJPA;
 
-    public UpperWorkerServiceImpl(UserJPA<Worker> userJPA,
-                                  MessageJPA messageJPA,
-                                  ContractJPA contractJPA,
-                                  TaskJPA taskJPA) {
+    public UpperWorkerServiceImpl(UserJPA<Worker> userJPA, MessageJPA messageJPA, ContractJPA contractJPA, TaskJPA taskJPA, TagAndWorkerJPA tagAndWorkerJPA) {
         super(userJPA, messageJPA);
         this.contractJPA = contractJPA;
         this.taskJPA = taskJPA;
+        this.tagAndWorkerJPA = tagAndWorkerJPA;
     }
 
     @Override
@@ -58,6 +57,9 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
         double newCrdt = Double.parseDouble(String.format("%.2f", result.getCredit()));
         result.setExperiencePoint(newExp);
         result.setCredit(newCrdt);
+
+        worker.userTags = tagAndWorkerJPA.getWorkerTags(worker.getEmailAddress());
+
         return result;
     }
 

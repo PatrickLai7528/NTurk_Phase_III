@@ -6,6 +6,8 @@ import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.GeneralAnnotation;
 import foursomeSE.entity.annotation.SegmentAnnotation;
 import foursomeSE.entity.contract.Contract;
+import foursomeSE.entity.tag.TagAndTask;
+import foursomeSE.entity.tag.TagAndWorker;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.Task;
 import foursomeSE.entity.user.Requester;
@@ -34,6 +36,9 @@ public class DBDataKeeper extends WithTheAutowired {
     private List<Gold> golds;
     private List<BlacklistItem> blacklistItems;
 
+    private List<TagAndTask> tagAndTasks;
+    private List<TagAndWorker> tagAndWorkers;
+
 
     // jpas messages就不测了吧
 
@@ -52,6 +57,10 @@ public class DBDataKeeper extends WithTheAutowired {
         verifications = iterableToList(verificationJPA.findAll());
         golds = iterableToList(goldJPA.findAll());
         blacklistItems = iterableToList(blacklistJPA.findAll());
+
+        tagAndTasks = iterableToList(tagAndTaskJPA.findAll());
+        tagAndWorkers = iterableToList(tagAndWorkerJPA.findAll());
+
 
         clearAll(); // 这个是删老的
     }
@@ -74,6 +83,9 @@ public class DBDataKeeper extends WithTheAutowired {
         goldJPA.saveAll(golds);
         blacklistJPA.saveAll(blacklistItems);
 
+        tagAndTaskJPA.saveAll(tagAndTasks);
+        tagAndWorkerJPA.saveAll(tagAndWorkers);
+
 //        inspectionContractJPA.saveAll(inspectionContracts);
     }
 
@@ -94,6 +106,8 @@ public class DBDataKeeper extends WithTheAutowired {
         goldJPA.deleteAll();
         blacklistJPA.deleteAll();
 
+        tagAndTaskJPA.deleteAll();
+        tagAndWorkerJPA.deleteAll();
 
         // 别忘这个...
         CriticalSection.clearAll();

@@ -1,10 +1,8 @@
 package foursomeSE.service.task;
 
-import foursomeSE.entity.annotation.GeneralAnnotation;
-import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.entity.statistics.*;
+import foursomeSE.entity.tag.TagAndTask;
 import foursomeSE.entity.task.CTask;
-import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.contract.Contract;
 import foursomeSE.entity.task.*;
@@ -15,7 +13,7 @@ import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
-import foursomeSE.jpa.message.MessageJPA;
+import foursomeSE.jpa.tag.TagAndTaskJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
@@ -34,7 +32,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static foursomeSE.service.task.TaskUtils.mtByImg;
 import static foursomeSE.service.task.TaskUtils.taskById;
 import static foursomeSE.service.user.UserUtils.userById;
 import static foursomeSE.service.user.UserUtils.userByUsername;
@@ -53,13 +50,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private AnnotationJPA annotationJPA;
     private GeneralAnnotationJPA generalAnnotationJPA;
     private VerificationJPA verificationJPA;
+    private TagAndTaskJPA tagAndTaskJPA;
 
     private MicrotaskJPA microtaskJPA;
     private LowerContractService lowerContractService;
 
     private String username;
 
-    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, AnnotationJPA annotationJPA, GeneralAnnotationJPA generalAnnotationJPA, VerificationJPA verificationJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
+    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, AnnotationJPA annotationJPA, GeneralAnnotationJPA generalAnnotationJPA, VerificationJPA verificationJPA, TagAndTaskJPA tagAndTaskJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
@@ -67,6 +65,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         this.annotationJPA = annotationJPA;
         this.generalAnnotationJPA = generalAnnotationJPA;
         this.verificationJPA = verificationJPA;
+        this.tagAndTaskJPA = tagAndTaskJPA;
         this.microtaskJPA = microtaskJPA;
         this.lowerContractService = lowerContractService;
     }
@@ -79,12 +78,6 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     @Override
     public void add(Task task, String username) {
         Requester requester = userByUsername(requesterJPA, username);
-//        double totalCost = task.getRewardPerMicrotask() * task.getImgNames().size();
-//        if (requester.getCredit() - totalCost < 0) {
-//            throw new MyNotValidException();
-//        }
-//        requester.setCredit(requester.getCredit() - totalCost);
-
 
         task.setRequesterId(requester.getId());
         task.setCreateTime(LocalDateTime.now());
@@ -106,7 +99,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
             m.setIsSample(i < SAMPLE_SIZE ? 1 : 0);
 
             microtaskJPA.save(m);
+        }
 
+        for (String s : task.getTaskTags()) {
+            TagAndTask tat = new TagAndTask();
+            tat.tagName = s;
+            tat.taskId = savedTask.getTaskId();
+
+            tagAndTaskJPA.save(tat);
         }
 
 //        requesterJPA.save(requester);
@@ -561,6 +561,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
             result.setVerifyQuality(yetToVerifyQuality);
             result.setVerifyCoverage(yetToVerifyCoverage);
         }
+
+        result.setTaskTags(tagAndTaskJPA.getTaskTags(task.getTaskId()));
 
         return result;
 //        if (username == null) {

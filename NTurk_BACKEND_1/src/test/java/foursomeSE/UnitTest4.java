@@ -59,7 +59,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
     @After
     public void after() {
 //        dbDataKeeper.reclaimAll();
-        dbDataKeeper.clearAll();
+//        dbDataKeeper.clearAll();
     }
 
     @Test
