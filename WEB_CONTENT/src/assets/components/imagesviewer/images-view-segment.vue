@@ -357,7 +357,7 @@
             },
             canGoon(callback1) {
                 let _this = this;
-                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                let route = 'http://localhost:8086/get/taskId/' + this.taskId;
                 this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let taskInfo = response.data;
                     console.log(taskInfo.verifyQuality);

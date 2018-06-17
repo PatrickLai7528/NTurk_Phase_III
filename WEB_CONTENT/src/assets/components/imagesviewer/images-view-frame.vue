@@ -351,7 +351,7 @@
             },
             canGoon(callback1) {
                 let _this = this;
-                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                let route = 'http://localhost:8086/get/taskId/' + this.taskId;    //这里的url变了
                 this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let taskInfo = response.data;
                     console.log(taskInfo.verifyQuality);
