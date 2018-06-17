@@ -216,14 +216,18 @@
                 }
             },
             decidePostData() {
-                return {
+                let data = {
                     emailAddress: this.ruleForm.account,
                     password: this.ruleForm.password,
                     nickname: this.ruleForm.userName,
                     iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
                     province: this.ruleForm.province,
-                    userTags: this.ruleForm.userTags
 				}
+				if(this.ruleForm.userType === "WORKER"){
+                    data['userTags'] = this.ruleForm.userTags;
+                    alert(data.userTags);
+                }
+                return data;
 			},
 			doWhileSignUpSuccess(response) {
 				this.showMsg("注册成功!", 'success');
