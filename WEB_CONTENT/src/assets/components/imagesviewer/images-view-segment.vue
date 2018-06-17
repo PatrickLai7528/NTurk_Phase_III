@@ -39,22 +39,26 @@
                 <div v-if = "taskType === 'grade'" >
                     <div >
                         <img src = "../../images/good.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "1" v-on:change="ratingChange">我觉得可以</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" :label = "1"
+                                  v-on:change = "ratingChange" >我觉得可以</el-radio >
                     </div >
                     <div class = "next" >
                         <img src = "../../images/bad.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "0" v-on:change="ratingChange">我觉得不行</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" :label = "0"
+                                  v-on:change = "ratingChange" >我觉得不行</el-radio >
                     </div >
                 </div >
                 <div v-if = "taskType === 'coverage'" >
 
                         <img src = "../../images/continued.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "0" v-on:change="ratingChange">还有漏网之鱼</el-radio >
+                        <el-radio class = "text" v-model = "nowRating" :label = "0"
+                                  v-on:change = "ratingChange" >还有漏网之鱼</el-radio >
 
                     <div class = "next" >
                         <img src = "../../images/done.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "1" v-on:change="ratingChange">已经一网打尽</el-radio >
-                    </div>
+                        <el-radio class = "text" v-model = "nowRating" :label = "1"
+                                  v-on:change = "ratingChange" >已经一网打尽</el-radio >
+                    </div >
 
 
                 </div >
@@ -226,10 +230,10 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
-                if(this.isRequester === false){
+                if (this.isRequester === false) {
                     _this.imgNames = _this.$store.getters.getImgNames.imgNames;
                 }
-                else{
+                else {
                     _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
                 }
 
@@ -244,30 +248,30 @@
                 return document.getElementById("canvas");
             },
             setDialogContent() {
-                let id, doIt;
-                doIt = () => {
-                    let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
-                    config = {strokeStyle: "black"};
-                    canvas = this.selectCanvas();
-                    imageNameList.push(this.wrongImg);
-                    imageViewer = new ImageViewer(canvas, imageNameList, "");
-                    imageViewer.drawCurrent();
-                    drawingStrategy = new SegmentDrawingStrategy();
-                    markingType = drawingStrategy.getMarkingTypeName();
-                    this.wrongAnnotation[markingType].forEach((value, index, array) => {
-                        drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
-                    })
-                };
-                if (this.dialogVisible) {
-                    doIt();
-                } else {
-                    id = setInterval(() => {
-                        if (this.dialogVisible) {
-                            doIt();
-                            clearInterval(id);
-                        }
-                    }, 2000)
-                }
+                // let id, doIt;
+                // doIt = () => {
+                let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
+                config = {strokeStyle: "black"};
+                canvas = this.selectCanvas();
+                imageNameList.push(this.wrongImg);
+                imageViewer = new ImageViewer(canvas, imageNameList, "");
+                imageViewer.drawCurrent();
+                drawingStrategy = new SegmentDrawingStrategy();
+                markingType = drawingStrategy.getMarkingTypeName();
+                this.wrongAnnotation[markingType].forEach((value, index, array) => {
+                    drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
+                });
+                // };
+                // if (this.dialogVisible) {
+                //     doIt();
+                // } else {
+                //     id = setInterval(() => {
+                //         if (this.dialogVisible) {
+                //             doIt();
+                //             clearInterval(id);
+                //         }
+                //     }, 2000)
+                // }
             },
             read() {
                 this.dialogVisible = false;
@@ -309,23 +313,23 @@
                             Authorization: _this.$store.getters.getToken
                         }
                     }).then(function (response) {
-                        let res = response.data;
-                        let forbidden = res.forbidden;
+                    let res = response.data;
+                    let forbidden = res.forbidden;
 
-                        if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
-                            _this.forbiddenMessage();
-                        }
-                        else if(res.failedImgNames !== undefined && res.failedImgNames.length !== 0){    //说明这次的回答有不正确的地方
-                            _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
-                            let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
-                            _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+                    if (forbidden === true) {   //如果被禁赛了，输出禁赛信息
+                        _this.forbiddenMessage();
+                    }
+                    else if (res.failedImgNames !== undefined && res.failedImgNames.length !== 0) {    //说明这次的回答有不正确的地方
+                        _this.wrongImg = res.failedImgNames[0];   //把第一条挑出来
+                        let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
+                        _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
 
-                            _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                            _this.showDialog();     //显示错误教程
-                        }
-                        else{
-                            _this.canGoon(_this.showMessage);
-                        }
+                        _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
+                        _this.showDialog();     //显示错误教程
+                    }
+                    else {
+                        _this.canGoon(_this.showMessage);
+                    }
                 }).catch(function (error) {
                     console.log(error);
                 });
@@ -361,25 +365,25 @@
                 this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
                 this.dialogVisible = true;   //显示错误提示
             },
-            canGoon(callback1){
+            canGoon(callback1) {
                 let _this = this;
                 let route = 'http://localhost:8086/taskId/' + this.taskId;
-                this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
+                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                     let taskInfo = response.data;
                     console.log(taskInfo.verifyQuality);
-                    if(_this.taskType === 'grade'){
-                        if(taskInfo.verifyQuality > 0) {
+                    if (_this.taskType === 'grade') {
+                        if (taskInfo.verifyQuality > 0) {
                             callback1();
                         }
-                        else{
+                        else {
                             _this.$router.push({path: '/profile'});
                         }
                     }
-                    else if(_this.taskType === 'coverage'){
-                        if(taskInfo.verifyCoverage > 0){
+                    else if (_this.taskType === 'coverage') {
+                        if (taskInfo.verifyCoverage > 0) {
                             callback1();
                         }
-                        else{
+                        else {
                             _this.$router.push({path: '/profile'});
                         }
                     }
@@ -469,7 +473,7 @@
                                 'imgName': _this.imgNames[i],
                                 'segment': _this.segments
                             };
-                            _this.$set(_this.annotationData,i,_this.annotation);
+                            _this.$set(_this.annotationData, i, _this.annotation);
 
                             if (_this.allLoad()) {
                                 callback();
@@ -488,7 +492,7 @@
 
                             temp.segments.push(temp.segment);
 
-                            if(_this.taskType !== 'grade') {         //这里要注意非grade的逻辑是一样的
+                            if (_this.taskType !== 'grade') {         //这里要注意非grade的逻辑是一样的
                                 for (let item of temp.segments) {
                                     item.color = '#C0392B';
                                 }
@@ -499,7 +503,7 @@
                                 'annotationId': temp.annotationId,
                             };
 
-                            _this.$set(_this.annotationData,i,_this.annotation);
+                            _this.$set(_this.annotationData, i, _this.annotation);
 
                             if (_this.allLoad()) {
                                 callback();
@@ -511,13 +515,13 @@
                     })
                 }
             },
-            allLoad(){
-                if(this.annotationData.length !== this.imgNames.length){
+            allLoad() {
+                if (this.annotationData.length !== this.imgNames.length) {
                     return false;
                 }
 
-                for(let i = 0;i < this.annotationData.length;i++){
-                    if(this.annotationData[i] === undefined){
+                for (let i = 0; i < this.annotationData.length; i++) {
+                    if (this.annotationData[i] === undefined) {
                         return false;
                     }
 
@@ -621,7 +625,7 @@
                 const canvas = document.querySelector('#canvas');
                 const cssString = "position:absolute; white-space: nowrap;" + "top:" + (p.y + canvas.offsetTop) + "px;" + "left:" + p.x + "px;";
 
-                const htmlString = `<el-tag style="background: #e5e9f2">標記${index+1}</el-tag>`;
+                const htmlString = `<el-tag style="background: #e5e9f2">標記${index + 1}</el-tag>`;
                 let div = document.createElement('div');
                 div.id = 'div' + index;
                 div.innerHTML = htmlString;
