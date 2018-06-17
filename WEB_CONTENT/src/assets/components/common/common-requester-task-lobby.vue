@@ -138,8 +138,8 @@
                 let imgNames = row.imgNames;     //TODO：听说是task里面有imgNames，所以查看标注方法应该一样
                 console.log(imgNames);
                 this.$store.commit('changeImgNames', imgNames);
-                console.log("haha");
-                console.log(this.$store.getters.getImgNames);
+                console.log(row.taskDescription);
+                this.$store.commit('changeTaskDescription',row.taskDescription);
                 this.$router.push({
                     name: this.routerPath[row.taskCategory],
                     params: {taskId: row.taskId, taskType: 'requester'}

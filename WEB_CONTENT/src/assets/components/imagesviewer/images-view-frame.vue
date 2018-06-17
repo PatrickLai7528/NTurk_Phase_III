@@ -249,17 +249,6 @@
                 annotation[markingType].forEach((value, index, array) => {
                     drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
                 })
-                // };
-                // if (this.dialogVisible) {
-                //     doIt();
-                // } else {
-                //     id = setInterval(() => {
-                //         if (this.dialogVisible) {
-                //             doIt();
-                //             clearInterval(id);
-                //         }
-                //     }, 2000)
-                // }
             },
             read() {
                 this.dialogVisible = false;
@@ -443,7 +432,6 @@
             },
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
-                this.rating = 5;
                 this.canCommit();
             }
             ,

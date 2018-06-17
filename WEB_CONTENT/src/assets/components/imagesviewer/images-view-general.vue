@@ -22,21 +22,11 @@
                 <div v-if="taskType === 'grade'">
                     <div>
                         <img src="../../images/good.svg" width="300" height="100">
-                        <el-radio class="text" v-model="nowRating" label="1">我觉得可以</el-radio>
+                        <el-radio class="text" v-model="nowRating" :label="1" v-on:change="ratingChange">我觉得可以</el-radio>
                     </div>
                     <div class="next">
                         <img src="../../images/bad.svg" width="300" height="100">
-                        <el-radio class="text" v-model="nowRating" label="2">我觉得不行</el-radio>
-                    </div>
-                </div>
-                <div v-if="taskType === 'coverage'">
-                    <div>
-                        <img src="../../images/continued.svg" width="300" height="100">
-                        <el-radio class="text" v-model="nowRating" label="1">还有漏网之鱼</el-radio>
-                    </div>
-                    <div class="next">
-                        <img src="../../images/done.svg" width="300" height="100">
-                        <el-radio class="text" v-model="nowRating" label="2">已经一网打尽</el-radio>
+                        <el-radio class="text" v-model="nowRating" :label="0" v-on:change="ratingChange">我觉得不行</el-radio>
                     </div>
                 </div>
                 <el-button id="commit-button" :disabled=commitDisabled @click="commitRating" type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
@@ -100,28 +90,21 @@
                 _this.context = canvas.getContext('2d');
                 */
                 this.isRequester = UserUtils.isRequester(this);
+
+                if (this.isRequester === false) {
+                    _this.imgNames = _this.$store.getters.getImgNames.imgNames;
+                }
+                else {
+                    _this.imgNames = _this.$store.getters.getImgNames;    //是发起者的时候这里略微有点不一样
+                }
+
                 _this.imgNames = _this.$store.getters.getImgNames;
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
+                _this.taskDescription = _this.$store.getters.getTaskDescription;     //加载任务描述
+                console.log(_this.$store.getters.getTaskDescription);
                 _this.loadAnnotationList();
             })
-        },
-        watch:{
-            $route: function (to,from) {
-                if(to.name === 'viewgeneral'){
-                    this.taskId = this.$route.params.taskId;
-                    this.imgNames = this.$store.getters.getImgNames;
-                    this.taskDescription = this.$store.getters.getTaskDescription;
-                    this.nowIndex = 0;
-                    this.number = this.imgNames.length;
-                    this.percent = parseFloat(((this.nowIndex + 1) / this.number * 100).toFixed(1));
-                    this.ratings = [];
-                    this.nowRating = 0;
-                    this.annotation = {};
-                    this.annotationData = [];
-                    this.loadAnnotationList();
-                }
-            }
         },
         methods:{
             //像评分和提交的组件，如果当前登陆者是发起者，是不显示的
@@ -130,35 +113,31 @@
             },
             commitRating(){
                 //list里面的对象包含annotationId和rate
-                function Inspection(annotationId,rate){
+                function Verification(annotationId,rate){
                     this.annotationId = annotationId;
                     this.rate = rate;
                 }
 
-                let inspections = [];   //这是最后的数组，所有的评分结果放在这个数组里
+                let verifications = [];   //这是最后的数组，所有的评分结果放在这个数组里
                 for(let i = 0;i < this.ratings.length;i++){
-                    let nowInspection = new Inspection(this.annotationData[i].annotationId,this.ratings[i]);
-                    inspections.push(nowInspection);
+                    let nowInspection = new Verification(this.annotationData[i].annotationId,this.ratings[i]);
+                    verifications.push(nowInspection);
                 }
 
                 let _this = this;
 
-                let path = '';
-                if(_this.taskType === 'coverage'){
-                    path = 'http://localhost:8086/coverageVerification/saveVerifications';
-                }
-                else if(_this.taskType === 'grade'){
-                    path = 'http://localhost:8086/qualityVerification/saveVerifications';
-                }
-                else{
-                    console.log("error");
-                }
+                let path = 'http://localhost:8086/qualityVerification/saveVerifications';     //general只有一种path
+
+                let data = {
+                  verifications:verifications,
+                };
 
                 this.$http.post(path,
-                    JSON.stringify(inspections),
+                    JSON.stringify(data),
                     {headers: {'Content-Type': 'application/json',Authorization:this.$store.getters.getToken}}).then(function (response){
-                        let failedIds = response.data.failedIds;
-                        let forbidden = response.data.forbidden;
+                        let res = response.data;
+                        let failedIds = res.failedImgNames;
+                        let forbidden = res.forbidden;
 
                         if(forbidden === true) {   //如果被禁赛了，输出禁赛信息
                             _this.forbiddenMessage();
@@ -167,18 +146,15 @@
                             _this.wrongImg = failedIds[0];   //把第一条挑出来
                             let wrongIndex = _this.findIndexByImg(_this.wrongImg);    //去查找index
                             _this.wrongAnswerPairs = _this.translateRate(_this.ratings[wrongIndex]);
+                            _this.wrongAnnotation = _this.annotationData[wrongIndex];
 
                             _this.wrongImg = 'http://localhost:8086/image/' + _this.wrongImg;
-                            _this.showDialog();     //显示错误教程
-                        }
-                        else if(_this.canGoon()){          //判断还能不能继续做
-                            _this.showMessage();    //能继续做，鼓励继续
+                            _this.dialogVisible = true;
                         }
                         else{
-                            _this.$router.push({path: '/profile'});    //不能继续，返回任务中心
+                            _this.canGoon(_this.showMessage);
                         }
 
-                        _this.showMessage();
                 }).catch(function (error) {
                     console.log(error);
                 });
@@ -193,29 +169,28 @@
                 return -1;
             },
             translateRate(rate){    //返回一个二元组，第一个是错误的信息，第二个是正确的信息
-                if(this.taskType === 'grade'){
-                    if(rate === 0){
-                        return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
-                    }
-                    else{
-                        return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
-                    }
+                if(rate === 0){
+                    return ["这张图片的标注有问题，不能过关","这张图片的标注是正确的"];
                 }
-                else if(this.taskType === 'coverage'){
-                    if(rate === 0){
-                        return ["这张图片还有其他可以标注的","这张图片已经没有其他可供标注的"];
-                    }
-                    else{
-                        return ["这张图片已经没有其他可供标注的","这张图片还有其他可以标注的"];
-                    }
+                else{
+                    return ["这张图片的标注是正确的","这张图片的标注有问题，不能过关"];
                 }
             },
-            showDialog(){
-                this.wrongAnnotation = this.getWrongImgAnnotation(this.wrongImg);
-                this.dialogVisible = true;   //显示错误提示
-            },
-            canGoon(){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
-
+            canGoon(callback1){     //TODO： 通过taskId得到task，判断还能不能继续作评审工作  返回bool
+                let _this = this;
+                let route = 'http://localhost:8086/taskId/' + this.taskId;
+                this.$http.get(route, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
+                    let taskInfo = response.data;
+                    console.log(taskInfo.verifyQuality);     //在这里只有verifyQuality
+                    if (taskInfo.verifyQuality > 0) {
+                        callback1();
+                    }
+                    else {
+                        _this.$router.push({path: '/profile'});
+                    }
+                }).catch(function (error) {                 //理论上来说不会出现这种情况
+                    console.log(error);
+                });
             },
             forbiddenMessage(){
                 this.$alert('您因为在这个任务中评审正确率太低，已经被禁止参加这个任务的评审工作', '禁赛通知', {
@@ -238,21 +213,12 @@
                     type: 'warning'
                 }).then(() => {
                     let contractId = '';
-                    let path = '';
-                    if(_this.taskType === 'grade'){
-                        path = 'http://localhost:8086/qualityVerification/taskId/' + _this.taskId;  //评分的交互路径
-                    }
-                    else if(_this.taskType === 'coverage'){
-                        path = 'http://localhost:8086/coverageVerification/taskId/' + _this.taskId;   //完整性判断的交互路径
-                    }
-                    else{
-                        console.log("emmmm");
-                    }
+                    let path = 'http://localhost:8086/qualityVerification/taskId/' + _this.taskId;  //评分的交互路径
 
                     _this.$http.get(path, {headers: {Authorization: _this.$store.getters.getToken}}).then(function (response) {
                         let imgNames = response.data;
                         _this.$store.commit('changeImgNames',imgNames);
-                        _this.$router.push({name: 'viewgeneral',params:{taskId:_this.taskId,taskType:_this.taskType}});
+                        location.reload();    //重新加载
                     }).catch(function (error) {
                         _this.successMessage();
                         _this.$router.push({path: '/profile'});
@@ -274,26 +240,31 @@
             loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
                 let _this = this;
                 let whatfor = 3;
-                if(_this.taskType === 'coverage'){
-                    whatfor = 2;
-                }
-                else if(_this.taskType === 'grade'){
+
+                if(_this.isRequester === false){     //说明是工人进行操作
                     whatfor = 1;
                 }
 
-                for(let img of this.imgNames){
-                    let route = "http://localhost:8086/generalAnnotation/imgNames/" + img + "/whatFor/" + whatfor;
+                for(let i = 0;i < _this.imgNames.length;i++){
+                    let route = "http://localhost:8086/generalAnnotation/imgNames/" + _this.imgNames[i] + "/whatFor/" + whatfor;
                     this.$http.get(route,{headers:{Authorization: _this.$store.getters.getToken}}).then(function(response){
                         if(response.status === 204){
                             _this.annotation = {
-                                'imgName': img,
+                                'imgName': _this.imgNames[i],
                                 'answer': '',
                             };
-                            _this.annotationData.push(_this.annotation);
+                            _this.$set(_this.annotationData, i, _this.annotation);
                         }
                         else{
-                            _this.annotation = response.data;
-                            _this.annotationData.push(_this.annotation);
+                            let temp = response.data;
+
+                            _this.annotation = {
+                                'imgName': _this.imgNames[i],
+                                'answer': temp.answer,
+                                'annotationId': temp.annotationId,
+                            };
+
+                            _this.$set(_this.annotationData, i, _this.annotation);
                         }
 
                     }).catch(function (error) {
@@ -303,7 +274,7 @@
             },
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
-                this.nowRating = 0;
+                this.nowRating = 5;
                 this.commitDisabled = 'disabled';
             },
             ratingChange: function(score){
@@ -337,6 +308,7 @@
         font-size: 18px;
         line-height: 40px;
         margin: 30px;
+        padding-top: 80%;
     }
 
     .pic {
