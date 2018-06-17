@@ -15,6 +15,7 @@
 
 <script>
     import UserUtils from '../../js/utils/UserUtils.js'
+    import DateUtils from "~/assets/js/utils/DateUtils";
 
     export default {
         data() {
@@ -33,7 +34,15 @@
         },
         methods: {
             setHeatMap(){
-                let data = this.getVirtualData(2018);
+                let now = new Date();
+                let year = now.getFullYear();
+                let month = now.getMonth()+1;
+                let startDay1 = DateUtils.monthFirstDay(year, month, -11);
+                let endDay1 = DateUtils.monthLastDay(year, month, -6);
+                let startDay2 = DateUtils.monthFirstDay(year, month, -5);
+                let endDay2 = DateUtils.monthLastDay(year, month, 0);
+
+                let data = this.getVirtualData();
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById('heat'));
                 let option = {
@@ -60,7 +69,7 @@
                             {max: 100, color: '#DEDEDE'}
                         ],
                         orient: 'vertical',
-                        left: 'right',
+                        right: '50px',
                         top: 'middle',
                         textStyle: {
                             fontSize: 18
@@ -70,7 +79,7 @@
                     calendar: [
                         {
                             //range: ['2017-06-16', '2018-06-16'],
-                            range: ['2018-01-01', '2018-06-30'],
+                            range: [startDay1, endDay1],
                             cellSize: [25, 25],
                             splitLine: {
                                 show: false
@@ -83,7 +92,7 @@
                         {
                             //range: ['2017-06-16', '2018-06-16'],
                             top: 300,
-                            range: ['2018-07-01', '2018-12-31'],
+                            range: [startDay2, endDay2],
                             cellSize: [25, 25],
                             splitLine: {
                                 show: false
@@ -127,14 +136,17 @@
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
             },
-            getVirtualData(year) {
+            getVirtualData() {
                 let echarts = require('echarts');
-                year = year || '2017';
-                let date = +echarts.number.parseDate(year + '-01-01');
-                let end = +echarts.number.parseDate((+year + 1) + '-01-01');
+                let now = new Date();
+                let year = now.getFullYear();
+                let month = now.getMonth()+1;
+
+                let date = new Date(DateUtils.monthFirstDay(year, month, -11)).getTime();
+                let end = new Date(DateUtils.monthLastDay(year, month, 0)).getTime();
                 let dayTime = 3600 * 24 * 1000;
                 let data = [];
-                for (let time = date; time < end; time += dayTime) {
+                for (let time = date; time <= end; time += dayTime) {
                     data.push([
                         echarts.format.formatTime('yyyy-MM-dd', time),
                         Math.floor(Math.random() * 1000)
@@ -142,10 +154,42 @@
                 }
                 return data;
             },
+            addDateAndValue(dateList, valueList){
+                let interval = 3600 * 24 * 1000;
+                let firstDay = new Date(dateList[0]).getTime();
+                let theDayBefore = firstDay - interval;
+
+                let saveDate = dateList;
+
+                for(let i=0;i<saveDate.length;i++){
+                    let index = i;
+                    let stamp_i = new Date(saveDate[i]).getTime();
+                    if(stamp_i-theDayBefore>interval){
+                        let currentDay = theDayBefore + interval;
+                        while(currentDay < stamp_i){
+                            dateList.splice(index, 0, this.getLocalTime(currentDay));
+                            valueList.splice(index, 0, 0);
+                            theDayBefore = currentDay;
+                            currentDay = currentDay + interval;
+                            index++;
+                        }
+                    }
+                    theDayBefore = stamp_i;
+                }
+            },
+            //时间戳转时间字符串
+            getLocalTime(timeStamp) {
+                let date = new Date(timeStamp);//毫秒
+                let year = date.getFullYear();
+                let month = date.getMonth() + 1;
+                month = month > 9 ? month : ("0" + month);
+                let day = date.getDate();
+                day = day > 9 ? day : ("0" + day);
+                return year + "-" + month + "-" + day;
+            },
             setLineGraph() {
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById('pointChart'));
-                let max = 0;
 
                 let data = [
                     {date: "2018-05-13", userPoint: 3, average: 5},
@@ -241,7 +285,7 @@
                 // }).catch(function (error) {
                 //     console.log(error);
                 // });
-            },
+            }
         }
     }
 </script>
