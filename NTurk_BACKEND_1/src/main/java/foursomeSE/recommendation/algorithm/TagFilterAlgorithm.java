@@ -32,8 +32,11 @@ public class TagFilterAlgorithm {
      * 参考《推荐系统实践》P106～110，并有所改动
      *
      * */
-    public static Map<Integer, Double> Recommendation(int userID){
-        generate(userID);
+    public static Map<Integer, Double> Recommendation(ArrayList<Task> tasks, ArrayList<Record> records, User worker){
+        user = worker;
+        taskList = tasks;
+        recordList = records;
+        generate(0);
 
         // 一些经常用到的数据，所以提出来，看起来方便一点
         // Rank中的某一项，是<任务ID，用户对这个任务的兴趣>
@@ -43,7 +46,7 @@ public class TagFilterAlgorithm {
 
         // 通过遍历任务记录，找出用户参与过的所有任务，并存储在tasksJoined中
         for(Record record: recordList){
-            if(userID==record.userID){
+            if(user.ID==record.userID){
                 tasksJoined.add(record.taskID);
             }
         }
