@@ -437,6 +437,7 @@
             },
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
+                this.rating = 5;
                 this.canCommit();
             }
             ,
@@ -518,7 +519,7 @@
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
                 this.loadWhenChange(newIndex);
-                this.nowRating = 0;
+                this.nowRating = 5;
                 this.commitDisabled = 'disabled';
             },
             loadWhenChange(newIndex) {

@@ -447,6 +447,7 @@
             ratingChange: function (score) {
                 this.ratings[this.nowIndex] = score;
                 console.log(this.ratings);
+                this.rating = 5;
                 this.canCommit();
             },
             loadAnnotationList(callback) {            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
@@ -525,7 +526,7 @@
             },
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
-                this.nowRating = 0;
+                this.nowRating = 5;
                 this.commitDisabled = 'disabled';
                 this.loadWhenChange(newIndex);
             },
