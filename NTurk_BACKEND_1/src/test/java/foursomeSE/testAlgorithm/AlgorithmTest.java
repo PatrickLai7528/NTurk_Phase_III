@@ -3,6 +3,7 @@ package foursomeSE.testAlgorithm;
 import foursomeSE.recommendation.Recommend;
 import foursomeSE.recommendation.algorithm.ItemCFAlgorithm;
 import foursomeSE.recommendation.algorithm.TagFilterAlgorithm;
+import foursomeSE.recommendation.datastructure.User;
 import foursomeSE.recommendation.tools.WilsonScore;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class AlgorithmTest {
 
     @Test
     public void Fusion() {
-        ArrayList<Integer> result = Recommend.getResult(0);
+        ArrayList<Integer> result = Recommend.getResult(new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new User(0, new ArrayList<>()));
         System.out.println("Final Result："+result);
         assertEquals(10, (int)result.get(0));
     }

@@ -14,7 +14,7 @@ import static foursomeSE.util.ConvenientFunctions.setSameFields;
 @Entity
 @Table(name = "frame_annotations")
 public class FrameAnnotation extends Annotation {
-//        @Basic
+    //        @Basic
 //    @Column(length = 100000)
     @Transient
     private ArrayList<Frame> frames;
@@ -54,14 +54,23 @@ public class FrameAnnotation extends Annotation {
     }
 
     @Override
-    public void setCore(ArrayList<Object> list) {
+    public void setCore(Object core) {
+        if (core != null && !(core instanceof Frame)) {
+            // null是允许的，然后null instance of永远是错的
+            throw new InvalidParameterException("wrong type for frame");
+        }
+
+        frame = (Frame) core;
+    }
+
+    @Override
+    public void setCores(ArrayList<Object> list) { // 这个list倒是不能是null
         // 但是有可能后面的不是，所以这么测也没什么用
         if (list.isEmpty() || list.get(0) instanceof Frame) {
-            frames = list.stream().map(i -> (Frame)i)
+            frames = list.stream().map(i -> (Frame) i)
                     .collect(Collectors.toCollection(ArrayList::new));
         } else {
             throw new InvalidParameterException("wrong type for frame");
         }
-
     }
 }

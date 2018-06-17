@@ -24,6 +24,12 @@ public interface VerificationJPA extends CrudRepository<Verification, Long> {
     List<Verification> findBetween(long taskId, int vTypeOrd, LocalDateTime floor, LocalDateTime roof);
 
     List<Verification> findByAnnotationIdAndVerificationType(long annotationId, VerificationType verificationType);
+
+    @Query(value = "SELECT count(*)\n" +
+            "FROM verification\n" +
+            "WHERE username = ?1 AND create_time > ?2 AND create_time < ?3",
+            nativeQuery = true)
+    long countUserDidBetween(String username, LocalDateTime floor, LocalDateTime roof);
 }
 
 

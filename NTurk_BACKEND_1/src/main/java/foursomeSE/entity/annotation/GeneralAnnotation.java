@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,4 +34,13 @@ public class GeneralAnnotation extends Annotation {
     }
 
     // 那两个core应该就不用管了，反正也是什么也没干。
+
+
+    @Override
+    public void setCore(Object core) {
+        if (core != null && !(core instanceof String)) {
+            throw new InvalidParameterException();
+        }
+        answer = (String) core;
+    }
 }

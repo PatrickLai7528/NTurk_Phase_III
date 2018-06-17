@@ -363,14 +363,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
     @Override
     public List<Heat> heatChart(String username) {
-        Worker worker = userByUsername(workerJPA, username);
+        List<Heat> result = new ArrayList<>();
 
+        Worker worker = userByUsername(workerJPA, username);
         for (LocalDate date = worker.getCreateTime().toLocalDate();
              date.isBefore(LocalDate.now());
              date = date.plusDays(1)) {
 
             Heat heat = new Heat();
-
             heat.date = date;
 
             long ac = annotationJPA.countUserDidBetween(
@@ -379,9 +379,17 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
                     LocalDateTime.of(date, LocalTime.MIN)
             );
 
+            long vc = verificationJPA.countUserDidBetween(
+                    username,
+                    LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
+                    LocalDateTime.of(date, LocalTime.MIN)
+            );
+            heat.activity = (int)(ac + vc);
+
+            result.add(heat);
         }
 
-        return null;
+        return result;
     }
 
     /**

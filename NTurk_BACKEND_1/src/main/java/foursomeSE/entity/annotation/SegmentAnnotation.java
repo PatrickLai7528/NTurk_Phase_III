@@ -4,6 +4,7 @@ import foursomeSE.entity.Segment;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +46,15 @@ public class SegmentAnnotation extends Annotation {
     }
 
     @Override
-    public void setCore(ArrayList<Object> list) {
+    public void setCore(Object core) {
+        if (core != null && !(core instanceof Segment)) {
+            throw new InvalidParameterException();
+        }
+        segment = (Segment) core;
+    }
+
+    @Override
+    public void setCores(ArrayList<Object> list) {
         segments = list.stream().map(x -> (Segment) x)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
