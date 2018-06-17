@@ -101,6 +101,8 @@
                 _this.imgNames = _this.$store.getters.getImgNames;
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
+                _this.taskDescription = _this.$store.getters.getTaskDescription;     //加载任务描述
+                console.log(_this.$store.getters.getTaskDescription);
                 _this.loadAnnotationList();
             })
         },
@@ -306,6 +308,7 @@
         font-size: 18px;
         line-height: 40px;
         margin: 30px;
+        padding-top: 80%;
     }
 
     .pic {

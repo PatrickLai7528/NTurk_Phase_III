@@ -49,12 +49,6 @@
                             <template slot = "title" >
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
-                            <div >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                                <el-tag size = "small" type = "info" >小型标签</el-tag >
-                            </div >
                         </el-collapse-item >
                         <el-collapse-item >
                             <template slot = "title" >
@@ -164,6 +158,7 @@
                 taskDescription: "",
                 imgNames: this.$store.getters.getImgNames,
                 tagsForAnnotation: this.$store.getters.getTagsForAnnotation,
+                tagsOfTask: [],
             }
         },
         computed: {
@@ -193,6 +188,7 @@
                 this.imgNames = this.$store.getters.getImgNames.imgNames;     //给imgNames赋值
                 this.tagsForAnnotation = this.$store.getters.getTagsForAnnotation;
                 this.taskDescription = this.$store.getters.getTaskDescription;      //对于general来说，taskDescription尤其重要
+                //this.tagsOfTask = this.$store.getters.getTagsOfTask;  TODO: 等待后端加上tags
                 console.log(this.tagsForAnnotation);
                 this.getImgNames();
                 this.setCountDown();
