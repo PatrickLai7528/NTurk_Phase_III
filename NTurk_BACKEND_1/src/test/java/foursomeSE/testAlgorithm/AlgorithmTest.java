@@ -48,9 +48,8 @@ public class AlgorithmTest {
 
     @Test
     public void Wilson() {
-        double score = WilsonScore.getScore(99, 100);
+        double score = WilsonScore.getScore(15, 15);
         System.out.println("Final Result：" + score);
-        assertEquals(0.9440, score, 0.01);
     }
 //    private void readJson(int i){
 //        JsonParser parser=new JsonParser();
