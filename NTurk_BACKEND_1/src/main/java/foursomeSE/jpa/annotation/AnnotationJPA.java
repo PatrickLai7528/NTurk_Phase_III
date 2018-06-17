@@ -107,6 +107,26 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             nativeQuery = true)
     long countFail();
 
+    @Query(value = "SELECT count(*)\n" +
+            "FROM annotation\n" +
+            "WHERE username = ?1 AND annotation_status = 1\n" +
+            "      AND create_time > ?2 AND create_time < ?3",
+            nativeQuery = true)
+    long countUserPassBetween(String username, LocalDateTime floor, LocalDateTime roof);
+
+    @Query(value = "SELECT count(*)\n" +
+            "FROM annotation\n" +
+            "WHERE username = ?1 AND annotation_status = 2\n" +
+            "      AND create_time > ?2 AND create_time < ?3",
+            nativeQuery = true)
+    long countUserFailBetween(String username, LocalDateTime floor, LocalDateTime roof);
+
+    @Query(value = "SELECT count(*)\n" +
+            "FROM annotation\n" +
+            "WHERE username = ?1 AND create_time > ?2 AND create_time < ?3",
+            nativeQuery = true)
+    long countUserDidBetween(String username, LocalDateTime floor, LocalDateTime root);
+
     @Query(value = "SELECT\n" +
             "  annotation_id\n" +
             "FROM (\n" +
@@ -241,5 +261,17 @@ FROM annotation
 WHERE microtask_id IN (SELECT microtasks.microtask_id
                        FROM microtasks
                        WHERE task_id = ? 1)
+      AND create_time > ?2 AND create_time < ?3
+
+// countUserPassBetween
+SELECT count(*)
+FROM annotation
+WHERE username = ?1 AND annotation_status = 1
+      AND create_time > ?2 AND create_time < ?3
+
+// countUserFailBetween
+SELECT count(*)
+FROM annotation
+WHERE username = ?1 AND annotation_status = 2
       AND create_time > ?2 AND create_time < ?3
  */

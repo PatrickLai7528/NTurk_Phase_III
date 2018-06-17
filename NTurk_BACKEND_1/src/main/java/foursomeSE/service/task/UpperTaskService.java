@@ -77,6 +77,8 @@ public interface UpperTaskService {
 
     Accuracy accuraccyChart(String username);
 
+    List<Heat> heatChart(String username);
+
 
     /**
      * old statistics

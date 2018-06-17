@@ -122,14 +122,23 @@ public class TaskController {
         return new ResponseEntity<Object>(ph, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "userProfile/requester/charts/",
+    @RequestMapping(value = "/userProfile/requester/charts/",
             method = RequestMethod.POST)
-    public ResponseEntity<?> CommitChart(@RequestHeader("Authorization") String token,
+    public ResponseEntity<?> commitChart(@RequestHeader("Authorization") String token,
                                          @RequestBody int taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         List<CommitItem> cis = taskService.commitChart(taskId, username);
         return new ResponseEntity<Object>(cis, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/userProfile/worker/charts/point",
+    method = RequestMethod.POST)
+    public ResponseEntity<?> accuracyChart(@RequestHeader("Authorization") String token) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        Accuracy accuracy = taskService.accuraccyChart(username);
+        return new ResponseEntity<Object>(accuracy, HttpStatus.OK);
     }
 
 
