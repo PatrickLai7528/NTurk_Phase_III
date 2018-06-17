@@ -148,7 +148,11 @@ public class ItemCFAlgorithm {
      * 于是，用户u对某个任务j的兴趣：Puj = sigma(Wij * Rui)，其中：i belongs to N(u) ; j belongs to S(i, K)
      * 最后把rank处理一下，就是返回的推荐列表
      * */
-    public static Map<Integer, Double> Recommendation(int userID){
+    public static Map<Integer, Double> Recommendation(ArrayList<User> users, ArrayList<Task> tasks, ArrayList<Record> records, User worker){
+        userList = users;
+        taskList = tasks;
+        recordList = records;
+        int userID = worker.ID;
         generate();
 
         // 一些经常用到的数据，所以提出来，看起来方便一点

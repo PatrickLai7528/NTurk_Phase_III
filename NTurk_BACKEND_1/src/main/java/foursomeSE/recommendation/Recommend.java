@@ -2,6 +2,9 @@ package foursomeSE.recommendation;
 
 import foursomeSE.recommendation.algorithm.ItemCFAlgorithm;
 import foursomeSE.recommendation.algorithm.TagFilterAlgorithm;
+import foursomeSE.recommendation.datastructure.Record;
+import foursomeSE.recommendation.datastructure.Task;
+import foursomeSE.recommendation.datastructure.User;
 import foursomeSE.recommendation.tools.Sort;
 
 import java.util.ArrayList;
@@ -23,14 +26,14 @@ public class Recommend {
      * 参看刘沛文、陈华峰教授的论文
      * http://www.shcas.net/jsjyup/pdf/2017/4/基于用户行为特征的动态权重混合推荐算法.pdf
      * */
-    public static ArrayList<Integer> getResult(int userID){
+    public static ArrayList<Integer> getResult(ArrayList<User> users, ArrayList<Task> tasks, ArrayList<Record> records, User worker){
         double lambda = 4;
         double Tr = 3;
         double I = 15;
         double dWeight = Math.min(lambda*Tr/I, 1);
 
-        Map<Integer, Double> itemCFList = ItemCFAlgorithm.Recommendation(userID);
-        Map<Integer, Double> tagFilterList = TagFilterAlgorithm.Recommendation(userID);
+        Map<Integer, Double> itemCFList = ItemCFAlgorithm.Recommendation(users, tasks, records, worker);
+        Map<Integer, Double> tagFilterList = TagFilterAlgorithm.Recommendation(tasks, records, worker);
         Map<Integer, Double> recommendList = new HashMap<>();
 
         for (Map.Entry<Integer, Double> data : itemCFList.entrySet()) {
