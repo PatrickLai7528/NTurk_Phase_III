@@ -11,10 +11,15 @@
                                     <span class = "tableSlotSpan" >{{props.row.requesterName}}</span >
                                 </el-form-item >
                             </el-col >
-                            <el-col :span = "12" >
+                            <el-col :span = "8" >
                                 <el-form-item label = "任务描述" >
                                     <span class = "tableSlotSpan" >{{ props.row.taskDescription }}</span >
                                 </el-form-item >
+                            </el-col >
+                            <el-col :span = "6" >
+                                <el-form-item label = '任务标签'>
+                                    <el-tag v-for="tag in props.row.taskTags">{{tag}}</el-tag>
+                                </el-form-item>
                             </el-col >
                         </el-row >
                     </el-form >

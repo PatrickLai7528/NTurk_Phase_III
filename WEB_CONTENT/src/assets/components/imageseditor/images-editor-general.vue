@@ -49,6 +49,10 @@
                             <template slot = "title" >
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
+                            <div >
+                                <el-tag size = "small" type = "success"
+                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
+                            </div >
                         </el-collapse-item >
                         <el-collapse-item >
                             <template slot = "title" >

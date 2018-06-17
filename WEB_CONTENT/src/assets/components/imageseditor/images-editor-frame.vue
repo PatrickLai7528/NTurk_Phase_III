@@ -52,7 +52,7 @@
                             </template >
                             <div >
                                 <el-tag size = "small" type = "success"
-                                        v-for = "item in tagsOfTask" >{{item['name']}}</el-tag >
+                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
