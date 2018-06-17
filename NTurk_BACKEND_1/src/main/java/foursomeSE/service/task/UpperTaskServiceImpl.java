@@ -221,8 +221,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         Task task = taskById(taskJPA, taskId);
 
 
-        for (LocalDate date = task.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now().plusDays(1));
+        for (LocalDate date = task.getCreateTime().toLocalDate().plusDays(1);
+             date.isBefore(LocalDate.now().plusDays(2));
              date = date.plusDays(1)) {
 
             PHItem phItem = new PHItem();
@@ -289,8 +289,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         List<CommitItem> result = new ArrayList<>();
         Task task = taskById(taskJPA, taskId);
 
-        for (LocalDate date = task.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now().plusDays(1));
+        for (LocalDate date = task.getCreateTime().toLocalDate().plusDays(1);
+             date.isBefore(LocalDate.now().plusDays(2));
              date = date.plusDays(1)) {
 
             CommitItem ci = new CommitItem();
@@ -336,8 +336,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
         Worker worker = userByUsername(workerJPA, username);
         double currentAccuracy = 0;
-        for (LocalDate date = worker.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now().plusDays(1));
+        for (LocalDate date = worker.getCreateTime().toLocalDate().plusDays(1);
+             date.isBefore(LocalDate.now().plusDays(2));
              date = date.plusDays(1)) {
 
             AccuracyItem ai = new AccuracyItem();
@@ -373,8 +373,8 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         List<Heat> result = new ArrayList<>();
 
         Worker worker = userByUsername(workerJPA, username);
-        for (LocalDate date = worker.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now().plusDays(1));
+        for (LocalDate date = worker.getCreateTime().toLocalDate().plusDays(1);
+             date.isBefore(LocalDate.now().plusDays(2));
              date = date.plusDays(1)) {
 
             Heat heat = new Heat();

@@ -96,7 +96,7 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
                 t.setCore(null);
             }
         } else if (t.getAnnotationStatus() == AnnotationStatus.PASSED) {
-            if (!isTrap(imgName, username)) {
+            if (!isTrap(imgName, username) && !(t instanceof GeneralAnnotation)) {
                 cores.add(t.core());
                 t.setCore(null);
             }

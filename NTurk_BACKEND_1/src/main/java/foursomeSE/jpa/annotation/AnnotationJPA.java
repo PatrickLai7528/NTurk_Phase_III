@@ -85,7 +85,7 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             "      AND NOT exists(SELECT *\n" +
             "                     FROM annotation a2\n" +
             "                     WHERE a2.create_time < ?2\n" +
-            "                           AND a1.microtask_id = ?1\n" +
+            "                           AND a2.microtask_id = ?1\n" +
             "                           AND a2.create_time > a1.create_time)",
             nativeQuery = true)
     Object[] findLatestBefore(long microtaskId, LocalDateTime localDateTime);
@@ -271,7 +271,7 @@ WHERE create_time < ?2
       AND NOT exists(SELECT *
                      FROM annotation a2
                      WHERE a2.create_time < ?2
-                           AND a1.microtask_id = ?1
+                           AND a2.microtask_id = ?1
                            AND a2.create_time > a1.create_time)
 
 // findAidsBetween
