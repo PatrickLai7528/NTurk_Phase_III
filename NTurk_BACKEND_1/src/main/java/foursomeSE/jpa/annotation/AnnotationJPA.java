@@ -85,7 +85,7 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             "      AND NOT exists(SELECT *\n" +
             "                     FROM annotation a2\n" +
             "                     WHERE a2.create_time < ?2\n" +
-            "                           AND a1.microtask_id = ?1\n" +
+            "                           AND a2.microtask_id = ?1\n" +
             "                           AND a2.create_time > a1.create_time)",
             nativeQuery = true)
     Object[] findLatestBefore(long microtaskId, LocalDateTime localDateTime);
@@ -94,7 +94,7 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             "FROM annotation\n" +
             "WHERE microtask_id IN (SELECT microtasks.microtask_id\n" +
             "                       FROM microtasks\n" +
-            "                       WHERE task_id = ? 1)\n" +
+            "                       WHERE task_id = ?1)\n" +
             "      AND create_time > ?2 AND create_time < ?3",
             nativeQuery = true)
     List<BigInteger> findAidsBetween(long taskId, LocalDateTime floor, LocalDateTime roof);
@@ -271,7 +271,7 @@ WHERE create_time < ?2
       AND NOT exists(SELECT *
                      FROM annotation a2
                      WHERE a2.create_time < ?2
-                           AND a1.microtask_id = ?1
+                           AND a2.microtask_id = ?1
                            AND a2.create_time > a1.create_time)
 
 // findAidsBetween
@@ -279,7 +279,7 @@ SELECT annotation_id
 FROM annotation
 WHERE microtask_id IN (SELECT microtasks.microtask_id
                        FROM microtasks
-                       WHERE task_id = ? 1)
+                       WHERE task_id = ?1)
       AND create_time > ?2 AND create_time < ?3
 
 // countUserPassBetween
