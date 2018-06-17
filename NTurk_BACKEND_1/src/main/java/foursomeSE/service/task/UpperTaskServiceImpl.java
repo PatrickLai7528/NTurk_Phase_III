@@ -295,18 +295,18 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
             CommitItem ci = new CommitItem();
             ci.date = date;
-            ci.DCommit = annotationJPA.findAidsBetween(
+            ci.draw = annotationJPA.findAidsBetween(
                     taskId,
                     LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
                     LocalDateTime.of(date, LocalTime.MIN)
             ).size();
-            ci.QVCommit = verificationJPA.findBetween(
+            ci.quality = verificationJPA.findBetween(
                     taskId,
                     VerificationType.QUALITY.ordinal(),
                     LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
                     LocalDateTime.of(date, LocalTime.MIN)
             ).size();
-            ci.CVCommit = verificationJPA.findBetween(
+            ci.coverage = verificationJPA.findBetween(
                     taskId,
                     VerificationType.COVERAGE.ordinal(),
                     LocalDateTime.of(date.minusDays(1), LocalTime.MIN),

@@ -5,6 +5,8 @@ import foursomeSE.entity.Frame;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.RAnnotations;
 import foursomeSE.entity.communicate.EnterResponse;
+import foursomeSE.entity.statistics.Accuracy;
+import foursomeSE.entity.statistics.CommitItem;
 import foursomeSE.entity.statistics.PHItem;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.task.Microtask;
@@ -39,6 +41,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UnitTest4 extends WithTheAutowired implements MyConstants {
+    public static double DELTA = 0.000001;
+
     @Autowired
     private DBDataKeeper dbDataKeeper;
     @Autowired
@@ -153,12 +157,24 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         // 注意到draw的时候是都可以draw的。
 
 
-        List<PHItem> phItems = taskService.PHChart(tid, ""); // usage没用到
+        List<PHItem> phItems = taskService.PHChart(tid, ""); // username没用到
         assertEquals(1, phItems.size());
         PHItem phItem = phItems.get(0);
         assertEquals(24, phItem.ongoing);
         assertEquals(14, phItem.underReview);
         assertEquals(2, phItem.finished);
+
+        List<CommitItem> commitItems = taskService.commitChart(tid, ""); // username没用到
+        assertEquals(1, commitItems.size());
+        CommitItem commitItem = commitItems.get(0);
+        assertEquals(20, commitItem.draw);
+        assertEquals(30, commitItem.quality);
+        assertEquals(15, commitItem.coverage);
+
+        Accuracy accuracy = taskService.accuraccyChart("worker2@ex.com");
+        assertEquals(1, accuracy.items.size());
+        assertEquals(0.95, accuracy.average, DELTA);
+        assertEquals(0.8, accuracy.items.get(0).point, DELTA);
 
 
 
