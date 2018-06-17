@@ -114,7 +114,7 @@
 				this.$http(argu)
 					.then(this.doWhileLogInSuccess)
 					.catch((error) => {
-						this.showMsg("行号或密码错误");
+						this.showMsg("帐号或密码错误");
 						//console.log(error);
 					})
 			},
