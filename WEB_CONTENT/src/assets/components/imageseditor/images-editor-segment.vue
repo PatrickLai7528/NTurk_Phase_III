@@ -216,7 +216,7 @@
                 viewer = new AnnotationViewer(new SegmentDrawingStrategy(), viewer,
                     'http://localhost:8086/segmentAnnotation/imgName/', this.$http);
                 this.viewer = new AnnotationEditor(viewer, header,
-                    'http://localhost:8086/segmentAnnotation/saveAnnotations/', this.$http);
+                    'http://localhost:8086/segmentAnnotation/saveAnnotations/', this.$http, 0);
                 this.viewer.drawCurrent(header, () => {
                     this.viewer.setTagUpdateCallback(this.updateTagHtml);
                     this.viewer.setTagTextUpdateCallback(this.updateTagText);

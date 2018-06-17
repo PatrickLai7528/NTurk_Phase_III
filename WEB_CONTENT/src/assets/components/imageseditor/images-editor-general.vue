@@ -220,7 +220,7 @@
                 viewer = new AnnotationViewer(this.answerPairsDrawingStrategy, viewer,
                     'http://localhost:8086/generalAnnotation/imgName/', this.$http);
                 this.viewer = new AnnotationEditor(viewer, header,
-                    'http://localhost:8086/generalAnnotation/saveAnnotations/', this.$http);
+                    'http://localhost:8086/generalAnnotation/saveAnnotations/', this.$http,0);
                 this.viewer.drawCurrent(header, () => {
                     this.viewer.setTagUpdateCallback(this.updateTagHtml);
                     this.viewer.setTagTextUpdateCallback(this.updateTagText);

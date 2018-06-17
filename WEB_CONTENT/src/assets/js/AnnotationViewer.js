@@ -70,7 +70,7 @@ let privateMethods = {
         /* 檢查參數 */
         if ("function" !== typeof callback)
             throw new Error("loadCurrentAnnotation in AnnotationViewer: callback = " + callback + "is not a function");
-        url = `${privateVariables.baseUrl + privateVariables.viewer.shareCurrentImageName()}`;
+        url = `${privateVariables.baseUrl + privateVariables.viewer.shareCurrentImageName()}/whatFor/${privateVariables.whatFor}`;
         header = privateVariables.header;
         privateVariables.isLastAnnotationLoading = true; // 標記位, 開始加載
         privateVariables.http.get(url, header)
@@ -155,7 +155,7 @@ class AnnotationViewer {
      * @param id can be string or number
      * @param http has to have a method call "get"
      */
-    constructor(markingDrawingStrategy, imageViewer, baseUrl, http) {
+    constructor(markingDrawingStrategy, imageViewer, baseUrl, http, whatFor) {
         /* 檢查參數 */
         if (typeof baseUrl !== "string")
             throw new Error("AnnotationViewer's constructor viewer expected a baseUrl of string, but got a " + typeof baseUrl);
@@ -180,6 +180,7 @@ class AnnotationViewer {
         privateVariables.http = http;
         privateVariables.tagHtml = "";
         privateVariables.markingDrawingStrategy = markingDrawingStrategy;
+        privateVariables.whatFor = whatFor;
     }
 
     /**
