@@ -311,16 +311,6 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
         }
     }
 
-//    protected void checkAndFindGold(VerificationType verificationType) {
-//        if (task.getIsCollecting() == 1) {
-//            List<Microtask> samples = microtaskJPA.getSampling(task.getTaskId());
-//            // 如果所有sample都完成了，选gold
-//            if (samples.stream().allMatch(s -> s.getMicrotaskStatus() == MicrotaskStatus.PASSED)) {
-//                findGoldForFS(samples, verificationType);
-//            }
-//        }
-//    }
-
     protected boolean needToFindGold() {
         if (task.getIsCollecting() == 0) {
             return false;

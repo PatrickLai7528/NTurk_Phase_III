@@ -215,7 +215,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
 
         for (LocalDate date = task.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now());
+             date.isBefore(LocalDate.now().plusDays(1));
              date = date.plusDays(1)) {
 
             PHItem phItem = new PHItem();
@@ -283,7 +283,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         Task task = taskById(taskJPA, taskId);
 
         for (LocalDate date = task.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now());
+             date.isBefore(LocalDate.now().plusDays(1));
              date = date.plusDays(1)) {
 
             CommitItem ci = new CommitItem();
@@ -330,7 +330,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         Worker worker = userByUsername(workerJPA, username);
         double currentAccuracy = 0;
         for (LocalDate date = worker.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now());
+             date.isBefore(LocalDate.now().plusDays(1));
              date = date.plusDays(1)) {
 
             AccuracyItem ai = new AccuracyItem();
@@ -367,7 +367,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 
         Worker worker = userByUsername(workerJPA, username);
         for (LocalDate date = worker.getCreateTime().toLocalDate();
-             date.isBefore(LocalDate.now());
+             date.isBefore(LocalDate.now().plusDays(1));
              date = date.plusDays(1)) {
 
             Heat heat = new Heat();
@@ -577,22 +577,4 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
 //            return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);
 //        }
     }
-
-
-//    private CTaskForInspection sToD2(Task task) {
-//        CTaskForInspection result = new CTaskForInspection(sToD(task));
-//        // 所有这个worker做过的关于这个task的inspection
-//        int alreadyDone = (int) inspectionContractJPA.countByWorkerUsernameAndTaskId(username, task.getTaskId());
-//        if (alreadyDone >= MANDATORY_TIME) {
-//            result.setMandatoryTime(0);
-//        } else { // 还要要求mandatoryTime不能大于目前他还可以做的inpection数量。
-//            int maxCanDo = contractJPA.findByTaskIdForInspection(task.getTaskId(), userByUsername(workerJPA, username).getId()).size();
-//            result.setMandatoryTime(Math.min(MANDATORY_TIME - alreadyDone, maxCanDo));
-//        }
-//
-//        return result;
-//    }
-////    private List<Task> _getWorkerTasks(String username) {
-//
-//    }
 }

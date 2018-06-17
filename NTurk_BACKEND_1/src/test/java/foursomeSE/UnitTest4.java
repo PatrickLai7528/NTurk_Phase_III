@@ -173,8 +173,8 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         assertEquals(in(IntStream.of(1, 3, 4, 5, 6, 7, 8, 9, 10, 11)), cGoldStrs);
 
         FrameAnnotation fantt1 = frameAnnotationService.getByImgName("7.jpg", 1, "worker11@ex.com");
-        assertTrue(fantt1.getFrame() != null);
-        assertTrue(fantt1.getFrames().isEmpty());
+        assertTrue(fantt1.getFrame() == null);
+        assertEquals(0, fantt1.getFrames().size());
 
         FrameAnnotation fantt2 = frameAnnotationService.getByImgName("7.jpg", 2, "worker11@ex.com");
         assertTrue(fantt2.getFrames().isEmpty()); // 因为quality没过的就和没有存在过差不多。
@@ -430,7 +430,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
 
         frameAnnotationService.saveAnnotations(rats(IntStream.rangeClosed(1, 5)), "worker1@ex.com");
 
-        Thread.sleep(2000);
+        Thread.sleep(4000);
 
         Microtask mt = mtByImg(microtaskJPA, "1.jpg");
         Object[] oos = annotationJPA.findLatestBefore(mt.getMicrotaskId(), LocalDateTime.now());

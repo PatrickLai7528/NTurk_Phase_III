@@ -54,14 +54,12 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
     }
 
     @Override
-    public T getByImgName(String imgName, int whatFor, String  username) {
+    public T getByImgName(String imgName, int whatFor, String username) {
         Microtask mt = mtByImg(microtaskJPA, imgName);
         T t; // t是最新的那个antt / gold的那个antt
 
 
-        if (mt.getIsSample() == 1 // 如果是worker在看一个完成了的microtask，那么一定是gold。其实不需要看是不是isSample了。
-                && mt.getMicrotaskStatus() == MicrotaskStatus.PASSED
-                && workerJPA.findByEmailAddress(username).isPresent()) {
+        if (isTrap(imgName, username)) {
             VerificationType vType;
             if (whatFor == 1) {
                 vType = VerificationType.QUALITY;
@@ -98,8 +96,10 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
                 t.setCore(null);
             }
         } else if (t.getAnnotationStatus() == AnnotationStatus.PASSED) {
-            cores.add(t.core());
-            t.setCore(null);
+            if (!isTrap(imgName, username)) {
+                cores.add(t.core());
+                t.setCore(null);
+            }
         }
 
         t.setCores(cores);
@@ -143,6 +143,13 @@ public abstract class AbstractUpperAnnotationServiceImpl<T extends Annotation>
         } else {
             throw new MyNotValidException();
         }
+    }
+
+    private boolean isTrap(String imgName, String username) {
+        Microtask mt = mtByImg(microtaskJPA, imgName);
+        return mt.getIsSample() == 1 // 如果是worker在看一个完成了的microtask，那么一定是gold。其实不需要看是不是isSample了。
+                && mt.getMicrotaskStatus() == MicrotaskStatus.PASSED
+                && workerJPA.findByEmailAddress(username).isPresent();
     }
 
     // 写成这样实在是脑残了，

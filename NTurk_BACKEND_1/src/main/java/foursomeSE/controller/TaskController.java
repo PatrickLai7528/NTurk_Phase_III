@@ -141,7 +141,7 @@ public class TaskController {
         return new ResponseEntity<Object>(accuracy, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/userProfile/worker/charts/heat",
+    @RequestMapping(value = "/userProfile/worker/charts/active",
         method = RequestMethod.GET)
     public ResponseEntity<?> heatChart(@RequestHeader("Authorization") String token) {
         String username = JwtUtil.getUsernameFromToken(token);

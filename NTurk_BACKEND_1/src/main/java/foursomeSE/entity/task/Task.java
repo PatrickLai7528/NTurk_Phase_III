@@ -43,9 +43,8 @@ public class Task {
 
 //    @OneToMany(orphanRemoval = true)
 //    @JoinColumn(name = "task_id")
-    @Basic
-    @Column(length = 50000)
-    private ArrayList<Tag> taskTags = new ArrayList<>();
+    @Transient
+    private ArrayList<String> taskTagNames = new ArrayList<>();
 
     @Transient
     private ArrayList<String> imgNames;
@@ -58,10 +57,6 @@ public class Task {
 
     public Task() {
     }
-
-//    public Task(CTask cTask) {
-//        setSameFields(this, cTask);
-//    }
 
     public Task(Task task) {
         setSameFields(this, task);
@@ -82,12 +77,6 @@ public class Task {
         return (int) (taskId ^ (taskId >>> 32));
     }
 
-//    public double getRewardPerPerson() {
-//        if (rewardStrategy == RewardStrategy.INDIVIDUAL) {
-//            return totalReward / capacity;
-//        }
-//        throw new UnsupportedOperationException();
-//    }
 
     /**
      * getters and setters
@@ -205,11 +194,11 @@ public class Task {
         this.imgNames = imgNames;
     }
 
-    public ArrayList<Tag> getTaskTags() {
-        return taskTags;
+    public ArrayList<String> getTaskTagNames() {
+        return taskTagNames;
     }
 
-    public void setTaskTags(ArrayList<Tag> taskTags) {
-        this.taskTags = taskTags;
+    public void setTaskTagNames(ArrayList<String> taskTagNames) {
+        this.taskTagNames = taskTagNames;
     }
 }
