@@ -2,6 +2,7 @@ package foursomeSE.service.task;
 
 import foursomeSE.entity.communicate.report.Reports;
 import foursomeSE.entity.statistics.*;
+import foursomeSE.entity.tag.CTag;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.CTaskForInspection;
 import foursomeSE.entity.communicate.EnterResponse;
@@ -78,6 +79,10 @@ public interface UpperTaskService {
     Accuracy accuraccyChart(String username);
 
     List<Heat> heatChart(String username);
+
+    List<CTag> getSystemTags();
+
+    List<CTask> recommend(String username);
 
 
     /**

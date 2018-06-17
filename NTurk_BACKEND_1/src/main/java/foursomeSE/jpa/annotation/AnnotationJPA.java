@@ -147,6 +147,25 @@ public interface AnnotationJPA extends CrudRepository<Annotation, Long> {
             nativeQuery = true)
     List<BigInteger> getSample(long microtaskId, int verificationTypeOrd);
 
+    @Query(value = "SELECT count(*)\n" +
+            "FROM annotation\n" +
+            "WHERE microtask_id IN (SELECT microtask_id\n" +
+            "                       FROM microtasks\n" +
+            "                       WHERE task_id = ?1)\n" +
+            "      AND username = ?2\n" +
+            "      AND annotation_status = 1",
+            nativeQuery = true)
+    long countPassByTaskAndUser(long taskId, String username);
+
+    @Query(value = "SELECT count(*)\n" +
+            "FROM annotation\n" +
+            "WHERE microtask_id IN (SELECT microtask_id\n" +
+            "                       FROM microtasks\n" +
+            "                       WHERE task_id = ?1)\n" +
+            "      AND username = ?2\n" +
+            "      AND annotation_status = 2",
+            nativeQuery = true)
+    long countFailByTaskAndUser(long taskId, String username);
 }
 
 /*
@@ -274,4 +293,22 @@ SELECT count(*)
 FROM annotation
 WHERE username = ?1 AND annotation_status = 2
       AND create_time > ?2 AND create_time < ?3
+
+// countPassByTaskAndUser
+SELECT count(*)
+FROM annotation
+WHERE microtask_id IN (SELECT microtask_id
+                       FROM microtasks
+                       WHERE task_id = ?1)
+      AND username = ?2
+      AND annotation_status = 1
+
+// countFailByTaskAndUser
+SELECT count(*)
+FROM annotation
+WHERE microtask_id IN (SELECT microtask_id
+                       FROM microtasks
+                       WHERE task_id = ?1)
+      AND username = ?2
+      AND annotation_status = 2
  */

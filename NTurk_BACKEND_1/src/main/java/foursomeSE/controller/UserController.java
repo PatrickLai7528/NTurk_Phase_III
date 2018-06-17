@@ -106,6 +106,17 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 这一句不可能走到的
     }
 
+    @RequestMapping(value = "/myInfo/editTags",
+    method = RequestMethod.POST)
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<?> editTags(@RequestHeader("Authorization") String token,
+                                      @RequestBody List<String> tagNames) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        workerService.editTags(tagNames, username);
+        return new ResponseEntity<Object>(HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "/requester",
             method = RequestMethod.PUT)

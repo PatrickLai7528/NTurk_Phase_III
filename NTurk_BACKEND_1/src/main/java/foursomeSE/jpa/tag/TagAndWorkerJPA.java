@@ -14,6 +14,8 @@ public interface TagAndWorkerJPA extends CrudRepository<TagAndWorker, Long> {
             "WHERE username = ?1",
             nativeQuery = true)
     List<String> getWorkerTags(String username);
+
+    List<TagAndWorker> findByUsername(String username);
 }
 
 /*

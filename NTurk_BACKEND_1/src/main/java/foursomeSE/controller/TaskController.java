@@ -2,6 +2,7 @@ package foursomeSE.controller;
 
 import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.statistics.*;
+import foursomeSE.entity.tag.CTag;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.task.Task;
 import foursomeSE.error.MyErrorType;
@@ -142,7 +143,7 @@ public class TaskController {
     }
 
     @RequestMapping(value = "/userProfile/worker/charts/active",
-        method = RequestMethod.GET)
+            method = RequestMethod.GET)
     public ResponseEntity<?> heatChart(@RequestHeader("Authorization") String token) {
         String username = JwtUtil.getUsernameFromToken(token);
 
@@ -150,6 +151,22 @@ public class TaskController {
         return new ResponseEntity<Object>(heatChart, HttpStatus.OK);
     }
 
+
+    @RequestMapping(value = "/systemTags",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getTags() {
+        List<CTag> result = taskService.getSystemTags();
+        return new ResponseEntity<Object>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/recommendTasks",
+    method = RequestMethod.GET)
+    public ResponseEntity<?> recommend(@RequestHeader("Authorization") String token) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        List<CTask> result = taskService.recommend(username);
+        return new ResponseEntity<Object>(result, HttpStatus.OK);
+    }
 
     /**
      * statistics

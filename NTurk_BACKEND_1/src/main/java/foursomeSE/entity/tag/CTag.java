@@ -7,13 +7,10 @@ import javax.validation.constraints.NotNull;
 
 // 感觉这个可能不需要了
 
-//@Entity
-//@Table(name = "tags")
+public class CTag {
+    public String value;
 
-public class Tag {
-//    @Id
-    public long id;
-
-//    @NotNull
-    public String name;
+    public CTag(String value) {
+        this.value = value;
+    }
 }

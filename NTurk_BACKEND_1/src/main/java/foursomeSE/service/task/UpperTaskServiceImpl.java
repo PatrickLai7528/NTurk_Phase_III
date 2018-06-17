@@ -1,6 +1,7 @@
 package foursomeSE.service.task;
 
 import foursomeSE.entity.statistics.*;
+import foursomeSE.entity.tag.CTag;
 import foursomeSE.entity.tag.TagAndTask;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.communicate.EnterResponse;
@@ -14,11 +15,15 @@ import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.contract.ContractJPA;
 import foursomeSE.jpa.tag.TagAndTaskJPA;
+import foursomeSE.jpa.tag.TagAndWorkerJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
 import foursomeSE.jpa.user.RequesterJPA;
 import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
+import foursomeSE.recommendation.Recommend;
+import foursomeSE.recommendation.datastructure.Record;
+import foursomeSE.recommendation.datastructure.User;
 import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
 import foursomeSE.util.MyConstants;
@@ -51,13 +56,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     private GeneralAnnotationJPA generalAnnotationJPA;
     private VerificationJPA verificationJPA;
     private TagAndTaskJPA tagAndTaskJPA;
+    private TagAndWorkerJPA tagAndWorkerJPA;
 
     private MicrotaskJPA microtaskJPA;
     private LowerContractService lowerContractService;
 
     private String username;
 
-    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, AnnotationJPA annotationJPA, GeneralAnnotationJPA generalAnnotationJPA, VerificationJPA verificationJPA, TagAndTaskJPA tagAndTaskJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
+    public UpperTaskServiceImpl(WorkerJPA workerJPA, RequesterJPA requesterJPA, ContractJPA contractJPA, TaskJPA taskJPA, AnnotationJPA annotationJPA, GeneralAnnotationJPA generalAnnotationJPA, VerificationJPA verificationJPA, TagAndTaskJPA tagAndTaskJPA, TagAndWorkerJPA tagAndWorkerJPA, MicrotaskJPA microtaskJPA, LowerContractService lowerContractService) {
         this.workerJPA = workerJPA;
         this.requesterJPA = requesterJPA;
         this.contractJPA = contractJPA;
@@ -66,6 +72,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         this.generalAnnotationJPA = generalAnnotationJPA;
         this.verificationJPA = verificationJPA;
         this.tagAndTaskJPA = tagAndTaskJPA;
+        this.tagAndWorkerJPA = tagAndWorkerJPA;
         this.microtaskJPA = microtaskJPA;
         this.lowerContractService = lowerContractService;
     }
@@ -384,12 +391,73 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
                     LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
                     LocalDateTime.of(date, LocalTime.MIN)
             );
-            heat.activity = (int)(ac + vc);
+            heat.activity = (int) (ac + vc);
 
             result.add(heat);
         }
 
         return result;
+    }
+
+    @Override
+    public List<CTag> getSystemTags() {
+        ArrayList<String> tags1 = iterableToStream(tagAndTaskJPA.findAll())
+                .map(i -> i.tagName)
+                .collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> tags2 = iterableToStream(tagAndWorkerJPA.findAll())
+                .map(i -> i.tagName)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        tags1.addAll(tags2);
+
+        ArrayList<CTag> result = tags1.stream()
+                .distinct()
+                .map(CTag::new)
+                .collect(Collectors.toCollection(ArrayList::new));
+        return result;
+    }
+
+    @Override
+    public List<CTask> recommend(String username) {
+        Worker worker = userByUsername(workerJPA, username);
+
+        ArrayList<User> users = iterableToStream(workerJPA.findAll()).map(w -> {
+            return new User(
+                    (int) w.getId(),
+                    new ArrayList<>(tagAndWorkerJPA.getWorkerTags(w.getEmailAddress())));
+        }).collect(Collectors.toCollection(ArrayList::new));
+
+        ArrayList<foursomeSE.recommendation.datastructure.Task> tasks =
+                iterableToStream(taskJPA.findAll())
+                        .map(t -> {
+                            return new foursomeSE.recommendation.datastructure.Task(
+                                    (int) t.getTaskId(),
+                                    new ArrayList<>(tagAndTaskJPA.getTaskTags(t.getTaskId()))
+                            );
+                        }).collect(Collectors.toCollection(ArrayList::new));
+
+        ArrayList<Record> records = new ArrayList<>();
+        for (Worker w : workerJPA.findAll()) {
+            List<Task> wTs = taskJPA.getByUsername(w.getEmailAddress());
+            for (Task t : wTs) {
+                long countPass = annotationJPA.countPassByTaskAndUser(t.getTaskId(), w.getEmailAddress());
+                long countFail = annotationJPA.countFailByTaskAndUser(t.getTaskId(), w.getEmailAddress());
+                Record record = new Record((int)w.getId(), (int)t.getTaskId(), (int)countPass, (int)countFail);
+                records.add(record);
+            }
+        }
+
+        User user = new User(
+                (int)worker.getId(),
+                new ArrayList<>(tagAndWorkerJPA.getWorkerTags(username))
+        );
+
+        ArrayList<Integer> result = Recommend.getResult(users, tasks, records, user);
+
+
+        return result.stream().mapToLong(i -> (long) (i))
+                .mapToObj(this::getById)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**

@@ -24,45 +24,57 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
 //    List<Task> findByTaskStatusAndEndTimeBefore(TaskStatus taskStatus, LocalDateTime now);
 //    List<Task> findByTaskStatusAndDdlBefore(TaskStatus taskStatus, LocalDateTime now);
 
-    @Query(value = "select * from tasks\n" +
-            "where task_id in (\n" +
-            "    select task_id from microtasks\n" +
-            "    where microtask_id in (\n" +
-            "        select microtask_id from annotation\n" +
-            "        where annotation_id = ?1\n" +
+    @Query(value = "SELECT * FROM tasks\n" +
+            "WHERE task_id IN (\n" +
+            "    SELECT task_id FROM microtasks\n" +
+            "    WHERE microtask_id IN (\n" +
+            "        SELECT microtask_id FROM annotation\n" +
+            "        WHERE annotation_id = ?1\n" +
             "    )\n" +
             ")",
             nativeQuery = true)
     Task findByAnnotationId(long id);
 
 
-    @Query(value = "select * from tasks where task_status = ?1", nativeQuery = true)
+    @Query(value = "SELECT * FROM tasks WHERE task_status = ?1", nativeQuery = true)
     List<Task> findByTaskStatus(int taskStatus);
 
-
-    @Query(value =
-            "select * from tasks\n" +
-            "where task_status = 1 and task_id in (\n" +
-            "    select task_id from contracts\n" +
-            "    where contract_status = 0 and worker_id in (\n" +
-            "        select id from workers\n" +
-            "        where email_address = ?1\n" +
-            "    )\n" +
-            ")",
+    @Query(value = "SELECT *\n" +
+            "FROM tasks\n" +
+            "WHERE task_id IN (SELECT task_id\n" +
+            "                  FROM contracts\n" +
+            "                  WHERE worker_id IN (SELECT worker_id\n" +
+            "                                      FROM workers\n" +
+            "                                      WHERE email_address = ?1))",
             nativeQuery = true)
-    List<Task> findWorkerInspectionTasks(String username);
+    List<Task> getByUsername(String username);
+
+
+
+
+//    @Query(value =
+//            "select * from tasks\n" +
+//            "where task_status = 1 and task_id in (\n" +
+//            "    select task_id from contracts\n" +
+//            "    where contract_status = 0 and worker_id in (\n" +
+//            "        select id from workers\n" +
+//            "        where email_address = ?1\n" +
+//            "    )\n" +
+//            ")",
+//            nativeQuery = true)
+//    List<Task> findWorkerInspectionTasks(String username);
 
     /**
      * 这个主要是创建时用，先存，然后再根据createTime拿，这样才知道id，也只有创建时才知道createTime
      * 其他Entity类似情形下也可能采用这个方法
-     *
+     * <p>
      * 但是不知道为什么只能用craeteTime.minusNanos(1)这样调这个方法而不能直接判断相等
      * 呃，-1还有时不行？？
      * 呃，-1000还有时不行。。
-     * */
+     */
     Task findByCreateTimeAfter(LocalDateTime createTime);
 
-    @Query(value = "select * from hibernate_sequence", nativeQuery = true)
+    @Query(value = "SELECT * FROM hibernate_sequence", nativeQuery = true)
     List<BigInteger> temp();
 
     /**
@@ -100,4 +112,12 @@ where task_id in (
         where annotation_id = ?1
     )
 )
+
+SELECT *
+FROM tasks
+WHERE task_id IN (SELECT task_id
+                  FROM contracts
+                  WHERE worker_id IN (SELECT worker_id
+                                      FROM workers
+                                      WHERE email_address = ?1))
 */

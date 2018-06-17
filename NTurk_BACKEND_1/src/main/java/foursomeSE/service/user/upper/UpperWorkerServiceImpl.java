@@ -1,5 +1,6 @@
 package foursomeSE.service.user.upper;
 
+import foursomeSE.entity.tag.TagAndWorker;
 import foursomeSE.entity.task.Task;
 import foursomeSE.entity.communicate.ExchangeRequest;
 import foursomeSE.entity.communicate.SimpleCWorker;
@@ -114,6 +115,21 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
                 String.format("%.2f", exchangeRequest.getPoint()),
                 String.format("%.2f", exchangeRequest.getMoney())
         }));
+    }
+
+
+    @Override
+    public void editTags(List<String> tagNames, String username) {
+        List<TagAndWorker> taws = tagAndWorkerJPA.findByUsername(username);
+        tagAndWorkerJPA.deleteAll(taws);
+
+        for (String tn : tagNames) {
+            TagAndWorker taw = new TagAndWorker();
+            taw.tagName = tn;
+            taw.username = username;
+
+            tagAndWorkerJPA.save(taw);
+        }
     }
 
     /**
