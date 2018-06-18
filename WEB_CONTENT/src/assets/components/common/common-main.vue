@@ -67,6 +67,8 @@
         <el-dialog class = "tutorial" title = "教程" :visible.sync = "dialogTutorialVisible" :modal = "false"
                    top = "9vh" >
             <p >亲爱的用户，在您开始进行标注前，请您仔细阅读下面教程，可能会让你事半功倍呦：</p >
+            <p> 您只需要在一张图上面标注<strong>一个</strong>所需物品即可</p>
+            <p> 您有可能会在图片上看到<strong>已有的标注</strong>，不要惊讶，就把它们当作您标注的规范来进行标注</p>
             <p >首先您要了解什么是好的标注，接下来以<strong >画框标注</strong >为例：</p >
             <img src = "../../images/tutorial.png" height = "400" width = "600" >
             <p >对标注最大的要求首先是<strong >不偏不倚</strong >，根据任务的要求找到相应的物品，但是还远不止于此</p >
@@ -82,6 +84,7 @@
         <el-dialog class = "tutorial" title = "教程" :visible.sync = "dialogGradingVisible" :modal = "false" top = "9vh" >
             <p >亲爱的用户，您接下来要进行一项简单却事关重大的任务</p >
             <p >您仅仅需要判断其他用户的标注是否<strong >准确</strong ></p >
+            <p >图片上可能有<strong>不只一个</strong>标注，不要感觉无从下手，您只需要判断用<strong>红色</strong>标注的哪一个标注的正确性即可</p>
             <p >接下来是几张优秀的标注和不准确的标注图片，请您过目：</p >
             <img src = "../../images/tutorial.png" height = "400" width = "600" >
             <p >上图二的标注不够精细，<strong >没有紧紧贴合</strong >物体的轮廓，框出了一些物体之外的背景，是<strong >不能过关</strong >的标注</p >
@@ -287,6 +290,7 @@
                         _this.path = _this.routerDictionary[taskCategory];
                     }
                 }).catch(function (error) {
+                    _this.forbiddenMessage();
                     console.log(error);
                 })
             },
@@ -302,6 +306,13 @@
                     title: '系统提示',
                     message: '这个任务没有更多需要评审的标注了，换个任务试试吧^_^',
                     type: 'success'
+                });
+            },
+            forbiddenMessage(){
+                this.$notify({
+                    title: '系统警告',
+                    message: '由于您在这个任务中评审的正确率太低，已经被禁止参加这个任务的评审工作了',
+                    type: 'error'
                 });
             },
             messageHandler() {
