@@ -28,7 +28,7 @@
                     url: "http://localhost:8086/requesterTasks/taskChart",
                     method: "POST",
                     headers: {Authorization: this.$store.getters.getToken},
-                    data: this.taskId       // 注意这个data部分，这是发送的数据
+                    data: this.taskId
                 }).then((response)=>{
                     alert(response.data);
                     let data = [
@@ -122,6 +122,7 @@
                     // 使用刚指定的配置项和数据显示图表。
                     myChart.setOption(option);
                 }).catch((error)=> {
+                    alert(error);
                     console.log(error);
                 })
             }
