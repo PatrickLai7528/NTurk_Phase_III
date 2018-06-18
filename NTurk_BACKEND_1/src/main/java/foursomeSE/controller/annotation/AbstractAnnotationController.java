@@ -47,7 +47,7 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
         return new ResponseEntity<>(a, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/imgName/{imgName}/whatFor/",
+    @RequestMapping(value = "/imgName/{imgName}/whatFor/undefined",
             method = RequestMethod.GET)
     public ResponseEntity<?> getByImgName1(@RequestHeader("Authorization") String token,
                                           @PathVariable("imgName") String imgName) {
