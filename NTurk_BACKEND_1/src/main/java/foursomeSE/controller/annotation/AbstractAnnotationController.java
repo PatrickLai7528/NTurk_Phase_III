@@ -47,6 +47,19 @@ public abstract class AbstractAnnotationController<T extends Annotation> {
         return new ResponseEntity<>(a, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/imgName/{imgName}/whatFor/",
+            method = RequestMethod.GET)
+    public ResponseEntity<?> getByImgName1(@RequestHeader("Authorization") String token,
+                                          @PathVariable("imgName") String imgName) {
+        String username = JwtUtil.getUsernameFromToken(token);
+
+        T a = annotationService.getByImgName(imgName, 0, username);
+        if (a == null) {
+            return new ResponseEntity<Object>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(a, HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "/saveAnnotations",
             method = RequestMethod.POST)
