@@ -5,15 +5,16 @@ import foursomeSE.entity.Frame;
 import foursomeSE.entity.annotation.FrameAnnotation;
 import foursomeSE.entity.annotation.RAnnotations;
 import foursomeSE.entity.communicate.EnterResponse;
-import foursomeSE.entity.statistics.Accuracy;
-import foursomeSE.entity.statistics.CommitItem;
-import foursomeSE.entity.statistics.PHItem;
+import foursomeSE.entity.statistics.*;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
 import foursomeSE.entity.verification.VerificationType;
 import foursomeSE.error.MyFailTestException;
+import foursomeSE.recommendation.datastructure.Record;
+import foursomeSE.recommendation.datastructure.Task;
+import foursomeSE.recommendation.datastructure.User;
 import foursomeSE.service.verification.QualityVerificationServiceImpl;
 import foursomeSE.service.verification.VerificationService;
 import foursomeSE.util.*;
@@ -26,14 +27,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static foursomeSE.service.task.TaskUtils.mtByImg;
+import static foursomeSE.service.user.UserUtils.userByUsername;
 import static foursomeSE.util.ConvenientFunctions.iterableToList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -157,6 +161,7 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         // 注意到draw的时候是都可以draw的。
 
 
+        // 这里插入对这个图表的测试
         List<PHItem> phItems = taskService.PHChart(tid, ""); // username没用到
         assertEquals(1, phItems.size());
         PHItem phItem = phItems.get(0);
@@ -171,13 +176,48 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         assertEquals(30, commitItem.quality);
         assertEquals(15, commitItem.coverage);
 
-        Accuracy accuracy = taskService.accuraccyChart("worker2@ex.com");
-        assertEquals(1, accuracy.items.size());
-        assertEquals(0.95, accuracy.average, DELTA);
-        assertEquals(0.8, accuracy.items.get(0).point, DELTA);
+        Accuracy accuracy = taskService.accuracyChart("worker2@ex.com");
+        assertTrue(!accuracy.items.isEmpty());
+        assertEquals(0.9, accuracy.average, DELTA);
+        AccuracyItem ai = accuracy.items.get(accuracy.items.size() - 1);
+        assertEquals(0.8, ai.point, DELTA);
 
+        List<Heat> heats = taskService.heatChart("worker1@ex.com");
+        assertEquals(LocalDate.of(2017, 7, 1), heats.get(0).date);
+        // 写给未来的自己：如果错在这里，那么你真无聊。。都过了这个月了还跑这个测试
+        Heat h = heats.get(heats.size() - 1);
+        assertEquals(15, h.activity);
 
+        heats = taskService.heatChart("worker2@ex.com");
+        assertEquals(10, heats.get(heats.size() - 1).activity);
 
+        // 然后测getRecommand里拿数据时
+        ArrayList<User> users = taskServiceImpl.getUsers();
+        assertEquals(50, users.size());
+        User user = users.stream()
+                .filter(u -> u.ID == userByUsername(workerJPA, "worker1@ex.com").getId())
+                .findFirst().get();
+        assertEquals(2, user.tagList.size());
+        assertTrue(user.tagList.contains("花"));
+        assertTrue(user.tagList.contains("草"));
+        //
+        ArrayList<Task> tasks = taskServiceImpl.getTasks();
+        assertEquals(2, tasks.size());
+        Task task = tasks.stream().filter(t -> t.ID == tid).findFirst().get();
+        ArrayList<String> expected = new ArrayList<>(Arrays.asList("花", "草", "⾍", "鱼"));
+        assertEquals(expected.size(), task.tagList.size());
+        assertTrue(expected.containsAll(task.tagList));
+        assertTrue(task.tagList.containsAll(expected));
+        //
+        ArrayList<Record> records = taskServiceImpl.getRecords();
+        Record record = records.stream()
+                .filter(r -> r.userID == userByUsername(workerJPA, "worker1@ex.com").getId())
+                .findFirst().get();
+        assertEquals(tid, record.taskID); // 但是这里就测不了我拿到的两个countPass和countFail了。
+        assertEquals(4, annotationJPA.countPassByTaskAndUser(tid, "worker2@ex.com"));
+        assertEquals(1, annotationJPA.countFailByTaskAndUser(tid, "worker2@ex.com"));
+
+        // 然后把sample做完
         int[] immu_i = {10};
 
         fill(qualityVerificationService, immu_i);

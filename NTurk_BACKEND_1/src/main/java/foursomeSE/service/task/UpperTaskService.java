@@ -76,7 +76,7 @@ public interface UpperTaskService {
 
     List<CommitItem> commitChart(long taskId, String username);
 
-    Accuracy accuraccyChart(String username);
+    Accuracy accuracyChart(String username);
 
     List<Heat> heatChart(String username);
 

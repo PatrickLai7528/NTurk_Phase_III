@@ -24,12 +24,16 @@ import static org.junit.Assert.assertEquals;
 
 @Service
 public class DataSupplier extends WithTheAutowired {
+    public final static String[] tagCandidates = {"花", "草", "⾍", "鱼", "兽"};
+
 
     public void mockWorkers() {
+        int ptr = 0;
+
         List<Worker> result = new ArrayList<>();
         for (int i = 1; i <= 50; i++) {
             Worker w = new Worker(); // 没iconName
-            w.setCreateTime(LocalDateTime.now().minusDays(100));
+//            w.setCreateTime(LocalDateTime.now().minusDays(100));
             w.setEmailAddress("worker" + i + "@ex.com");
             w.setNickname("三刀" + i);
             w.setPassword(new BCryptPasswordEncoder().encode("worker" + i));
@@ -38,9 +42,14 @@ public class DataSupplier extends WithTheAutowired {
             w.setExperiencePoint(101);
             w.setProvince("北京");
 
+            w.userTags = Arrays.asList(tagCandidates[ptr], tagCandidates[(ptr + 1) % 5]);
+
             result.add(w);
+            workerService.add(w);
+
+            ptr = (ptr + 1) % 5;
         }
-        workerJPA.saveAll(result);
+//        workerJPA.saveAll(result);
     }
 
     public void mockRequesters() {
@@ -83,6 +92,9 @@ public class DataSupplier extends WithTheAutowired {
 
         ArrayList<String> imgs1 = IntStream.rangeClosed(1, 40).mapToObj(i -> i + ".jpg").collect(Collectors.toCollection(ArrayList::new));
         t.setImgNames(imgs1);
+
+        ArrayList<String> tags = new ArrayList<>(Arrays.asList("花,草,⾍,鱼".split(",")));
+        t.setTaskTags(tags);
 
         taskService.add(t, "requester1@ex.com");
     }

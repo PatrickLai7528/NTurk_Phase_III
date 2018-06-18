@@ -99,6 +99,15 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
     @Override
     public void add(Worker user) {
         super.add(user);
+
+        for (String userTag : user.userTags) {
+            TagAndWorker taw = new TagAndWorker();
+            taw.username = user.getEmailAddress();
+            taw.tagName = userTag;
+
+            tagAndWorkerJPA.save(taw);
+        }
+
         messageJPA.save(Message.createMessage(user.getEmailAddress(), MessageType.CREAT_WORKER));
     }
 

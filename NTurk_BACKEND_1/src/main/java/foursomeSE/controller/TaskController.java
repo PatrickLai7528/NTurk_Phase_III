@@ -138,7 +138,7 @@ public class TaskController {
     public ResponseEntity<?> accuracyChart(@RequestHeader("Authorization") String token) {
         String username = JwtUtil.getUsernameFromToken(token);
 
-        Accuracy accuracy = taskService.accuraccyChart(username);
+        Accuracy accuracy = taskService.accuracyChart(username);
         return new ResponseEntity<Object>(accuracy, HttpStatus.OK);
     }
 

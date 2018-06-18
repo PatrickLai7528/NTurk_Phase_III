@@ -16,6 +16,7 @@ import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
 import foursomeSE.service.annotation.UpperAnnotationService;
 import foursomeSE.service.task.UpperTaskService;
+import foursomeSE.service.task.UpperTaskServiceImpl;
 import foursomeSE.service.user.upper.UpperRequesterService;
 import foursomeSE.service.user.upper.UpperWorkerService;
 import foursomeSE.service.verification.VerificationService;
@@ -63,6 +64,8 @@ public abstract class WithTheAutowired {
 
     @Autowired
     protected UpperTaskService taskService;
+    @Autowired
+    protected UpperTaskServiceImpl taskServiceImpl;
     @Autowired
     protected UpperAnnotationService<GeneralAnnotation> generalAnnotationService;
     @Autowired

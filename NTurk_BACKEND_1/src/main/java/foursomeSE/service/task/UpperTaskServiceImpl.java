@@ -321,7 +321,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     }
 
     @Override
-    public Accuracy accuraccyChart(String username) {
+    public Accuracy accuracyChart(String username) {
         Accuracy result = new Accuracy();
 
         long countPass = annotationJPA.countPass();
@@ -330,7 +330,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         if (countPass + countFail == 0) {
             result.average = 0;
         } else {
-            result.average = (countPass / (countPass + countFail));
+            result.average = (((double) countPass) / (countPass + countFail));
         }
 
 
@@ -359,7 +359,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
                 ai.point = currentAccuracy;
             } else {
                 ai.point = currentAccuracy
-                        = (countUserPass / (countUserPass + countUserFail));
+                        = (((double) countUserPass) / (countUserPass + countUserFail));
             }
 
             result.items.add(ai);
@@ -372,8 +372,13 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     public List<Heat> heatChart(String username) {
         List<Heat> result = new ArrayList<>();
 
+        // 比如今年是2018/06/17，那么就应该从2017/07/01开始。
+        LocalDate begin = LocalDate.now().minusYears(1).plusMonths(1);
+        begin = begin.minusDays(begin.getDayOfMonth()).plusDays(1);
+
+
         Worker worker = userByUsername(workerJPA, username);
-        for (LocalDate date = worker.getCreateTime().toLocalDate().plusDays(1);
+        for (LocalDate date = begin;
              date.isBefore(LocalDate.now().plusDays(2));
              date = date.plusDays(1)) {
 
@@ -421,34 +426,14 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     public List<CTask> recommend(String username) {
         Worker worker = userByUsername(workerJPA, username);
 
-        ArrayList<User> users = iterableToStream(workerJPA.findAll()).map(w -> {
-            return new User(
-                    (int) w.getId(),
-                    new ArrayList<>(tagAndWorkerJPA.getWorkerTags(w.getEmailAddress())));
-        }).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<User> users = getUsers();
 
-        ArrayList<foursomeSE.recommendation.datastructure.Task> tasks =
-                iterableToStream(taskJPA.findAll())
-                        .map(t -> {
-                            return new foursomeSE.recommendation.datastructure.Task(
-                                    (int) t.getTaskId(),
-                                    new ArrayList<>(tagAndTaskJPA.getTaskTags(t.getTaskId()))
-                            );
-                        }).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<foursomeSE.recommendation.datastructure.Task> tasks = getTasks();
 
-        ArrayList<Record> records = new ArrayList<>();
-        for (Worker w : workerJPA.findAll()) {
-            List<Task> wTs = taskJPA.getByUsername(w.getEmailAddress());
-            for (Task t : wTs) {
-                long countPass = annotationJPA.countPassByTaskAndUser(t.getTaskId(), w.getEmailAddress());
-                long countFail = annotationJPA.countFailByTaskAndUser(t.getTaskId(), w.getEmailAddress());
-                Record record = new Record((int)w.getId(), (int)t.getTaskId(), (int)countPass, (int)countFail);
-                records.add(record);
-            }
-        }
+        ArrayList<Record> records = getRecords();
 
         User user = new User(
-                (int)worker.getId(),
+                (int) worker.getId(),
                 new ArrayList<>(tagAndWorkerJPA.getWorkerTags(username))
         );
 
@@ -458,6 +443,39 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         return result.stream().mapToLong(i -> (long) (i))
                 .mapToObj(this::getById)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    // 以下这三个方法都不应该public的，但是为了测试。。。
+    public ArrayList<User> getUsers() {
+        return iterableToStream(workerJPA.findAll()).map(w -> {
+            return new User(
+                    (int) w.getId(),
+                    new ArrayList<>(tagAndWorkerJPA.getWorkerTags(w.getEmailAddress())));
+        }).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public ArrayList<foursomeSE.recommendation.datastructure.Task> getTasks() {
+        return iterableToStream(taskJPA.findAll())
+                .map(t -> {
+                    return new foursomeSE.recommendation.datastructure.Task(
+                            (int) t.getTaskId(),
+                            new ArrayList<>(tagAndTaskJPA.getTaskTags(t.getTaskId()))
+                    );
+                }).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public ArrayList<Record> getRecords() {
+        ArrayList<Record> records = new ArrayList<>();
+        for (Worker w : workerJPA.findAll()) {
+            List<Task> wTs = taskJPA.getByUsername(w.getEmailAddress());
+            for (Task t : wTs) {
+                long countPass = annotationJPA.countPassByTaskAndUser(t.getTaskId(), w.getEmailAddress());
+                long countFail = annotationJPA.countFailByTaskAndUser(t.getTaskId(), w.getEmailAddress());
+                Record record = new Record((int) w.getId(), (int) t.getTaskId(), (int) countPass, (int) countFail);
+                records.add(record);
+            }
+        }
+        return records;
     }
 
     /**
@@ -607,11 +625,6 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
      * private
      */
     private CTask sToD(Task task) {
-//        int attendance = (int) contractJPA.countByTaskIdAndContractStatus(task.getTaskId(), ContractStatus.COMPLETED);
-//                lowerContractService.getLotBy(
-//                        c -> c.getTaskId() == task.getTaskId()
-//                                && c.getContractStatus() == ContractStatus.COMPLETED
-//                ).size();
 
         String requesterName = userById(requesterJPA, task.getRequesterId()).getNickname();
         CTask result = new CTask(task);
@@ -633,18 +646,5 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         result.setTaskTags(tagAndTaskJPA.getTaskTags(task.getTaskId()));
 
         return result;
-//        if (username == null) {
-//            return new CTask(task, attendance, requesterName);
-//        }
-//        try {
-//            ContractStatus contractStatus = contractByTaskIdAndUsername(contractJPA, workerJPA, task.getTaskId(), username).getContractStatus();
-////                    lowerContractService
-////                    .getOneBy(c -> c.getTaskId() == task.getTaskId()
-////                            && c.getWorkerId() == userByUsername(workerJPA, username).getId())
-////                    .getContractStatus(); // 这里用到了getByTaskIdByUsername，用软件工程我解决不了，
-//            return new CTask(task, attendance, requesterName, contractStatus);
-//        } catch (MyObjectNotFoundException e) {
-//            return new CTask(task, attendance, requesterName, ContractStatus.VIRGIN);
-//        }
     }
 }
