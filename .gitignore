@@ -16,6 +16,4 @@ node_modules/
 *.json
 *.json
 *.jpg
-# *.properties
 NTurk_BACKEND_1/src/main/resources/data/images/49059488_p0_master1200.jpg
-NTurk_BACKEND_1/src/main/resources/application.properties
