@@ -471,7 +471,7 @@ class AnnotationEditor {
     }
 
     submitCurrent(annotationSize) {
-        let editedAnnotations, markingType;
+        let editedAnnotations, markingType, isDone = true;
         editedAnnotations = privateVariables.editedAnnotation;
         if (annotationSize !== editedAnnotations.size) {
             return false;
@@ -483,14 +483,18 @@ class AnnotationEditor {
              *  第三個是判斷是否原本是有做的, 但把marking都刪掉了
              */
             if (null === value || undefined === value || null === value[markingType] || undefined === value[markingType]) {
-                return false;
+                isDone = false;
             }
+            if (value[markingType] || value[markingType].length === 0)
+                isDone = false;
             value[markingType].forEach((marking, index, array) => {
                 if (privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)) {
-                    return false;
+                    isDone = false;
                 }
             });
         });
+        if (!isDone)
+            return isDone;
         // 全部annotation都做完了
         console.log(editedAnnotations);
         editedAnnotations.forEach((value, key, map) => {
