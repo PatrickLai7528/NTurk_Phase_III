@@ -25,24 +25,23 @@
                 let myChart = echarts.init(document.getElementById('taskInfo'));
 
                 this.$http({
-                    url: "http://localhost:8086/requesterTasks/taskChart",
-                    method: "POST",
-                    headers: {Authorization: this.$store.getters.getToken},
-                    data: this.taskId       // 注意这个data部分，这是发送的数据
+                    url: "http://localhost:8086/requesterTasks/taskChart/"+this.taskId,
+                    method: "GET",
+                    headers: {Authorization: this.$store.getters.getToken}
                 }).then((response)=>{
-                    alert(response.data);
-                    let data = [
-                        {date: "2018/05/13", ongoing: 10, finished: 3, underReview: 7},
-                        {date: "2018/05/14", ongoing: 9, finished: 5, underReview: 6},
-                        {date: "2018/05/16", ongoing: 8, finished: 6, underReview: 6},
-                        {date: "2018/05/17", ongoing: 7, finished: 7, underReview: 6},
-                        {date: "2018/05/20", ongoing: 6, finished: 9, underReview: 5},
-                        {date: "2018/05/23", ongoing: 5, finished: 11, underReview: 4},
-                        {date: "2018/05/25", ongoing: 3, finished: 14, underReview: 3},
-                        {date: "2018/05/26", ongoing: 2, finished: 17, underReview: 1},
-                        {date: "2018/05/30", ongoing: 0, finished: 20, underReview: 0},
-
-                    ];
+                    let data = response.data;
+                    // let data = [
+                    //     {date: "2018/05/13", ongoing: 10, finished: 3, underReview: 7},
+                    //     {date: "2018/05/14", ongoing: 9, finished: 5, underReview: 6},
+                    //     {date: "2018/05/16", ongoing: 8, finished: 6, underReview: 6},
+                    //     {date: "2018/05/17", ongoing: 7, finished: 7, underReview: 6},
+                    //     {date: "2018/05/20", ongoing: 6, finished: 9, underReview: 5},
+                    //     {date: "2018/05/23", ongoing: 5, finished: 11, underReview: 4},
+                    //     {date: "2018/05/25", ongoing: 3, finished: 14, underReview: 3},
+                    //     {date: "2018/05/26", ongoing: 2, finished: 17, underReview: 1},
+                    //     {date: "2018/05/30", ongoing: 0, finished: 20, underReview: 0},
+                    //
+                    // ];
                     let dateList = data.map((item)=> {
                         return item.date;
                     });
