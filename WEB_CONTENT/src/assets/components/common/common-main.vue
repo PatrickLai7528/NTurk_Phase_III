@@ -191,6 +191,8 @@
                 }
             },
             doWhileGetTableDataSuccess(response, url) {        //赖总的编程风格很友好啊，将代码都优化了
+                console.log(response.data);
+                console.log(url);
                 if (response.data.length !== 0) {
                     for (let e of response.data) {
                         let flag = true;
