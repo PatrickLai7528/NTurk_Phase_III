@@ -375,11 +375,12 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
         // 比如今年是2018/06/17，那么就应该从2017/07/01开始。
         LocalDate begin = LocalDate.now().minusYears(1).plusMonths(1);
         begin = begin.minusDays(begin.getDayOfMonth()).plusDays(1);
+        LocalDate end = begin.plusYears(1);
 
 
         Worker worker = userByUsername(workerJPA, username);
         for (LocalDate date = begin;
-             date.isBefore(LocalDate.now().plusDays(2));
+             date.isBefore(end);
              date = date.plusDays(1)) {
 
             Heat heat = new Heat();
