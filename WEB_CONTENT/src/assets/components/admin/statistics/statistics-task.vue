@@ -38,7 +38,6 @@
 					let taskList = data.map((item) => {
 						return item.name;
 					});
-					;
 
 					let option = {
 						textStyle: {
@@ -102,11 +101,9 @@
 					let inProcessTaskList = data.map((item) => {
 						return item.inProgress;
 					});
-					;
 					let completedTaskList = data.map((item) => {
 						return item.completed;
 					});
-					;
 
 					let option = {
 						textStyle: {
@@ -182,9 +179,7 @@
 
 				let route = 'http://localhost:8086/admin/task/taskGrowth';
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					console.log("i am in setTaskGrowth");
-					console.log(response.data);
-					// let data = this.translate(response.data);
+					let data = this.translate(response.data);
 					let dateList = data.map((item) => {
 						return item.date;
 					});
