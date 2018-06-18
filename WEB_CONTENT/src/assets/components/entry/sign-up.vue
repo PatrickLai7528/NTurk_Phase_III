@@ -18,17 +18,6 @@
             <el-form-item label = "确认密码" prop = "confirmPassword" >
                 <el-input v-model = "ruleForm.confirmPassword" placeholder = "请重新输入密码" type = "password" ></el-input >
             </el-form-item >
-            <el-form-item label = "省份" prop = "province" >
-                <el-select v-model = "ruleForm.province" placeholder = "请选择" class = "input" filterable >
-                    <el-option
-		                    class = "option"
-		                    v-for = "item in provinces"
-		                    :key = "item.value"
-		                    :value = "item.value" >
-                    </el-option >
-                </el-select >
-                <!--<el-input v-model="ruleForm.password" placeholder="請輸入所在省份" type="password"></el-input>-->
-            </el-form-item >
             <el-form-item label = "账户类型" prop = "userType" >
                 <el-select v-model = "ruleForm.userType" placeholder = "请选择" class = "input" filterable >
                     <el-option
@@ -137,7 +126,6 @@
                     userName: '',
                     password: '',
                     confirmPassword: '',
-                    province: '',
                     userType: '',
                     userIcon: '',
                     userTags: []
@@ -155,9 +143,6 @@
                     ],
                     confirmPassword: [
                         {validator: validateConfirmPassword, trigger: 'blur'}
-                    ],
-                    province: [
-                        {validator: validateEmpty, trigger: 'blur'}
                     ],
                     userType: [
                         {validator: validateEmpty, trigger: 'blur'}
@@ -223,7 +208,6 @@
                     password: this.ruleForm.password,
                     nickname: this.ruleForm.userName,
                     iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
-                    province: this.ruleForm.province,
 				};
 				if(this.ruleForm.userType === "WORKER"){
                     data['userTags'] = this.ruleForm.userTags;
@@ -270,7 +254,7 @@
                     this.$message({
                         message: '添加标签成功',
                         type: 'success'
-                    })
+                    });
                     done();
                 }
             },
