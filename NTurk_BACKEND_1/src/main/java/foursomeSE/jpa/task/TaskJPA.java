@@ -43,7 +43,7 @@ public interface TaskJPA extends CrudRepository<Task, Long> {
             "FROM tasks\n" +
             "WHERE task_id IN (SELECT task_id\n" +
             "                  FROM contracts\n" +
-            "                  WHERE worker_id IN (SELECT worker_id\n" +
+            "                  WHERE worker_id IN (SELECT id\n" +
             "                                      FROM workers\n" +
             "                                      WHERE email_address = ?1))",
             nativeQuery = true)
