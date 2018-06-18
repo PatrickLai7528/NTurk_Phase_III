@@ -51,8 +51,8 @@
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
                             <div >
-                                <el-tag size = "small" type = "success"
-                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
+                                <el-tag size = "small" type = "primary"
+                                        v-for = "item in tagsOfTask" class="tags">{{item}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -126,6 +126,10 @@
 	    margin: 1.5em;
 	    text-align: left;
 	    font-size: 18px;
+    }
+
+    .tags{
+        margin-left: 15px;
     }
 
     #canvas {
