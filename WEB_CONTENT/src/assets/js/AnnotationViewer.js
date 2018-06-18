@@ -75,6 +75,7 @@ let privateMethods = {
         privateVariables.isLastAnnotationLoading = true; // 標記位, 開始加載
         privateVariables.http.get(url, header)
             .then((response) => {
+                console.log(response);
                 let oldAnnotation, markingType, temp, pluralMarking;
                 markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
                 temp = response.data[markingType];
