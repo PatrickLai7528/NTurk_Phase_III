@@ -17,14 +17,13 @@ public class TagFilterAlgorithm {
     private static ArrayList<Task> taskList = new ArrayList<>();
     private static ArrayList<Record> recordList = new ArrayList<>();
 
-    /*
+    /**
      * 基于用户对任务的"兴趣"来进行推荐
      * 兴趣通过用户本身的Tag和任务的Tag来进行计算
      * 
      * 算法思路：
      * 用户对某一个任务的"兴趣"可以理解为：用户的每一个UserTag和这个任务的契合度之和
      * 某个UserTag和某个任务的契合度，用(这个UserTag和这个任务中某个TaskTag的相似度)中的最大值来表示
-     * 某个UserTag和某个任务的契合度如果低于某个界值，则被视为0
      * 即：Pij = Sigma(MAX(Similarity(ut, tt)))，ut belongs to UT(i)，tt belongs to TT(j)
      * 其中：Pij是用户i对于任务j的兴趣，UT(i)是用户i的Tag集合，TT(j)是任务j的Tag集合
      *      Similarity(ut, tt)指ut和tt这两个标签的相似度，
@@ -54,9 +53,6 @@ public class TagFilterAlgorithm {
         /*
         * 对于用户未参与过的某个任务，
         * 计算某个UserTag和某个任务的契合度，并更新用户的兴趣列表
-        * 某个UserTag和某个任务的契合度如果低于某个界值，则被视为0
-        * 这里界限值被设为0.75，可能根据实际情况变动
-        * 注意：现在已经不设置界限值了
         * */
         for (String userTag: user.tagList) {
             for (Task task: taskList) {
