@@ -143,7 +143,7 @@
     import AnnotationViewer from '../../js/AnnotationViewer.js'
     import AnnotationEditor from '../../js/AnnotaionEditor.js'
     import SegmentDrawingStrategy from '../../js/strategy/SegmentDrawingStrategy.js'
-    import countdown from 'light-countdown'
+    import CountDown from '../../js/countDown/CountDown.js'
 
     export default {
         data() {
@@ -198,11 +198,18 @@
                 this.getImgNames();
                 this.setCountDown();
             })
+        },/**
+         * 在destroy之前把計時器刪除
+         */
+        beforeDestroy() {
+            this.countDown.clearTimer();
         },
         methods: {
             setCountDown() {
                 let _this = this;
-                countdown({
+                let countDown = document.querySelector("#countDown");
+                console.log(countDown);
+                this.countDown = new CountDown({
                     timeEnd: (new Date().getTime() + 900000),
                     selector: '#countDown',
                     msgPattern: '剩餘任務時間: {minutes}分{seconds}秒',
@@ -211,6 +218,7 @@
                         _this.$router.push({path: '/profile'});
                     }
                 });
+                this.countDown.init();
             },
             getImgNames() {
                 let viewer = new ImageViewer(this.canvas, this.imgNames, "http://localhost:8086/image/");

@@ -143,7 +143,6 @@
     import AnnotationViewer from '../../js/AnnotationViewer.js'
     import FrameDrawingStrategy from '../../js/strategy/FrameDrawingStrategy.js'
     import AnnotationEditor from '../../js/AnnotaionEditor.js'
-    import countdown from 'light-countdown'
     import CountDown from '../../js/countDown/CountDown.js'
 
     export default {
