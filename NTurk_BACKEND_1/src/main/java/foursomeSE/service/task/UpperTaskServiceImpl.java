@@ -226,7 +226,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
              date = date.plusDays(1)) {
 
             PHItem phItem = new PHItem();
-            phItem.date = date;
+            phItem.date = date.minusDays(1);
 
 
             for (Microtask mt : microtaskJPA.findByTaskId(taskId)) {
@@ -294,7 +294,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
              date = date.plusDays(1)) {
 
             CommitItem ci = new CommitItem();
-            ci.date = date;
+            ci.date = date.minusDays(1);
             ci.draw = annotationJPA.findAidsBetween(
                     taskId,
                     LocalDateTime.of(date.minusDays(1), LocalTime.MIN),
@@ -341,7 +341,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
              date = date.plusDays(1)) {
 
             AccuracyItem ai = new AccuracyItem();
-            ai.date = date;
+            ai.date = date.minusDays(1);
 
             long countUserPass = annotationJPA.countUserPassBetween(
                     username,
@@ -372,9 +372,10 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
     public List<Heat> heatChart(String username) {
         List<Heat> result = new ArrayList<>();
 
-        // 比如今年是2018/06/17，那么就应该从2017/07/01开始。
+        // 比如今年是2018/06/17，那么就应该从2017/07/01开始，然后要到2018/6/30
         LocalDate begin = LocalDate.now().minusYears(1).plusMonths(1);
         begin = begin.minusDays(begin.getDayOfMonth()).plusDays(1);
+        begin = begin.plusDays(1);
         LocalDate end = begin.plusYears(1);
 
 
@@ -384,7 +385,7 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
              date = date.plusDays(1)) {
 
             Heat heat = new Heat();
-            heat.date = date;
+            heat.date = date.minusDays(1);
 
             long ac = annotationJPA.countUserDidBetween(
                     username,

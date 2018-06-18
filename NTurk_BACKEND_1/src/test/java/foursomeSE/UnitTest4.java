@@ -185,11 +185,14 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         List<Heat> heats = taskService.heatChart("worker1@ex.com");
         assertEquals(LocalDate.of(2017, 7, 1), heats.get(0).date);
         // 写给未来的自己：如果错在这里，那么你真无聊。。都过了这个月了还跑这个测试
-        Heat h = heats.get(heats.size() - 1);
-        assertEquals(15, h.activity);
+        Heat heat  = heats.stream().filter(h -> h.date.equals(LocalDate.now())).findFirst().get();
+        assertEquals(15, heat.activity);
+        heat = heats.get(heats.size() - 1);
+        assertEquals(LocalDate.of(2018, 6, 30), heat.date);
 
         heats = taskService.heatChart("worker2@ex.com");
-        assertEquals(10, heats.get(heats.size() - 1).activity);
+        heat  = heats.stream().filter(h -> h.date.equals(LocalDate.now())).findFirst().get();
+        assertEquals(10, heat.activity);
 
         // 然后测getRecommand里拿数据时
         ArrayList<User> users = taskServiceImpl.getUsers();
