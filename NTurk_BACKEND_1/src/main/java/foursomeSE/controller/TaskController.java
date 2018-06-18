@@ -123,7 +123,7 @@ public class TaskController {
         return new ResponseEntity<>(ph, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/userProfile/requester/charts/",
+    @RequestMapping(value = "/userProfile/requester/charts/{taskId}",
             method = RequestMethod.GET)
     public ResponseEntity<?> commitChart(@RequestHeader("Authorization") String token,
                                          @PathVariable("taskId") long taskId) {
