@@ -19,10 +19,12 @@
                                         <div class = "middle-info" >
                                             <span >类型：{{tasks[index].taskCategory}}</span >
                                         </div >
-                                        <div class = "bottom-info" v-if = "isWorker === true" >
-                                            <span >状态：{{tasks[index].contractStatus}}</span >
+                                        <div class = "tag-info" >
+                                            <span >标签：</span >
+                                            <el-tag size = "small" type = "primary" style="margin: 5px"
+                                                    v-for = "item in tasks[index].taskTags">{{item}}</el-tag >
                                         </div >
-                                        <div class = "bottom-info" v-if = "isWorker === false" >
+                                        <div class = "bottom-info" >
                                             <span >创建时间：{{tasks[index].createTime}}</span >
                                         </div >
                                     </el-card >
@@ -39,10 +41,12 @@
                                         <div class = "middle-info" >
                                             <span >类型：{{tasks[index].taskCategory}}</span >
                                         </div >
-                                        <div class = "bottom-info" v-if = "isWorker === true" >
-                                            <span >状态：{{tasks[index].contractStatus}}</span >
+                                        <div class = "tag-info" >
+                                            <span >标签：</span >
+                                            <el-tag size = "small" type = "primary" style="margin: 5px"
+                                                    v-for = "item in tasks[index].taskTags">{{item}}</el-tag >
                                         </div >
-                                        <div class = "bottom-info" v-if = "isWorker === false" >
+                                        <div class = "bottom-info" >
                                             <span >创建时间：{{tasks[index].createTime}}</span >
                                         </div >
                                     </el-card >
@@ -186,8 +190,8 @@
             return {
                 isWorker: null,
                 notificationList: [{
-                    title: '假裝有消息',
-                    content: '假裝有描述',
+                    title: '',
+                    content: '',
                 }],
                 tasks: [{
                     taskName: '',
@@ -368,9 +372,16 @@
 	    color: #444444;
     }
 
+    .tag-info {
+        font-size: 16px;
+        color: #444444;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
     .bottom-info {
 	    font-size: 16px;
-	    margin-top: 14px;
+	    margin-top: 10px;
 	    color: #FF3B3F;
 	    line-height: 10px;
 	    font-weight: lighter;
@@ -411,6 +422,5 @@
 
     .a {
 	    padding: 0px;
-	
     }
 </style >
