@@ -93,6 +93,7 @@
             // },
             doWhileGetInfoSuccess(response) {
                 let data = response.data;
+                console.log(data);
                 this.iconName = "http://localhost:8086/image/" + data.iconName;
                 this.infoList.type.value = UserUtils.isWorker(this) ? "工人" : "发起者";
                 this.userName = data.nickname;
@@ -105,8 +106,10 @@
                 this.isWorker = UserUtils.isWorker(this);
 
                 if (this.isWorker) {
-                    this.userTags = ["食物"];
-                    this.systemTags = TagUtils.getSystemTags(this.$http);
+                    this.userTags = data.userTags;
+                    TagUtils.getSystemTags(this.$http,(returnValue)=>{
+                        this.systemTags = returnValue;
+                    });
                 }
             },
             loadInfo() {
@@ -126,13 +129,10 @@
                     this.$message({
                         message: '请至少选择三个标签',
                         type: 'warning'
-                    })
+                    });
                 }
                 else{
-                    this.$message({
-                        message: '修改标签成功',
-                        type: 'success'
-                    })
+                    this.updateUserTags(this.userTags);
                     done();
                 }
             },
@@ -143,6 +143,25 @@
                     dangerouslyUseHTMLString: true,
                 });
             },
+            updateUserTags(userTags){
+                this.$http({
+                    url: "http://localhost:8086/myInfo/editTags",
+                    method: "POST",
+                    headers: {Authorization: this.$store.getters.getToken},
+                    data: userTags
+                }).then((response)=>{
+                    this.$message({
+                        message: '修改标签成功',
+                        type: 'success'
+                    });
+                }).catch((error)=> {
+                    console.log(error);
+                    this.$message({
+                        message: '服务器错误',
+                        type: 'error'
+                    });
+                })
+            }
         }
     };
 </script >

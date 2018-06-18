@@ -8,6 +8,8 @@ import foursomeSE.entity.communicate.EnterResponse;
 import foursomeSE.entity.statistics.*;
 import foursomeSE.entity.task.CTask;
 import foursomeSE.entity.task.Microtask;
+import foursomeSE.entity.user.CWorker;
+import foursomeSE.entity.user.Worker;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
 import foursomeSE.entity.verification.VerificationType;
@@ -15,6 +17,7 @@ import foursomeSE.error.MyFailTestException;
 import foursomeSE.recommendation.datastructure.Record;
 import foursomeSE.recommendation.datastructure.Task;
 import foursomeSE.recommendation.datastructure.User;
+import foursomeSE.service.user.upper.UpperWorkerService;
 import foursomeSE.service.verification.QualityVerificationServiceImpl;
 import foursomeSE.service.verification.VerificationService;
 import foursomeSE.util.*;
@@ -590,5 +593,14 @@ public class UnitTest4 extends WithTheAutowired implements MyConstants {
         assertEquals(in(IntStream.of(11, 12, 13, 14, 15)), etr.getImgNames());
 
         // 再经过一堆人画了这五张就又可以画了。。
+    }
+
+    // 测拿用户标答
+    @Test
+    public void test5() {
+        CWorker w = workerService.getById(userByUsername(workerJPA, "worker1@ex.com").getId());
+        assertTrue(!w.userTags.isEmpty());
+
+
     }
 }
