@@ -43,6 +43,7 @@ const doNothing = () => {
 
 class Countdown {
     constructor(opt) {
+        console.log("in countdown ");
         this.currentTime = opt.currentTime || now;
         this.timeEnd = opt.timeEnd || now;
         this.selector = opt.selector || '.J_countdown';

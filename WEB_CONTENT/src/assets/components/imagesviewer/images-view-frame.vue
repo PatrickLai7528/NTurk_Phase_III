@@ -76,15 +76,20 @@
                            type = "primary" >提交<i class = "el-icon-upload el-icon--right" ></i ></el-button >
             </div >
         </el-aside >
-
-        <el-dialog class = "warn" title = "错误提示" :visible.sync = "dialogVisible" :modal = "false" top = "9vh" >
-            <p >亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p >
-            <div id = "canvasDiv2" >
+<div id = "canvasDiv2" >
                 <div v-html = "canvasHtml" >
                     {{canvasHtml}}
                 </div >
                 <div v-html = "tagHtml" >{{tagHtml}}</div >
             </div >
+        <el-dialog class = "warn" title = "错误提示" :visible.sync = "dialogVisible" :modal = "false" top = "9vh" >
+            <p >亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p >
+            <!--<div id = "canvasDiv2" >-->
+            <!--<div v-html = "canvasHtml" >-->
+            <!--{{canvasHtml}}-->
+            <!--</div >-->
+            <!--<div v-html = "tagHtml" >{{tagHtml}}</div >-->
+            <!--</div >-->
             <p >这道题的图片和标注如上图所示</p >
             <p >您认为:{{wrongAnswerPairs[0]}}</p >
             <p >但实际上：{{wrongAnswerPairs[1]}}</p >
@@ -474,7 +479,7 @@
                                 temp.frame.color = '#C0392B';
                             }
 
-                            if(temp.frame !== null && temp.frame !== undefined){
+                            if (temp.frame !== null && temp.frame !== undefined) {
                                 temp.frames.push(temp.frame);
                             }
 
