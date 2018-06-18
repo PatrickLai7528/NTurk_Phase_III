@@ -106,7 +106,7 @@
 
                 if (this.isWorker) {
                     this.userTags = ["食物"];
-                    this.systemTags = TagUtils.getSystemTags();
+                    this.systemTags = TagUtils.getSystemTags(this.$http);
                 }
             },
             loadInfo() {
