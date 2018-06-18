@@ -75,25 +75,32 @@ let privateMethods = {
         privateVariables.isLastAnnotationLoading = true; // 標記位, 開始加載
         privateVariables.http.get(url, header)
             .then((response) => {
-                let oldAnnotation, markingType, temp, pluralMarking;
+                console.log(response);
+                let oldAnnotation = {}, markingType, temp, pluralMarkingType;
                 markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
-                temp = response.data[markingType];
+                pluralMarkingType = privateVariables.markingDrawingStrategy.getPluralMarkingTypeName();
+                if (response.data != "")
+                    oldAnnotation[markingType] = response.data[pluralMarkingType];
+                else {
+                    oldAnnotation[markingType] = [];
+                }
+                // temp = response.data[markingType];
                 // console.log(temp);
-                oldAnnotation = response.data;
-                oldAnnotation[markingType] = [];
-                oldAnnotation[markingType].push(temp);
+                // oldAnnotation = response.data;
+                // oldAnnotation[markingType] = [];
+                // oldAnnotation[markingType].push(temp);
                 // console.log("in then");
                 // console.log(response);
                 // console.log(oldAnnotation);
-                if (privateVariables.markingDrawingStrategy.hasPluralMarking()) {
-                    pluralMarking = oldAnnotation[privateVariables.markingDrawingStrategy.getPluralMarkingTypeName()];
-                    if (pluralMarking && !pluralMarking instanceof Array) {
-                        throw new Error("Plural Marking is not Array");
-                    }
-                    pluralMarking.forEach((value, index, array) => {
-                        oldAnnotation[markingType].push(value);
-                    })
-                }
+                // if (privateVariables.markingDrawingStrategy.hasPluralMarking()) {
+                //     pluralMarking = oldAnnotation[privateVariables.markingDrawingStrategy.getPluralMarkingTypeName()];
+                //     if (pluralMarking && !pluralMarking instanceof Array) {
+                //         throw new Error("Plural Marking is not Array");
+                //     }
+                //     pluralMarking.forEach((value, index, array) => {
+                //         oldAnnotation[markingType].push(value);
+                //     })
+                // }
                 privateVariables.annotations.set(privateVariables.viewer.shareCurrentImageName(), oldAnnotation);
                 privateVariables.isCurrentAnnotationNew = false;
             })
