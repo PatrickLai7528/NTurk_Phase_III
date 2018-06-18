@@ -111,6 +111,7 @@
 </template>
 
 <style>
+>>>>>>> ji
     .el-carousel__item:nth-child(2n) {
         background-color: #99a9bf;
     }

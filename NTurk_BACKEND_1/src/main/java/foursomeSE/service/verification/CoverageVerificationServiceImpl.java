@@ -13,6 +13,7 @@ import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
 import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
@@ -26,8 +27,9 @@ import java.util.List;
 @Service
 @Qualifier("coverage")
 public class CoverageVerificationServiceImpl extends AbstractVerificationServiceImpl {
-    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService);
+
+    public CoverageVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService, WorkerJPA workerJPA) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService, workerJPA);
     }
 
     @Override

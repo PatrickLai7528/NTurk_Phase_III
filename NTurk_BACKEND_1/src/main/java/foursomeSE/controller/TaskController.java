@@ -113,20 +113,20 @@ public class TaskController {
         return new ResponseEntity<>(enterResponse, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/requesterTasks/taskChart",
-            method = RequestMethod.POST)
+    @RequestMapping(value = "/requesterTasks/taskChart/{taskId}",
+            method = RequestMethod.GET)
     public ResponseEntity<?> taskChart(@RequestHeader("Authorization") String token,
-                                       @RequestBody int taskId) {
+                                       @PathVariable("taskId") long taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         List<PHItem> ph = taskService.PHChart(taskId, username);
-        return new ResponseEntity<Object>(ph, HttpStatus.OK);
+        return new ResponseEntity<>(ph, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/userProfile/requester/charts/",
-            method = RequestMethod.POST)
+    @RequestMapping(value = "/userProfile/requester/charts/{taskId}",
+            method = RequestMethod.GET)
     public ResponseEntity<?> commitChart(@RequestHeader("Authorization") String token,
-                                         @RequestBody int taskId) {
+                                         @PathVariable("taskId") long taskId) {
         String username = JwtUtil.getUsernameFromToken(token);
 
         List<CommitItem> cis = taskService.commitChart(taskId, username);

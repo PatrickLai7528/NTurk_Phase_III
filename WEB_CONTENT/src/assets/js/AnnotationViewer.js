@@ -76,7 +76,9 @@ let privateMethods = {
         privateVariables.http.get(url, header)
             .then((response) => {
                 console.log(response);
+
                 let oldAnnotation = {}, markingType, temp, pluralMarkingType;
+
                 markingType = privateVariables.markingDrawingStrategy.getMarkingTypeName();
                 pluralMarkingType = privateVariables.markingDrawingStrategy.getPluralMarkingTypeName();
                 if (response.data != "")
@@ -178,7 +180,7 @@ class AnnotationViewer {
         VirtualInterface.ensureImplements(imageViewer, CanvasShareableInterface);
         /* 檢查markingDrawingStrategy 是否實現MarkingDrawingStrategy, 若否會抛出錯誤, 詳情看VirtualInterface */
         VirtualInterface.ensureImplements(markingDrawingStrategy, MarkingDrawingStrategy)
-
+        console.log("hahahah");
         privateVariables.viewer = imageViewer;
         privateVariables.canvas = imageViewer.shareCanvas();
         privateVariables.config.defaultWidth = imageViewer.shareWidth();

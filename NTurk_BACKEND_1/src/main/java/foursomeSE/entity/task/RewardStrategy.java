@@ -1,5 +1,5 @@
-package foursomeSE.entity.task;
-
-public enum RewardStrategy {
-    TOTAL, INDIVIDUAL
-}
+//package foursomeSE.entity.task;
+//
+//public enum RewardStrategy {
+//    TOTAL, INDIVIDUAL
+//}

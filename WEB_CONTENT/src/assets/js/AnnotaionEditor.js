@@ -471,7 +471,9 @@ class AnnotationEditor {
     }
 
     submitCurrent(annotationSize) {
+
         let editedAnnotations, markingType, isDone = true
+
         editedAnnotations = privateVariables.editedAnnotation;
         if (annotationSize < editedAnnotations.size) {
             return false;
@@ -487,12 +489,14 @@ class AnnotationEditor {
             }
             if(value[markingType].length === 0)
                 isDone = false
+
             value[markingType].forEach((marking, index, array) => {
                 if (privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)) {
                     isDone = false;
                 }
             });
         });
+
         if(!isDone)
             return isDone;
 
