@@ -59,7 +59,7 @@ public class UpperWorkerServiceImpl extends AbstractUpperUserServiceImpl<Worker,
         result.setExperiencePoint(newExp);
         result.setCredit(newCrdt);
 
-        worker.userTags = tagAndWorkerJPA.getWorkerTags(worker.getEmailAddress());
+        result.userTags = tagAndWorkerJPA.getWorkerTags(worker.getEmailAddress());
 
         return result;
     }

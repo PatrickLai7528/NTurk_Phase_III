@@ -154,7 +154,10 @@
         },
         mounted: function () {
             this.$nextTick(() => {
-                this.systemTags = TagUtils.getSystemTags();   //获得系统Tag列表
+                //获得系统Tag列表
+                TagUtils.getSystemTags(this.$http,(returnValue)=>{
+                    this.systemTags = returnValue;
+                });
                 this.setUpBusEvent()
             });
         },
@@ -250,6 +253,7 @@
                         headers: {Authorization: this.$store.getters.getToken},
                         data: this.decidePostData()
                     }).then(this.doWhileSuccess).catch((error) => {
+                        alert(error);
                         console.log(error);
                         this.badMessage("你的积分不足，请前往个人中心进行充值");
                         this.$router.push({path: '/profile'});

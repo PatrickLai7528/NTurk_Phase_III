@@ -42,17 +42,17 @@ public class AlgorithmTest {
 
     @Test
     public void Fusion() {
-        ArrayList<Integer> result = Recommend.getResult(new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new User(0, new ArrayList<>()));
-        System.out.println("Final Result："+result);
-        assertEquals(10, (int)result.get(0));
+//        ArrayList<Integer> result = Recommend.getResult(new ArrayList<>(),new ArrayList<>(),new ArrayList<>(),new User(0, new ArrayList<>()));
+//        System.out.println("Final Result："+result);
+//        assertEquals(10, (int)result.get(0));
     }
 
     @Test
     public void Wilson() {
-        double score = WilsonScore.getScore(99, 100);
-        System.out.println("Final Result：" + score);
-        score = WilsonScore.getScore(2, 2);
-        System.out.println("Final Result：" + score);
+//        double score = WilsonScore.getScore(99, 100);
+//        System.out.println("Final Result：" + score);
+//        score = WilsonScore.getScore(2, 2);
+//        System.out.println("Final Result：" + score);
     }
 //    private void readJson(int i){
 //        JsonParser parser=new JsonParser();

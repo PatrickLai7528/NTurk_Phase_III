@@ -10,6 +10,7 @@ import foursomeSE.entity.task.Microtask;
 import foursomeSE.entity.task.MicrotaskStatus;
 import foursomeSE.entity.task.Task;
 import foursomeSE.entity.task.TaskStatus;
+import foursomeSE.entity.user.Worker;
 import foursomeSE.entity.verification.RVerifications;
 import foursomeSE.entity.verification.Verification;
 import foursomeSE.entity.verification.VerificationType;
@@ -20,6 +21,7 @@ import foursomeSE.jpa.annotation.AnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
 import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static foursomeSE.service.annotation.AnnotationUtils.anttById;
 import static foursomeSE.service.task.TaskUtils.taskById;
+import static foursomeSE.service.user.UserUtils.userByUsername;
 
 public abstract class AbstractVerificationServiceImpl implements VerificationService, MyConstants {
 
@@ -43,6 +46,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     protected VerificationJPA verificationJPA;
     protected BlacklistJPA blacklistJPA;
     protected LowerContractService lowerContractService;
+    protected WorkerJPA workerJPA;
 
 
     protected String username;
@@ -50,7 +54,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
     protected Annotation annotation;
     protected Task task;
 
-    public AbstractVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService) {
+    public AbstractVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService, WorkerJPA workerJPA) {
         this.microtaskJPA = microtaskJPA;
         this.taskJPA = taskJPA;
         this.goldJPA = goldJPA;
@@ -58,6 +62,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
         this.verificationJPA = verificationJPA;
         this.blacklistJPA = blacklistJPA;
         this.lowerContractService = lowerContractService;
+        this.workerJPA = workerJPA;
     }
 
     @Override
@@ -217,7 +222,7 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
                         }
                     }
                 } else {
-                    // 还是要accept一下的
+                    // 这就不能accept了
                     for (Verification v : verifications.getVerifications()) {
                         setMicrotaskAndAnnotation(v);
 
@@ -274,6 +279,11 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
         verificationJPA.save(v);
 
 
+        Worker worker = userByUsername(workerJPA, v.getUsername());
+        worker.setCredit(worker.getCredit() + 5);
+        workerJPA.save(worker);
+
+
         microtask.setParallel(microtask.getParallel() - 1);
         microtaskJPA.save(microtask);
 
@@ -285,14 +295,21 @@ public abstract class AbstractVerificationServiceImpl implements VerificationSer
         annotation.setAnnotationStatus(getSuccessfulAnStt());
         annotationJPA.save(annotation);
 
+        Worker worker = userByUsername(workerJPA, annotation.getUsername());
+        worker.setCredit(worker.getCredit() + 10);
+        workerJPA.save(worker);
+
         microtask.setMicrotaskStatus(getSuccessfulMtStt());
         microtaskJPA.save(microtask);
     }
 
-
     protected void failVerification() {
         annotation.setAnnotationStatus(getFailedAnStt());
         annotationJPA.save(annotation);
+
+        Worker worker = userByUsername(workerJPA, annotation.getUsername());
+        worker.setCredit(worker.getCredit() - 5);
+        workerJPA.save(worker);
 
         microtask.setMicrotaskStatus(getFailedMtStt());
         microtaskJPA.save(microtask);
