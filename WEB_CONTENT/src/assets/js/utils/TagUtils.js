@@ -3,14 +3,14 @@
  */
 
 class TagUtils {
-	static getSystemTags(http){
-	    let tags = [];
+	static getSystemTags(http, cb){
         http.get("http://localhost:8086/systemTags").then((response)=>{
-            tags = response.data;
+            let tags = response.data;
+            cb(tags);
         }).catch((error)=> {
             console.log(error);
-        })
-
+            cb([]);
+        });
     }
 
     static callback(){

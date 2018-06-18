@@ -156,7 +156,7 @@
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
 
                     let data = response.data;
-                    console.log(data);
+                    alert(data);
                     let average = [];
                     let dateList = data.items.map((item)=> {
                         average.push(data.average);
