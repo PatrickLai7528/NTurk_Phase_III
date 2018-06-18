@@ -1,7 +1,8 @@
-/**
- * 这个是我们的测试类，但是为了install时顺利，先注释了
- * */
-
+///**
+// * 这个是我们的测试类，但是为了install时顺利，先注释了
+// *
+// * */
+//
 //package foursomeSE;
 //
 //import foursomeSE.entity.BlacklistItem;
