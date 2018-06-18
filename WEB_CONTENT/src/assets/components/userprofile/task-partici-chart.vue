@@ -27,8 +27,9 @@
         mounted: function () {
             this.notGeneral = (this.taskCategory !== "GENERAL");
             this.$nextTick(()=> {
-                this.setWaveGraph("draw", null, 'rgb(135, 224, 166)', "每日标注数量");
-                this.setWaveGraph("quality", null, 'rgb(245, 105, 57)', "每日评审数量");
+                let root = "http://localhost:8086/userProfile/requester/charts/";
+                this.setWaveGraph("draw", root+"general/", 'rgb(135, 224, 166)', "每日标注数量");
+                this.setWaveGraph("quality", root+"general/", 'rgb(245, 105, 57)', "每日评审数量");
                 if(this.notGeneral){
                     this.setWaveGraph("coverage", null, 'rgb(198, 38, 47)', "每日审核数量");
                 }
