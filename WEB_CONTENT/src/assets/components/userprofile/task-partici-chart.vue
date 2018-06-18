@@ -41,116 +41,119 @@
                 let myChart = echarts.init(document.getElementById(elementID));
                 let max = 0;
 
-                let data = [
-                    {date: "2018-05-13", value: 2},
-                    {date: "2018-05-14", value: 4},
-                    {date: "2018-05-16", value: 6},
-                    {date: "2018-05-17", value: 4},
-                    {date: "2018-05-18", value: 8},
-                    {date: "2018-05-20", value: 7},
-                    {date: "2018-05-23", value: 5},
-                    {date: "2018-05-25", value: 9},
-                    {date: "2018-05-28", value: 6},
-                    {date: "2018-05-31", value: 10},
-                    {date: "2018-06-01", value: 7},
-                    {date: "2018-06-04", value: 5},
-                    {date: "2018-06-07", value: 8},
-                    {date: "2018-06-09", value: 9},
-                    {date: "2018-06-10", value: 3},
-                ];
-                let dateList = data.map((item)=> {
-                    // let date = item.date.split("/");
-                    // let year = parseInt(date[0]);
-                    // let month = parseInt(date[1]);
-                    // let day = parseInt(date[2]);
-                    // alert(new Date(year, month, day));
-                    // return new Date(year, month, day);
-                    return item.date;
-                });
-                let valueList = data.map((item)=> {
-                    if(max<item.value){
-                        max = item.value;
-                    }
-                    return item.value;
-                });
+                this.$http({
+                    url: "http://localhost:8086/userProfile/requester/charts/",
+                    method: "GET",
+                    headers: {Authorization: this.$store.getters.getToken},
+                    data: this.taskId
+                }).then((response)=>{
+                    alert(response.data);
+                    let data = [
+                        {date: "2018-05-13", value: 2},
+                        {date: "2018-05-14", value: 4},
+                        {date: "2018-05-16", value: 6},
+                        {date: "2018-05-17", value: 4},
+                        {date: "2018-05-18", value: 8},
+                        {date: "2018-05-20", value: 7},
+                        {date: "2018-05-23", value: 5},
+                        {date: "2018-05-25", value: 9},
+                        {date: "2018-05-28", value: 6},
+                        {date: "2018-05-31", value: 10},
+                        {date: "2018-06-01", value: 7},
+                        {date: "2018-06-04", value: 5},
+                        {date: "2018-06-07", value: 8},
+                        {date: "2018-06-09", value: 9},
+                        {date: "2018-06-10", value: 3},
+                    ];
+                    let dateList = data.map((item)=> {
+                        // let date = item.date.split("/");
+                        // let year = parseInt(date[0]);
+                        // let month = parseInt(date[1]);
+                        // let day = parseInt(date[2]);
+                        // alert(new Date(year, month, day));
+                        // return new Date(year, month, day);
+                        return item.date;
+                    });
+                    let valueList = data.map((item)=> {
+                        if(max<item.value){
+                            max = item.value;
+                        }
+                        return item.value;
+                    });
 
-                let option = {
-                    textStyle: {
-                        fontSize: 20
-                    },
-                    title: [{
-                        left: 'center',
-                        text: "任务："+this.taskName,
+                    let option = {
                         textStyle: {
                             fontSize: 20
-                        }
-                    }],
-                    tooltip: {
-                        trigger: 'axis',
-                        formatter: "{b} <br/>"+message+": {c}",
-                        textStyle: {
-                            fontSize: 20
-                        }
-                    },
-                    xAxis: [{
-                        type: 'category',
-                        boundaryGap: false,
-                        data: dateList,
-                        axisLabel: {
+                        },
+                        title: [{
+                            left: 'center',
+                            text: "任务："+this.taskName,
                             textStyle: {
-                                fontSize: 16
+                                fontSize: 20
                             }
-                        }
-                    }],
-                    yAxis: [{
-                        type: 'value',
-                        splitLine: {show: false},
-                        axisLabel: {
+                        }],
+                        tooltip: {
+                            trigger: 'axis',
+                            formatter: "{b} <br/>"+message+": {c}",
                             textStyle: {
-                                fontSize: 16
+                                fontSize: 20
                             }
                         },
-                        max: max*1.5
-                    }],
-                    grid: [{
-                        bottom: '10%'
-                    }],
-                    series: [{
-                        type: 'line',
-                        showSymbol: false,
-                        data: valueList,
-                        lineStyle: {
-                            width: 0
-                        },
-                        symbol:'none',  //这句就是去掉点的
-                        smooth: true,  //这句就是让曲线变平滑的
-                        smoothMonotone: 'none',
-                        areaStyle: {
-                            color: {
-                                type: 'linear',
-                                x: 0,
-                                y: 0,
-                                x2: 0,
-                                y2: 1,
-                                colorStops: [{
-                                    offset: 0, color: color // 0% 处的颜色
-                                }, {
-                                    offset: 1, color: color// 100% 处的颜色
-                                }],
-                                globalCoord: false // 缺省为 false
+                        xAxis: [{
+                            type: 'category',
+                            boundaryGap: false,
+                            data: dateList,
+                            axisLabel: {
+                                textStyle: {
+                                    fontSize: 16
+                                }
                             }
-                        }
-                    }]
-                };
-                // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
-
-                //let route = 'http://localhost:8086/admin/requester/requesterGrowth';
-                // this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //
-                // }).catch(function (error) {
-                //     console.log(error);
-                // });
+                        }],
+                        yAxis: [{
+                            type: 'value',
+                            splitLine: {show: false},
+                            axisLabel: {
+                                textStyle: {
+                                    fontSize: 16
+                                }
+                            },
+                            max: max*1.5
+                        }],
+                        grid: [{
+                            bottom: '10%'
+                        }],
+                        series: [{
+                            type: 'line',
+                            showSymbol: false,
+                            data: valueList,
+                            lineStyle: {
+                                width: 0
+                            },
+                            symbol:'none',  //这句就是去掉点的
+                            smooth: true,  //这句就是让曲线变平滑的
+                            smoothMonotone: 'none',
+                            areaStyle: {
+                                color: {
+                                    type: 'linear',
+                                    x: 0,
+                                    y: 0,
+                                    x2: 0,
+                                    y2: 1,
+                                    colorStops: [{
+                                        offset: 0, color: color // 0% 处的颜色
+                                    }, {
+                                        offset: 1, color: color// 100% 处的颜色
+                                    }],
+                                    globalCoord: false // 缺省为 false
+                                }
+                            }
+                        }]
+                    };
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
+                }).catch((error)=> {
+                    console.log(error);
+                })
             },
             addDateAndValue(dateList, valueList){
                 let interval = 3600 * 24 * 1000;
