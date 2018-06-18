@@ -40,10 +40,10 @@
                     let data = response.data;
                     let dateList = data.map((item)=> {
                         return item.date;
-                    });;
+                    });
                     let valueList = data.map((item)=> {
                         return item.value;
-                    });;
+                    });
 
                     let option = {
                         textStyle: {
