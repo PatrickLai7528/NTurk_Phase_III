@@ -44,6 +44,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/image/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/image/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/systemTags").permitAll()
                 .antMatchers("/h2-console/**/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/tasks/id/**").permitAll()
 //                .antMatchers("/auth/**").permitAll()
@@ -82,7 +83,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                         "/**/*.css",
                         "/**/*.js",
                         "/image/**",
-                        "/tasks/id/**"
+                        "/tasks/id/**",
+                        "/systemTags/**"
                 )
                 .antMatchers(
                         HttpMethod.POST,
