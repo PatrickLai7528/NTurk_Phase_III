@@ -12,6 +12,7 @@ import foursomeSE.jpa.annotation.GeneralAnnotationJPA;
 import foursomeSE.jpa.gold.GoldJPA;
 import foursomeSE.jpa.task.MicrotaskJPA;
 import foursomeSE.jpa.task.TaskJPA;
+import foursomeSE.jpa.user.WorkerJPA;
 import foursomeSE.jpa.verification.VerificationJPA;
 import foursomeSE.service.contract.LowerContractService;
 import foursomeSE.util.CriticalSection;
@@ -25,8 +26,8 @@ import java.util.List;
 public class QualityVerificationServiceImpl extends AbstractVerificationServiceImpl {
     private GeneralAnnotationJPA generalAnnotationJPA;
 
-    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService, GeneralAnnotationJPA generalAnnotationJPA) {
-        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService);
+    public QualityVerificationServiceImpl(MicrotaskJPA microtaskJPA, TaskJPA taskJPA, GoldJPA goldJPA, AnnotationJPA annotationJPA, VerificationJPA verificationJPA, BlacklistJPA blacklistJPA, LowerContractService lowerContractService, WorkerJPA workerJPA, GeneralAnnotationJPA generalAnnotationJPA) {
+        super(microtaskJPA, taskJPA, goldJPA, annotationJPA, verificationJPA, blacklistJPA, lowerContractService, workerJPA);
         this.generalAnnotationJPA = generalAnnotationJPA;
     }
 

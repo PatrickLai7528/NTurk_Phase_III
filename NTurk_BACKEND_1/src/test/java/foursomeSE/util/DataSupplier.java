@@ -36,7 +36,7 @@ public class DataSupplier extends WithTheAutowired {
 //            w.setCreateTime(LocalDateTime.now().minusDays(100));
             w.setEmailAddress("worker" + i + "@ex.com");
             w.setNickname("三刀" + i);
-            w.setPassword(new BCryptPasswordEncoder().encode("123456"));
+            w.setPassword("123456");
             w.setIconName("hamburger1.png");
             w.setCredit(0);
             w.setExperiencePoint(101);
