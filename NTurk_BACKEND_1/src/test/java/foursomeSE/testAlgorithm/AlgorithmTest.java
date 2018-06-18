@@ -49,7 +49,9 @@ public class AlgorithmTest {
 
     @Test
     public void Wilson() {
-        double score = WilsonScore.getScore(15, 15);
+        double score = WilsonScore.getScore(99, 100);
+        System.out.println("Final Result：" + score);
+        score = WilsonScore.getScore(2, 2);
         System.out.println("Final Result：" + score);
     }
 //    private void readJson(int i){

@@ -51,8 +51,8 @@
                                 <span style = "font-size: 16px" >標籤</span >
                             </template >
                             <div >
-                                <el-tag size = "small" type = "success"
-                                        v-for = "item in tagsOfTask" >{{item}}</el-tag >
+                                <el-tag size = "small" type = "primary"
+                                        v-for = "item in tagsOfTask" class="tags">{{item}}</el-tag >
                             </div >
                         </el-collapse-item >
                         <el-collapse-item >
@@ -126,6 +126,10 @@
 	    margin: 1.5em;
 	    text-align: left;
 	    font-size: 18px;
+    }
+
+    .tags{
+        margin-left: 15px;
     }
 
     #canvas {
@@ -227,7 +231,7 @@
                 console.log(this.imgNames);
                 viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer,
                     'http://localhost:8086/frameAnnotation/imgName/', this.$http, 0);
-                this.viewer = new AnnotationEditor(viewer, header,
+                this.viewer = new AnnotationEditor(viewer, header,n dev
                     'http://localhost:8086/frameAnnotation/saveAnnotations/', this.$http);
                 this.viewer.drawCurrent(header, () => {
                     this.viewer.setTagUpdateCallback(this.updateTagHtml);

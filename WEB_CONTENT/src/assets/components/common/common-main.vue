@@ -18,7 +18,7 @@
                             </el-col >
                             <el-col :span = "6" >
                                 <el-form-item label = '任务标签'>
-                                    <el-tag v-for="tag in props.row.taskTags">{{tag}}</el-tag>
+                                    <el-tag v-for="tag in props.row.taskTags" class="tags">{{tag}}</el-tag>
                                 </el-form-item>
                             </el-col >
                         </el-row >
@@ -379,6 +379,10 @@
     .cell {
 	    display: table-cell;
 	    vertical-align: middle;
+    }
+
+    .tags{
+        margin-left: 15px;
     }
 
     .default-font-style {
