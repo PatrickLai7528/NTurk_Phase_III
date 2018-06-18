@@ -49,7 +49,6 @@
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
                     let data = [];
                     response.data.forEach((item) => {
-                        console.log(item);
                         data.push([
                             echarts.format.formatTime('yyyy-MM-dd', item.date),
                             item.activity
@@ -153,100 +152,80 @@
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById('pointChart'));
 
-                let data = [
-                    {date: "2018-05-13", userPoint: 3, average: 5},
-                    {date: "2018-05-14", userPoint: 4, average: 5},
-                    {date: "2018-05-16", userPoint: 6, average: 5},
-                    {date: "2018-05-17", userPoint: 7, average: 5},
-                    {date: "2018-05-18", userPoint: 5, average: 5},
-                    {date: "2018-05-20", userPoint: 9, average: 5},
-                    {date: "2018-05-23", userPoint: 4, average: 5},
-                    {date: "2018-05-25", userPoint: 6, average: 5},
-                    {date: "2018-05-26", userPoint: 3, average: 5},
-                    {date: "2018-05-27", userPoint: 3, average: 5},
-                    {date: "2018-05-28", userPoint: 3, average: 5},
-                    {date: "2018-05-31", userPoint: 2, average: 5},
-                    {date: "2018-06-01", userPoint: 5, average: 5},
-                    {date: "2018-06-04", userPoint: 8, average: 5},
-                    {date: "2018-06-07", userPoint: 7, average: 5},
-                    {date: "2018-06-09", userPoint: 4, average: 5},
-                    {date: "2018-06-10", userPoint: 6, average: 5},
-                ];
-                let dateList = data.map((item)=> {
-                    return item.date;
-                });
-                let userPointList = data.map((item)=> {
-                    return item.userPoint;
-                });
-                let average = data.map((item)=> {
-                    return item.average;
-                });
+                let route = 'http://localhost:8086/userProfile/worker/charts/point';
+                this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
 
+                    let data = response.data;
+                    console.log(data);
+                    let average = [];
+                    let dateList = data.items.map((item)=> {
+                        average.push(data.average);
+                        return item.date;
+                    });
+                    let userPointList = data.items.map((item)=> {
+                        return item.point;
+                    });
 
-                // 指定图表的配置项和数据
-                let option = {
+                    // 指定图表的配置项和数据
+                    let option = {
 
-                    textStyle: {
-                        fontSize: 20
-                    },
-                    title: [{
-                        left: '10%',
-                        text: "得分情况一览",
                         textStyle: {
                             fontSize: 20
-                        }
-                    }],
-                    tooltip: {
-                        trigger: 'axis',
-                        textStyle: {
-                            fontSize: 20
-                        }
-                    },
-                    legend: {
-                        right: '5%',
-                        data: ['您的得分', '系统均分']
-                    },
-                    xAxis: {
-                        data: dateList
-                    },
-                    yAxis: {
-                        width: 5
-                    },
-                    series: [
-                        {
-                            name: '您的得分',
-                            type: 'line',
-                            lineStyle: {
-                                width: 3
-                            },
-                            z: 2,
-                            smooth: true,  //这句就是让曲线变平滑的
-                            smoothMonotone: 'none',
-                            data: userPointList
                         },
-                        {
-                            name: '系统均分',
-                            type: 'line',
-                            lineStyle: {
-                                width: 3
+                        title: [{
+                            left: '10%',
+                            text: "得分情况一览",
+                            textStyle: {
+                                fontSize: 20
+                            }
+                        }],
+                        tooltip: {
+                            trigger: 'axis',
+                            textStyle: {
+                                fontSize: 20
+                            }
+                        },
+                        legend: {
+                            right: '5%',
+                            data: ['您的得分', '系统均分']
+                        },
+                        xAxis: {
+                            data: dateList
+                        },
+                        yAxis: {
+                            width: 5
+                        },
+                        series: [
+                            {
+                                name: '您的得分',
+                                type: 'line',
+                                lineStyle: {
+                                    width: 3
+                                },
+                                z: 2,
+                                smooth: true,  //这句就是让曲线变平滑的
+                                smoothMonotone: 'none',
+                                data: userPointList
                             },
-                            z: 1,
-                            symbol: 'none',
-                            smooth: true,  //这句就是让曲线变平滑的
-                            smoothMonotone: 'none',
-                            data: average
-                        }
-                    ]
-                };
-                // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
-
-                //let route = 'http://localhost:8086/admin/requester/requesterGrowth';
-                // this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //
-                // }).catch(function (error) {
-                //     console.log(error);
-                // });
+                            {
+                                name: '系统均分',
+                                type: 'line',
+                                lineStyle: {
+                                    width: 3
+                                },
+                                z: 1,
+                                symbol: 'none',
+                                smooth: true,  //这句就是让曲线变平滑的
+                                smoothMonotone: 'none',
+                                data: average
+                            }
+                        ]
+                    };
+                    // 使用刚指定的配置项和数据显示图表。
+                    myChart.setOption(option);
+                }).catch(function (error) {
+                    console.log(error);
+                });
             }
         }
     }
