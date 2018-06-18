@@ -231,7 +231,7 @@
                 console.log(this.imgNames);
                 viewer = new AnnotationViewer(new FrameDrawingStrategy(), viewer,
                     'http://localhost:8086/frameAnnotation/imgName/', this.$http, 0);
-                this.viewer = new AnnotationEditor(viewer, header,n dev
+                this.viewer = new AnnotationEditor(viewer, header,
                     'http://localhost:8086/frameAnnotation/saveAnnotations/', this.$http);
                 this.viewer.drawCurrent(header, () => {
                     this.viewer.setTagUpdateCallback(this.updateTagHtml);

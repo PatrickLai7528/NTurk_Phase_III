@@ -126,7 +126,7 @@
     }
 
     .prompt {
-	    margin-top: 250px;
+	    margin-top: 150px;
     }
 
     #rate-bar {
