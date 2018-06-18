@@ -473,8 +473,10 @@ public class UpperTaskServiceImpl implements UpperTaskService, MyConstants {
             for (Task t : wTs) {
                 long countPass = annotationJPA.countPassByTaskAndUser(t.getTaskId(), w.getEmailAddress());
                 long countFail = annotationJPA.countFailByTaskAndUser(t.getTaskId(), w.getEmailAddress());
-                Record record = new Record((int) w.getId(), (int) t.getTaskId(), (int) countPass, (int) (countFail + countPass));
-                records.add(record);
+                if (countPass + countFail != 0) {
+                    Record record = new Record((int) w.getId(), (int) t.getTaskId(), (int) countPass, (int) (countFail + countPass));
+                    records.add(record);
+                }
             }
         }
         return records;
