@@ -20,7 +20,9 @@
                                             <span >类型：{{tasks[index].taskCategory}}</span >
                                         </div >
                                         <div class = "bottom-info" v-if = "isWorker === true" >
-                                            <span >状态：{{tasks[index].contractStatus}}</span >
+                                            <span >标签：</span >
+                                            <el-tag size = "small" type = "primary"
+                                                    v-for = "item in tasks[index].taskTags">{{item}}</el-tag >
                                         </div >
                                         <div class = "bottom-info" v-if = "isWorker === false" >
                                             <span >创建时间：{{tasks[index].createTime}}</span >
@@ -40,7 +42,9 @@
                                             <span >类型：{{tasks[index].taskCategory}}</span >
                                         </div >
                                         <div class = "bottom-info" v-if = "isWorker === true" >
-                                            <span >状态：{{tasks[index].contractStatus}}</span >
+                                            <span >标签：</span >
+                                            <el-tag size = "small" type = "primary"
+                                                    v-for = "item in tasks[index].taskTags">{{item}}</el-tag >
                                         </div >
                                         <div class = "bottom-info" v-if = "isWorker === false" >
                                             <span >创建时间：{{tasks[index].createTime}}</span >
@@ -186,8 +190,8 @@
             return {
                 isWorker: null,
                 notificationList: [{
-                    title: '假裝有消息',
-                    content: '假裝有描述',
+                    title: '',
+                    content: '',
                 }],
                 tasks: [{
                     taskName: '',
@@ -245,6 +249,7 @@
                     let data = response.data[i];
                     let createTime = data.createTime;
                     data.createTime = DateUtils.simpleDateFormate(createTime);
+                    console.log(data);
                     this.tasks.push(data);
                 }
                 this.translate();
