@@ -157,7 +157,7 @@ public class ItemCFAlgorithm {
         taskList = tasks;
         recordList = records;
         int userID = worker.ID;
-        generate();
+//        generate();
 
         // 一些经常用到的数据，所以提出来，看起来方便一点
         // Ru中的某一项，是<任务ID，用户对这个任务的兴趣>
@@ -225,46 +225,46 @@ public class ItemCFAlgorithm {
      * recordList：任务记录列表，
      *             "任务记录"对象（属性：用户ID、任务ID、用户得分）
      * */
-    private static void generate(){
-        JsonParser parser=new JsonParser();
-        try {
-            JsonObject object=(JsonObject) parser.parse(new FileReader(Main.class.getResource("/data/jsons/data0.json").getFile()));
-
-            generateTaskList(object.get("taskNumber").getAsInt());
-            generateUserList(object.get("userNumber").getAsInt());
-            generateRecordList(object.get("record").getAsJsonArray());
-        } catch (JsonIOException e) {
-            e.printStackTrace();
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void generateUserList(int number){
-        userList.clear();
-        for(int i=0;i<number;i++){
-            User newUser = new User();
-            userList.add(newUser);
-        }
-    }
-
-    private static void generateTaskList(int number){
-        taskList.clear();
-        for(int i=0;i<number;i++){
-            Task newTask = new Task();
-            taskList.add(newTask);
-        }
-    }
-
-    private static void generateRecordList(JsonArray array){
-        recordList.clear();
-        for (int i = 0; i < array.size(); i++) {
-            JsonArray subArray=array.get(i).getAsJsonArray();
-            Record newRecord = new Record(subArray.get(0).getAsInt(),
-                    subArray.get(1).getAsInt(), subArray.get(2).getAsInt());
-            recordList.add(newRecord);
-        }
-    }
+//    private static void generate(){
+//        JsonParser parser=new JsonParser();
+//        try {
+//            JsonObject object=(JsonObject) parser.parse(new FileReader(Main.class.getResource("/data/jsons/data0.json").getFile()));
+//
+//            generateTaskList(object.get("taskNumber").getAsInt());
+//            generateUserList(object.get("userNumber").getAsInt());
+//            generateRecordList(object.get("record").getAsJsonArray());
+//        } catch (JsonIOException e) {
+//            e.printStackTrace();
+//        } catch (JsonSyntaxException e) {
+//            e.printStackTrace();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    private static void generateUserList(int number){
+//        userList.clear();
+//        for(int i=0;i<number;i++){
+//            User newUser = new User();
+//            userList.add(newUser);
+//        }
+//    }
+//
+//    private static void generateTaskList(int number){
+//        taskList.clear();
+//        for(int i=0;i<number;i++){
+//            Task newTask = new Task();
+//            taskList.add(newTask);
+//        }
+//    }
+//
+//    private static void generateRecordList(JsonArray array){
+//        recordList.clear();
+//        for (int i = 0; i < array.size(); i++) {
+//            JsonArray subArray=array.get(i).getAsJsonArray();
+//            Record newRecord = new Record(subArray.get(0).getAsInt(),
+//                    subArray.get(1).getAsInt(), subArray.get(2).getAsInt());
+//            recordList.add(newRecord);
+//        }
+//    }
 }

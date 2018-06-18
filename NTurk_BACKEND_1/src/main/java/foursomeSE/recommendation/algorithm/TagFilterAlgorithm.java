@@ -35,7 +35,7 @@ public class TagFilterAlgorithm {
         user = worker;
         taskList = tasks;
         recordList = records;
-        generate(0);
+//        generate(0);
 
         // 一些经常用到的数据，所以提出来，看起来方便一点
         // Rank中的某一项，是<任务ID，用户对这个任务的兴趣>
@@ -95,54 +95,54 @@ public class TagFilterAlgorithm {
      * recordList：任务记录列表，
      *             "任务记录"对象（属性：用户ID、任务ID、用户得分）
      * */
-    private static void generate(int userID){
-        JsonParser parser=new JsonParser();
-        try {
-            JsonObject object=(JsonObject) parser.parse(new FileReader(Main.class.getResource("/data/jsons/TagFilter.json").getFile()));
-
-            JsonObject userObject = object.get("user").getAsJsonObject();
-            int uID = userObject.get("ID").getAsInt();
-            ArrayList<String> uTags = new ArrayList<>();
-
-            JsonArray uTagsFromJSON = userObject.get("Tags").getAsJsonArray();
-            for(int m=0;m<uTagsFromJSON.size();m++){
-                uTags.add(uTagsFromJSON.get(m).getAsString());
-            }
-
-            user = new User(uID, uTags);
-
-            taskList.clear();
-            JsonArray array = object.get("taskList").getAsJsonArray();
-            for(int i=0;i<array.size();i++){
-                JsonObject task = array.get(i).getAsJsonObject();
-                int ID = task.get("ID").getAsInt();
-                ArrayList<String> tags = new ArrayList<>();
-
-                JsonArray tagsFromJSON = task.get("Tags").getAsJsonArray();
-                for(int k=0;k<tagsFromJSON.size();k++){
-                    tags.add(tagsFromJSON.get(k).getAsString());
-                }
-
-                Task newTask = new Task(ID, tags);
-                taskList.add(newTask);
-            }
-
-            recordList.clear();
-            JsonArray array2 = object.get("recordList").getAsJsonArray();
-            for (int i = 0; i < array2.size(); i++) {
-                JsonObject record = array2.get(i).getAsJsonObject();
-                int recordUserID = record.get("userID").getAsInt();
-                int recordTaskID = record.get("taskID").getAsInt();
-                int recordScore = record.get("score").getAsInt();
-                Record newRecord = new Record(recordUserID,recordTaskID,recordScore);
-                recordList.add(newRecord);
-            }
-        } catch (JsonIOException e) {
-            e.printStackTrace();
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+//    private static void generate(int userID){
+//        JsonParser parser=new JsonParser();
+//        try {
+//            JsonObject object=(JsonObject) parser.parse(new FileReader(Main.class.getResource("/data/jsons/TagFilter.json").getFile()));
+//
+//            JsonObject userObject = object.get("user").getAsJsonObject();
+//            int uID = userObject.get("ID").getAsInt();
+//            ArrayList<String> uTags = new ArrayList<>();
+//
+//            JsonArray uTagsFromJSON = userObject.get("Tags").getAsJsonArray();
+//            for(int m=0;m<uTagsFromJSON.size();m++){
+//                uTags.add(uTagsFromJSON.get(m).getAsString());
+//            }
+//
+//            user = new User(uID, uTags);
+//
+//            taskList.clear();
+//            JsonArray array = object.get("taskList").getAsJsonArray();
+//            for(int i=0;i<array.size();i++){
+//                JsonObject task = array.get(i).getAsJsonObject();
+//                int ID = task.get("ID").getAsInt();
+//                ArrayList<String> tags = new ArrayList<>();
+//
+//                JsonArray tagsFromJSON = task.get("Tags").getAsJsonArray();
+//                for(int k=0;k<tagsFromJSON.size();k++){
+//                    tags.add(tagsFromJSON.get(k).getAsString());
+//                }
+//
+//                Task newTask = new Task(ID, tags);
+//                taskList.add(newTask);
+//            }
+//
+//            recordList.clear();
+//            JsonArray array2 = object.get("recordList").getAsJsonArray();
+//            for (int i = 0; i < array2.size(); i++) {
+//                JsonObject record = array2.get(i).getAsJsonObject();
+//                int recordUserID = record.get("userID").getAsInt();
+//                int recordTaskID = record.get("taskID").getAsInt();
+//                int recordScore = record.get("score").getAsInt();
+//                Record newRecord = new Record(recordUserID,recordTaskID,recordScore);
+//                recordList.add(newRecord);
+//            }
+//        } catch (JsonIOException e) {
+//            e.printStackTrace();
+//        } catch (JsonSyntaxException e) {
+//            e.printStackTrace();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

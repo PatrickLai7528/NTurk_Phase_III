@@ -12,6 +12,8 @@ import javafx.beans.property.IntegerProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+// 这个类根本没用的
+
 @Service
 public class ImageServiceImpl implements ImageService {
 
