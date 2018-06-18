@@ -224,7 +224,7 @@
                     nickname: this.ruleForm.userName,
                     iconName: this.isUploadIcon ? this.ruleForm.userIcon : '',
                     province: this.ruleForm.province,
-				}
+				};
 				if(this.ruleForm.userType === "WORKER"){
                     data['userTags'] = this.ruleForm.userTags;
                 }
