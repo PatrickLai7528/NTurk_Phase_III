@@ -179,7 +179,9 @@
                     let random = Math.floor(Math.random() * (10000 - 1) + 1);
                     this.ruleForm.userIcon = "usericon_" + d.getMilliseconds().toString().substring(0, 10) + random + '.jpg';
                     this.userIconUploadURL += "/" + this.ruleForm.userIcon;
-                    this.systemTags = TagUtils.getSystemTags(this.$http);
+                    TagUtils.getSystemTags(this.$http,(returnValue)=>{
+                        this.systemTags = returnValue;
+                    });
                 }
             )
         },
