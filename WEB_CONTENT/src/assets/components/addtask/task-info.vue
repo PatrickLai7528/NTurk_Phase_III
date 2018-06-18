@@ -154,7 +154,7 @@
         },
         mounted: function () {
             this.$nextTick(() => {
-                this.systemTags = TagUtils.getSystemTags();   //获得系统Tag列表
+                this.systemTags = TagUtils.getSystemTags(this.$http);   //获得系统Tag列表
                 this.setUpBusEvent()
             });
         },

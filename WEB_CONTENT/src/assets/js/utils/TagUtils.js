@@ -3,18 +3,19 @@
  */
 
 class TagUtils {
-	static getSystemTags(){
+	static getSystemTags(http){
 	    let tags = [];
-        this.$http({
-            url: "http://localhost:8086/task/systemTags/",
-            method: "GET",
-            headers: {Authorization: "sdafasfdsfdas"}
-        }).then((response)=>{
-            alert(response);
+        http.get("http://localhost:8086/systemTags").then((response)=>{
+            tags = response.data;
         }).catch((error)=> {
             console.log(error);
         })
-	}
+
+    }
+
+    static callback(){
+	    alert();
+    }
 
 	constructor() {
 	}
