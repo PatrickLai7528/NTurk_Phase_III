@@ -485,7 +485,9 @@ class AnnotationEditor {
             if (null === value || undefined === value || null === value[markingType] || undefined === value[markingType]) {
                 isDone = false;
             }
-            if (value[markingType] || value[markingType].length === 0)
+            console.log(value[markingType]);
+            console.log(value[markingType] === 0);
+            if (value[markingType].length === 0)
                 isDone = false;
             value[markingType].forEach((marking, index, array) => {
                 if (privateVariables.markingDrawingStrategy.isMarkingEmpty(marking)) {
