@@ -145,7 +145,7 @@
             },
             updateUserTags(userTags){
                 this.$http({
-                    url: "http://localhost:8086/userProfile/worker/charts/active",
+                    url: "http://localhost:8086/myInfo/editTags",
                     method: "POST",
                     headers: {Authorization: this.$store.getters.getToken},
                     data: userTags
