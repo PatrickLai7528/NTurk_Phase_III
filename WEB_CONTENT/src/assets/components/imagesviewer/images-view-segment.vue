@@ -1,153 +1,167 @@
-<template >
-    <el-container >
-        <el-main class = "wrap" >
-            <div class = "block" >
-                <el-carousel id = "carousel" ref = "carousel" height = "36em" v-bind:autoplay = "false" arrow = "always"
-                             v-on:change = "onIndexChange" >
-                    <el-carousel-item id = "carouselItem" v-for = "item in imgNames.length" :key = "item" >
-                        <div id = "canvasDiv" >
-                            <canvas id = "canvas" class = "fl" >
-                            </canvas >
-                        </div >
-                    </el-carousel-item >
-                </el-carousel >
-            </div >
-        </el-main >
-        <el-aside width = "300px" style = "alignment: center" >
-            <ul style = "list-style-type:none" >
-                <li v-for = "(val,index) in segments" >
+<template>
+    <el-container>
+        <el-main class="wrap" v-show="!dialogVisible">
+            <div class="block">
+                <el-carousel id="carousel" ref="carousel" height="36em" v-bind:autoplay="false" arrow="always"
+                             v-on:change="onIndexChange">
+                    <el-carousel-item id="carouselItem" v-for="item in imgNames.length" :key="item">
+                        <div id="canvasDiv">
+                            <canvas id="canvas" class="fl">
+                            </canvas>
+                        </div>
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+        </el-main>
+        <el-aside width="300px" style="alignment: center" v-show="!dialogVisible">
+            <ul style="list-style-type:none">
+                <li v-for="(val,index) in segments">
                     <el-popover
-		                    placement = "right"
-		                    width = "150"
-		                    trigger = "click"
+                            placement="right"
+                            width="150"
+                            trigger="click"
                     >
                         <el-input
-		                        type = "textarea"
-		                        :rows = "2"
-		                        v-model = "val.tag"
-		                        :disabled = "true"
+                                type="textarea"
+                                :rows="2"
+                                v-model="val.tag"
+                                :disabled="true"
                         >
-                        </el-input >
-                        <el-button slot = "reference" class = "tag" >標記{{index+1}}</el-button >
-                        <el-button @click = "deleteTag(index)" :disabled = "true" >刪除</el-button >
-                    </el-popover >
-                </li >
-            </ul >
-            <div v-if = "isRequester === false" >
-                <div class = "prompt text" v-if = "taskType === 'grade'" >请判断该标注的正确性：</div >
-                <div class = "prompt text" v-if = "taskType === 'coverage'" >请判断标注的完整性：</div >
-                <div v-if = "taskType === 'grade'" >
-                    <div >
-                        <img src = "../../images/good.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "1"
-                                  v-on:change = "ratingChange" >我觉得可以</el-radio >
-                    </div >
-                    <div class = "next" >
-                        <img src = "../../images/bad.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "0"
-                                  v-on:change = "ratingChange" >我觉得不行</el-radio >
-                    </div >
-                </div >
-                <div v-if = "taskType === 'coverage'" >
+                        </el-input>
+                        <el-button slot="reference" class="tag">標記{{index+1}}</el-button>
+                        <el-button @click="deleteTag(index)" :disabled="true">刪除</el-button>
+                    </el-popover>
+                </li>
+            </ul>
+            <div v-if="isRequester === false">
+                <div class="prompt text" v-if="taskType === 'grade'">请判断该标注的正确性：</div>
+                <div class="prompt text" v-if="taskType === 'coverage'">请判断标注的完整性：</div>
+                <div v-if="taskType === 'grade'">
+                    <div>
+                        <img src="../../images/good.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" :label="1"
+                                  v-on:change="ratingChange">我觉得可以
+                        </el-radio>
+                    </div>
+                    <div class="next">
+                        <img src="../../images/bad.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" :label="0"
+                                  v-on:change="ratingChange">我觉得不行
+                        </el-radio>
+                    </div>
+                </div>
+                <div v-if="taskType === 'coverage'">
 
-                        <img src = "../../images/continued.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "0"
-                                  v-on:change = "ratingChange" >还有漏网之鱼</el-radio >
+                    <img src="../../images/continued.svg" width="300" height="100">
+                    <el-radio class="text" v-model="nowRating" :label="0"
+                              v-on:change="ratingChange">还有漏网之鱼
+                    </el-radio>
 
-                    <div class = "next" >
-                        <img src = "../../images/done.svg" width = "300" height = "100" >
-                        <el-radio class = "text" v-model = "nowRating" :label = "1"
-                                  v-on:change = "ratingChange" >已经一网打尽</el-radio >
-                    </div >
+                    <div class="next">
+                        <img src="../../images/done.svg" width="300" height="100">
+                        <el-radio class="text" v-model="nowRating" :label="1"
+                                  v-on:change="ratingChange">已经一网打尽
+                        </el-radio>
+                    </div>
 
 
-                </div >
-                <el-button id = "commit-button" :disabled = commitDisabled @click = "commitRating"
-                           type = "primary" >提交<i class = "el-icon-upload el-icon--right" ></i ></el-button >
-            </div >
-        </el-aside >
+                </div>
+                <el-button id="commit-button" :disabled=commitDisabled @click="commitRating"
+                           type="primary">提交<i class="el-icon-upload el-icon--right"></i></el-button>
+            </div>
+        </el-aside>
 
-        <el-dialog class = "warn" title = "错误提示" :visible.sync = "dialogVisible" :modal = "false" top = "9vh" >
-            <p >亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p >
-            <div id = "canvasDiv2" >
-                <div v-html = "canvasHtml" >
-                    {{canvasHtml}}
-                </div >
-                <div v-html = "tagHtml" >{{tagHtml}}</div >
-            </div >
-            <p >这道题的图片和标注如上图所示</p >
-            <p >您认为:{{wrongAnswerPairs[0]}}</p >
-            <p >但实际上：{{wrongAnswerPairs[1]}}</p >
-            <p >您的答案对标注的质量非常关键，请您在下次的标注中更加<strong >用心</strong >和<strong >仔细</strong ></p >
-            <p >我们还会<strong >继续检查</strong >您的答案，如果下次再发现问题可能会对您采取<strong >惩罚措施</strong ></p >
+        <div style="text-align: center;font-family: Microsoft YaHei;">
+            <el-row>
+                <el-col :offset="8">
+                    <el-card v-show="dialogVisible" style="overflow: auto; text-align: center; height: 700px">
+                        <!--<el-dialog class = "warn" title = "错误提示" :visible.sync = "dialogVisible" :modal = "false" top = "9vh"-->
+                        <!--@open = "setCanvas2" >-->
+                        <p slot="header">亲爱的用户，在您刚才的评判过程中，我们发现了错误的判决：</p>
+                        <div id="canvasDiv2">
+                            <div v-html="canvasHtml">
+                                {{canvasHtml}}
+                            </div>
+                            <div v-html="tagHtml">{{tagHtml}}</div>
+                        </div>
+                        <!--<canvas id = "canvas2" ></canvas >-->
+                        <p>这道题的图片和标注如上图所示</p>
+                        <p>您认为:{{wrongAnswerPairs[0]}}</p>
+                        <p>但实际上：{{wrongAnswerPairs[1]}}</p>
+                        <p>您的答案对标注的质量非常关键，请您在下次的标注中更加<strong>用心</strong>和<strong>仔细</strong></p>
+                        <p>我们还会<strong>继续检查</strong>您的答案，如果下次再发现问题可能会对您采取<strong>惩罚措施</strong></p>
 
-            <el-button type = "primary" @click = "read()" >确 定</el-button >
-        </el-dialog >
-    </el-container >
-</template >
+                        <el-button type="primary" @click="read()">确 定</el-button>
+                        <!--</el-dialog >-->
+                    </el-card>
+                </el-col>
+            </el-row>
+        </div>
+    </el-container>
+</template>
 
-<style >
+<style>
     .el-carousel__item:nth-child(2n) {
-	    background-color: #99a9bf;
+        background-color: #99a9bf;
     }
 
     .el-carousel__item:nth-child(2n+1) {
-	    background-color: #d3dce6;
+        background-color: #d3dce6;
     }
 
     .fl {
-	    float: left;
-	    display: block;
+        float: left;
+        display: block;
     }
 
     #carouselItem {
-	    text-align: center;
+        text-align: center;
     }
 
     #canvas {
-	    border-right: 1px #585858 solid;
-	    cursor: crosshair;
-	    background-color: black;
+        border-right: 1px #585858 solid;
+        cursor: crosshair;
+        background-color: black;
     }
 
     #canvasDiv {
-	    position: relative;
-	    display: inline-block;
+        position: relative;
+        display: inline-block;
     }
 
     .el-button {
-	    width: 100px;
-	    margin: 10px;
+        width: 100px;
+        margin: 10px;
     }
 
     .tag {
-	    background-color: #df4b26;
-	    color: white;
+        background-color: #df4b26;
+        color: white;
     }
 
     .prompt {
-	    margin-top: 150px;
+        margin-top: 150px;
     }
 
     #rate-bar {
-	    margin-top: 20px;
+        margin-top: 20px;
     }
 
     #commit-button {
-	    margin-top: 50px;
+        margin-top: 50px;
     }
 
     .next {
-	    margin-top: 20px;
+        margin-top: 20px;
     }
 
     .text {
-	    font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
-	    font-weight: 600;
+        font-family: Arial, KaiTi, STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
+        font-weight: 600;
     }
-</style >
+</style>
 
-<script >
+<script>
     import UserUtils from '../../js/utils/UserUtils.js'
     import ImageViewer from '../../js/ImageViewer.js'
     import SegmentDrawingStrategy from '../../js/strategy/SegmentDrawingStrategy.js'
@@ -217,9 +231,10 @@
                 dialogVisible: false,
                 wrongAnnotation: {},
                 wrongImg: '',
-                canvasHtml: '<canvas id="canvas"></canvas>',
+                canvasHtml: '<canvas id="canvas2"></canvas>',
                 tagHtml: '',
                 wrongAnswerPairs: [],
+                isCanvas2Set: false,
             }
         },
         mounted() {
@@ -240,30 +255,59 @@
                 _this.number = _this.imgNames.length;
                 _this.percent = parseFloat(((_this.nowIndex + 1) / _this.number * 100).toFixed(1));
                 _this.loadAnnotationList(_this.loadImageAndAnnotation);
-                _this.setDialogContent();
+                // _this.setDialogContent();
             });
         },
         methods: {
+            setCanvas2() {
+                this.canvas2 = document.getElementById("canvas2");
+                this.isCanvas2Set = true;
+            },
             selectCanvas() {
                 return document.getElementById("canvas");
             },
             setDialogContent(annotation) {
-                // let id, doIt;
-                // doIt = () => {
-                let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
-                config = {strokeStyle: "black"};
-                canvas = this.selectCanvas();
-                imageNameList.push(this.wrongImg);
-                imageViewer = new ImageViewer(canvas, imageNameList, "");
-                imageViewer.drawCurrent();
-                drawingStrategy = new SegmentDrawingStrategy();
-                markingType = drawingStrategy.getMarkingTypeName();
-                annotation[markingType].forEach((value, index, array) => {
-                    drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
-                });
+                let id, doIt;
+                doIt = () => {
+                    let imageViewer, imageNameList = [], canvas, drawingStrategy, markingType, config;
+                    // config.strokeStyle;
+                    // context.fillStyle = config.fillStyle;
+                    // context.globalAlpha = config.globalAlpha;
+                    config = {
+                        strokeStyle: "black",
+                        fillStyle: "red",
+                        globalAlpha: 0.5
+                    };
+                    // canvas = this.selectCanvas();
+                    canvas = this.canvas2;
+                    imageNameList.push(this.wrongImg);
+                    console.log(canvas);
+                    imageViewer = new ImageViewer(canvas, imageNameList, "");
+                    imageViewer.drawCurrent(() => {
+                        drawingStrategy = new SegmentDrawingStrategy();
+                        markingType = drawingStrategy.getMarkingTypeName();
+                        console.log(annotation);
+
+                        annotation[markingType].forEach((value, index, array) => {
+                            drawingStrategy.drawThis(canvas.getContext("2d"), value, config);
+                            // this.tagHtml += drawingStrategy.addTag(canvas, value, index);
+                        })
+                    });
+                };
+                if (this.isCanvas2Set) {
+                    doIt();
+                } else {
+                    id = setInterval(() => {
+                        if (this.isCanvas2Set) {
+                            doIt();
+                            clearInterval(id);
+                        }
+                    }, 1000)
+                }
             },
             read() {
                 this.dialogVisible = false;
+                this.$router.push({path:'/profile'});
             },
             commitRating() {
                 //list里面的对象包含annotationId和rate
@@ -352,6 +396,7 @@
                 }
             },
             showDialog(annotation) {
+                this.setCanvas2();
                 this.dialogVisible = true;   //显示错误提示
                 this.setDialogContent(annotation);
             },
@@ -386,6 +431,7 @@
                     confirmButtonText: '确定',
                     type: 'error',
                 });
+                this.$router.push({path:'/profile'});
             },
             successMessage() {
                 this.$notify({
@@ -426,11 +472,17 @@
                 });
             },
             canCommit() {
-                if (this.ratings.length === this.imgNames.length) {
-                    this.commitDisabled = false;
+                if (this.ratings.length !== this.imgNames.length) {
+                    this.commitDisabled = 'disabled';
                 }
                 else {
-                    this.commitDisabled = 'disabled';
+                    for (let i = 0; i < this.ratings.length; i++) {
+                        if (this.ratings[i] === undefined) {
+                            this.commitDisabled = 'disabled';
+                            return;
+                        }
+                    }
+                    this.commitDisabled = false;
                 }
             },
             ratingChange: function (score) {
@@ -473,7 +525,7 @@
                                 temp.segment.color = '#C0392B';
                             }
 
-                            if(temp.segment !== null && temp.segment !== undefined){
+                            if (temp.segment !== null && temp.segment !== undefined) {
                                 temp.segments.push(temp.segment);
                             }
 
@@ -516,9 +568,16 @@
             },
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
-                this.nowRating = 5;
-                this.commitDisabled = 'disabled';
                 this.loadWhenChange(newIndex);
+
+                if (this.ratings[this.nowIndex] !== undefined) {
+                    this.nowRating = this.ratings[this.nowIndex];
+                }
+                else {
+                    this.nowRating = 5;
+                }
+
+                this.canCommit();
             },
             loadImageAndAnnotation() {
                 let _this = this;
@@ -632,4 +691,4 @@
             },
         }
     }
-</script >
+</script>

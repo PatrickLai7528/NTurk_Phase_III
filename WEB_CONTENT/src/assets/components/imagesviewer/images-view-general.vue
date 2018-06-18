@@ -230,12 +230,20 @@
                     console.log("-1");
                 });
             },
-            canCommit(){
-                if(this.ratings.length === this.imgNames.length){
-                    this.commitDisabled = false;
-                }
-                else{
+            canCommit() {
+                if (this.ratings.length !== this.imgNames.length) {
                     this.commitDisabled = 'disabled';
+                    return;
+                }
+                else {
+                    for(let i = 0;i < this.ratings.length;i++){
+                        if(this.ratings[i] === undefined){
+                            this.commitDisabled = 'disabled';
+                            return;
+                        }
+                    }
+                    this.commitDisabled = false;
+                    return;
                 }
             },
             loadAnnotationList(){            //现在加载逻辑非常简单  annotationId都有，只要按照顺序push就好了
@@ -276,8 +284,13 @@
             },
             onIndexChange: function (newIndex, oldIndex) {
                 this.nowIndex = newIndex;
-                this.nowRating = 5;
-                this.commitDisabled = 'disabled';
+                if(this.ratings[this.nowIndex] !== undefined){
+                    this.nowRating = this.ratings[this.nowIndex];
+                }
+                else{
+                    this.nowRating = 5;
+                }
+
                 this.canCommit();
             },
             ratingChange: function(score){

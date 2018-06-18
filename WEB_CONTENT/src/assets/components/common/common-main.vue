@@ -27,7 +27,6 @@
             </el-table-column >
             <el-table-column prop = "source" label = "任务来源" sortable :filters = "[
                                 {text: '参加过', value: '参加过'},
-                                {text: '我喜欢', value: '标注任务'},
                                 {text: '猜你喜欢', value: '猜你喜欢'},
                                 {text: '新任务', value: '新任务'}]"
                              :filter-method = "filterSourceHandler" ></el-table-column >
@@ -67,6 +66,8 @@
         <el-dialog class = "tutorial" title = "教程" :visible.sync = "dialogTutorialVisible" :modal = "false"
                    top = "9vh" >
             <p >亲爱的用户，在您开始进行标注前，请您仔细阅读下面教程，可能会让你事半功倍呦：</p >
+            <p> 您只需要在一张图上面标注<strong>一个</strong>所需物品即可</p>
+            <p> 您有可能会在图片上看到<strong>已有的标注</strong>，不要惊讶，就把它们当作您标注的规范来进行标注</p>
             <p >首先您要了解什么是好的标注，接下来以<strong >画框标注</strong >为例：</p >
             <img src = "../../images/tutorial.png" height = "400" width = "600" >
             <p >对标注最大的要求首先是<strong >不偏不倚</strong >，根据任务的要求找到相应的物品，但是还远不止于此</p >
@@ -82,6 +83,7 @@
         <el-dialog class = "tutorial" title = "教程" :visible.sync = "dialogGradingVisible" :modal = "false" top = "9vh" >
             <p >亲爱的用户，您接下来要进行一项简单却事关重大的任务</p >
             <p >您仅仅需要判断其他用户的标注是否<strong >准确</strong ></p >
+            <p >图片上可能有<strong>不只一个</strong>标注，不要感觉无从下手，您只需要判断用<strong>红色</strong>标注的哪一个标注的正确性即可</p>
             <p >接下来是几张优秀的标注和不准确的标注图片，请您过目：</p >
             <img src = "../../images/tutorial.png" height = "400" width = "600" >
             <p >上图二的标注不够精细，<strong >没有紧紧贴合</strong >物体的轮廓，框出了一些物体之外的背景，是<strong >不能过关</strong >的标注</p >
@@ -166,6 +168,7 @@
                 this.sourceDictionary["http://localhost:8086/workerTasks"] = '参加过';
                 //"http://localhost:8086/newTasks","http://localhost:8086/workerTasks"
                 this.sourceDictionary["http://localhost:8086/newTasks"] = '新任务';   //后面还可以扩充我喜欢或者为你推荐
+                this.sourceDictionary['http://localhost:8086/recommendTasks'] = '猜你喜欢';
             },
             filterCategoryHandler(value, row, column) {      //对任务的类别进行筛选
                 return row.taskCategory === value;
@@ -188,10 +191,17 @@
                 }
             },
             doWhileGetTableDataSuccess(response, url) {        //赖总的编程风格很友好啊，将代码都优化了
-                console.log(response.data);
-                if (response.data.length != 0) {
+                if (response.data.length !== 0) {
                     for (let e of response.data) {
-                        if (!(e in this.tableData)) {
+                        let flag = true;
+                        for(let i = 0;i < this.tableData.length;i++){
+                            if(e.taskId === this.tableData[i].taskId){
+                                flag = false;
+                                break;
+                            }
+                        }
+
+                        if(flag === true){
                             this.tableData.push(e);
                             e.source = this.sourceDictionary[url];     //添加来源
                         }
@@ -202,9 +212,9 @@
             },
             decideGetTableDataUrl() {//现在的返回值是一个数组
                 if (this.message === "user")   //现在理论上来说应该得到我喜欢的任务，但是还没有实现
-                    return ["http://localhost:8086/workerTasks"]; //用户中心得到的是以前存在的任务
-                else
-                    return ["http://localhost:8086/workerTasks", "http://localhost:8086/newTasks"];
+                    return ["http://localhost:8086/recommendTasks"]; //用户中心得到的是以前存在的任务
+            else
+                    return ["http://localhost:8086/workerTasks","http://localhost:8086/newTasks"];
             },
             getTableData() {
                 let header = {Authorization: this.$store.getters.getToken};
@@ -287,6 +297,7 @@
                         _this.path = _this.routerDictionary[taskCategory];
                     }
                 }).catch(function (error) {
+                    _this.forbiddenMessage();
                     console.log(error);
                 })
             },
@@ -302,6 +313,13 @@
                     title: '系统提示',
                     message: '这个任务没有更多需要评审的标注了，换个任务试试吧^_^',
                     type: 'success'
+                });
+            },
+            forbiddenMessage(){
+                this.$notify({
+                    title: '系统警告',
+                    message: '由于您在这个任务中评审的正确率太低，已经被禁止参加这个任务的评审工作了',
+                    type: 'error'
                 });
             },
             messageHandler() {

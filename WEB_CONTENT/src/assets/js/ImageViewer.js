@@ -85,12 +85,12 @@ class ImageViewer {
 
 		if (!imageNames instanceof Array)
 			throw new Error("ImageViewer's constructor expected a imageNames of array, but got a " + typeof imageNames);
-
+		console.log("fuck ");
 		if (typeof baseUrl !== "string")
 			throw new Error("ImageViewer's constructor expected a baseUrl of string, but got a " + typeof baseUrl);
 
-		if (baseUrl[baseUrl.length - 1] !== "/")
-			throw new Error("ImageViewer's constructor: baseUrl should included the last '/'");
+		// if (baseUrl[baseUrl.length - 1] !== "/")
+		// 	throw new Error("ImageViewer's constructor: baseUrl should included the last '/'");
 
 		privateVariables.canvas = canvas;
 		privateVariables.canvas.height = privateVariables.config.defaultHeight;

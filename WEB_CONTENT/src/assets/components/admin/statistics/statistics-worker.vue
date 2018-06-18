@@ -5,12 +5,6 @@
                 <el-tab-pane label="工人增长">
                     <div id="workerGrowth" style="height: 600px; width: 900px"></div>
                 </el-tab-pane>
-                <el-tab-pane label="工人分布-饼状图">
-                    <div id="workerDisPie" style="height: 600px; width: 900px"></div>
-                </el-tab-pane>
-                <el-tab-pane label="工人分布-地图">
-                    <div id="workerDisMap" style="height: 600px; width: 900px"></div>
-                </el-tab-pane>
                 <el-tab-pane label="工人活跃度">
                     <div id="workerActive" style="height: 600px; width: 900px"></div>
                 </el-tab-pane>
@@ -24,8 +18,6 @@
         mounted: function () {
             this.$nextTick(()=> {
                 this.setWorkerGrowth();
-                this.setWorkerDisPie();
-                this.setWorkerDisMap();
                 this.setWorkerActive();
             })
         },
@@ -39,10 +31,10 @@
                     let data = response.data;
                     let dateList = data.map((item)=> {
                         return item.date;
-                    });;
+                    });
                     let valueList = data.map((item)=> {
                         return item.value;
-                    });;
+                    });
 
                     let option = {
                         textStyle: {
@@ -95,163 +87,6 @@
                                 width: 5
                             }
                         }]
-                    };
-                    // 使用刚指定的配置项和数据显示图表。
-                    myChart.setOption(option);
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            setWorkerDisPie: function() {
-                let echarts = require('echarts');
-                let myChart = echarts.init(document.getElementById('workerDisPie'));
-
-                let route = 'http://localhost:8086/admin/worker/workerDis';
-                this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = response.data;
-                    let provinceList = data.map((item)=> {
-                        return item.name;
-                    });;
-
-                    let option = {
-                        textStyle: {
-                            fontSize: 20
-                        },
-                        title: {
-                            text: '工人数量统计',
-                            subtext: '饼图展示',
-                            x:'center',
-                            textStyle: {
-                                fontSize: 20
-                            }
-                        },
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: "{a} <br/>{b}: {c}人 ({d}%)",
-                            textStyle: {
-                                fontSize: 20
-                            }
-                        },
-                        legend: {
-                            orient: 'vertical',
-                            left: 'left',
-                            data: provinceList
-                        },
-                        series: [
-                            {
-                                name: '工人数量',
-                                type: 'pie',
-                                radius: '70%',
-                                center: ['60%', '50%'],
-                                data: data
-                            }
-                        ],
-                        color: [
-                            '#32C5E9','#9FE6B8',
-                            '#FFDB5C','#FF9F7F',
-                            '#FB7293','#E7BCF3',
-                            '#8378EA','#37A2DA'
-                        ]
-                    };
-
-                    // 使用刚指定的配置项和数据显示图表。
-                    myChart.setOption(option);
-                }).catch(function (error) {
-                    console.log(error);
-                });
-            },
-            setWorkerDisMap: function() {
-                let echarts = require('echarts');
-                let myChart = echarts.init(document.getElementById('workerDisMap'));
-                require('echarts/map/js/china.js');
-
-                let route = 'http://localhost:8086/admin/worker/workerDis';
-                this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = response.data;
-
-                    let option = {
-                        textStyle: {
-                            fontSize: 20
-                        },
-                        title: {
-                            text: '工人数量统计',
-                            subtext: '地图展示',
-                            x:'center',
-                            textStyle: {
-                                fontSize: 20
-                            }
-                        },
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: function(data){
-                                if( !isNaN(data.value) ){
-                                    return '工人数量'+'<br/>'+data.name+': '+data.value+'人';
-                                }
-                            },
-                            textStyle: {
-                                fontSize: 20
-                            }
-                        },
-                        visualMap: {
-                            min: 0,
-                            max: 1000,
-                            left: 'left',
-                            top: 'bottom',
-                            text: ['High','Low'],
-                            seriesIndex: [1],
-                            inRange: {
-                                color: ['#e0ffff', '#73cefc', '#2ea8ff', '#006edd']
-                            },
-                            calculable: true
-                        },
-                        geo: {
-                            map: 'china',
-                            roam: true,
-                            label: {
-                                normal: {
-                                    show: true,
-                                    textStyle: {
-                                        color: 'rgba(0,0,0,0.4)'
-                                    }
-                                }
-                            },
-                            itemStyle: {
-                                normal:{
-                                    borderColor: 'rgba(0, 0, 0, 0.2)'
-                                },
-                                emphasis:{
-                                    areaColor: null,
-                                    shadowOffsetX: 0,
-                                    shadowOffsetY: 0,
-                                    shadowBlur: 20,
-                                    borderWidth: 0,
-                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                                }
-                            }
-                        },
-                        series: [
-                            {
-                                type: 'scatter',
-                                coordinateSystem: 'geo',
-                            },
-                            {
-                                name: '工人数量',
-                                type: 'map',
-                                geoIndex: 0,
-                                // tooltip: {show: false},
-                                label: {
-                                    normal: {
-                                        formatter: '{b}',
-                                        position: 'right',
-                                        show: false
-                                    },
-                                    emphasis: {
-                                        show: true
-                                    }
-                                },
-                                data: data
-                            }
-                        ]
                     };
                     // 使用刚指定的配置项和数据显示图表。
                     myChart.setOption(option);

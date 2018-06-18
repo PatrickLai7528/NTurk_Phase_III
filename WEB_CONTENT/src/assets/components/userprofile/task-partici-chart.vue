@@ -27,52 +27,46 @@
         mounted: function () {
             this.notGeneral = (this.taskCategory !== "GENERAL");
             this.$nextTick(()=> {
-                let root = "http://localhost:8086/userProfile/requester/charts/";
-                this.setWaveGraph("draw", root+"general/", 'rgb(135, 224, 166)', "每日标注数量");
-                this.setWaveGraph("quality", root+"general/", 'rgb(245, 105, 57)', "每日评审数量");
-                if(this.notGeneral){
-                    this.setWaveGraph("coverage", null, 'rgb(198, 38, 47)', "每日审核数量");
-                }
+                this.$http({
+                    url: "http://localhost:8086/userProfile/requester/charts/"+this.taskId,
+                    method: "GET",
+                    headers: {Authorization: this.$store.getters.getToken},
+                }).then((response)=>{
+                    let data = response.data;
+                    let drawMax = 0;
+                    let qualityMax = 0;
+                    let coverageMax = 0;
+
+                    let dateList = data.map((item)=> {
+                        return item.date;
+                    });
+                    let drawList = data.map((item)=> {
+                        drawMax = item.draw>drawMax ? item.draw : drawMax;
+                        return item.draw;
+                    });
+                    let qualityList = data.map((item)=> {
+                        qualityMax = item.quality>qualityMax ? item.quality : qualityMax;
+                        return item.quality;
+                    });
+                    let coverageList = data.map((item)=> {
+                        coverageMax = item.coverage>coverageMax ? item.coverage : coverageMax;
+                        return item.coverage;
+                    });
+
+                    this.setWaveGraph("draw", dateList, drawList, drawMax, 'rgb(135, 224, 166)', "每日标注数量");
+                    this.setWaveGraph("quality", dateList, qualityList, qualityMax, 'rgb(245, 105, 57)', "每日评审数量");
+                    if(this.notGeneral){
+                        this.setWaveGraph("coverage", dateList, coverageList, coverageMax, 'rgb(198, 38, 47)', "每日审核数量");
+                    }
+                }).catch((error)=> {
+                    console.log(error);
+                });
             })
         },
         methods: {
-            setWaveGraph(elementID, route, color, message) {
+            setWaveGraph(elementID, dateList, valueList, max, color, message) {
                 let echarts = require('echarts');
                 let myChart = echarts.init(document.getElementById(elementID));
-                let max = 0;
-
-                let data = [
-                    {date: "2018-05-13", value: 2},
-                    {date: "2018-05-14", value: 4},
-                    {date: "2018-05-16", value: 6},
-                    {date: "2018-05-17", value: 4},
-                    {date: "2018-05-18", value: 8},
-                    {date: "2018-05-20", value: 7},
-                    {date: "2018-05-23", value: 5},
-                    {date: "2018-05-25", value: 9},
-                    {date: "2018-05-28", value: 6},
-                    {date: "2018-05-31", value: 10},
-                    {date: "2018-06-01", value: 7},
-                    {date: "2018-06-04", value: 5},
-                    {date: "2018-06-07", value: 8},
-                    {date: "2018-06-09", value: 9},
-                    {date: "2018-06-10", value: 3},
-                ];
-                let dateList = data.map((item)=> {
-                    // let date = item.date.split("/");
-                    // let year = parseInt(date[0]);
-                    // let month = parseInt(date[1]);
-                    // let day = parseInt(date[2]);
-                    // alert(new Date(year, month, day));
-                    // return new Date(year, month, day);
-                    return item.date;
-                });
-                let valueList = data.map((item)=> {
-                    if(max<item.value){
-                        max = item.value;
-                    }
-                    return item.value;
-                });
 
                 let option = {
                     textStyle: {
@@ -144,46 +138,6 @@
                 };
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
-
-                //let route = 'http://localhost:8086/admin/requester/requesterGrowth';
-                // this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                //
-                // }).catch(function (error) {
-                //     console.log(error);
-                // });
-            },
-            addDateAndValue(dateList, valueList){
-                let interval = 3600 * 24 * 1000;
-                let firstDay = new Date(dateList[0]).getTime();
-                let theDayBefore = firstDay - interval;
-
-                let saveDate = dateList;
-
-                for(let i=0;i<saveDate.length;i++){
-                    let index = i;
-                    let stamp_i = new Date(saveDate[i]).getTime();
-                    if(stamp_i-theDayBefore>interval){
-                        let currentDay = theDayBefore + interval;
-                        while(currentDay < stamp_i){
-                            dateList.splice(index, 0, this.getLocalTime(currentDay));
-                            valueList.splice(index, 0, 0);
-                            theDayBefore = currentDay;
-                            currentDay = currentDay + interval;
-                            index++;
-                        }
-                    }
-                    theDayBefore = stamp_i;
-                }
-            },
-            //时间戳转时间字符串
-            getLocalTime(timeStamp) {
-                let date = new Date(timeStamp);//毫秒
-                let year = date.getFullYear();
-                let month = date.getMonth() + 1;
-                month = month > 9 ? month : ("0" + month);
-                let day = date.getDate();
-                day = day > 9 ? day : ("0" + day);
-                return year + "-" + month + "-" + day;
             }
         }
     }

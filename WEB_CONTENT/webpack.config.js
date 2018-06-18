@@ -22,8 +22,8 @@ module.exports = (options = {}) => ({
         },
             {
                 test: /\.js$/,
-                use: ['babel-loader'],
-                exclude: /node_modules/
+                loader: 'babel-loader',//注意elementUI的源码使用ES6需要解析,注意，这里不要直接复制，还需要改element ui对应的版本号
+                include: [resolve('node_modules/element-ui/packages/row/src/row.js'), resolve('src'), resolve('test'), resolve('/node_modules/.1.4.2@element-ui/src'), resolve('/node_modules/.1.4.2@element-ui/packages')]
             },
             {
                 test: /\.css$/,
