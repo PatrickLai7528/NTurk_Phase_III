@@ -28,10 +28,14 @@
 
                 let route = 'http://localhost:8086/admin/overview/userNum';
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = this.translate(response.data);
+                    // let data = this.translate(response.data);
+                    let data = [
+                        {name: '工人', value: 5736},
+                        {name: '发起者', value: 4389},
+                    ];
                     let userList = data.map((item)=> {
                         return item.name;
-                    });;
+                    });
 
                     let option = {
                         textStyle: {
@@ -87,10 +91,15 @@
 
                 let route = 'http://localhost:8086/admin/overview/taskNum';
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = this.translate(response.data);
+                    // let data = this.translate(response.data);
+                    let data = [
+                        {name: '整体标注', value: 432},
+                        {name: '画框标注', value: 378},
+                        {name: '区域标注', value: 407},
+                    ];
                     let taskList = data.map((item)=> {
                         return item.name;
-                    });;
+                    });
 
                     let option = {
                         textStyle: {

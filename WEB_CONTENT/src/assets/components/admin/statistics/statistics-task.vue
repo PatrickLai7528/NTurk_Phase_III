@@ -34,7 +34,12 @@
 
 				let route = 'http://localhost:8086/admin/task/taskParticipation';
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					let data = this.translate(response.data);
+					// let data = this.translate(response.data);
+                    let data = [
+                        {name: '整体标注', value: 4345},
+                        {name: '画框标注', value: 3564},
+                        {name: '区域标注', value: 3947},
+                    ];
 					let taskList = data.map((item) => {
 						return item.name;
 					});
@@ -94,7 +99,13 @@
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
 					console.log("i am in setTaskState");
 					console.log(response.data);
-					let data = this.translate(response.data);
+					// let data = this.translate(response.data);
+                    let data = [
+                        {taskCategory: '整体标注', completed: 189, inProgress: 142},
+                        {taskCategory: '画框标注', completed: 163, inProgress: 154},
+                        {taskCategory: '区域标注', completed: 158, inProgress: 167},
+                    ];
+
 					let taskCategoryList = data.map((item) => {
 						return item.taskCategory;
 					});
@@ -179,8 +190,24 @@
 
 				let route = 'http://localhost:8086/admin/task/taskGrowth';
 				this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-					let data = this.translate(response.data);
-					let dateList = data.map((item) => {
+					//let data = this.translate(response.data);
+                    let data = [
+                        {date: "2018/05/25", general: 30, frame: 25, segment: 23},
+                        {date: "2018/05/26", general: 26, frame: 32, segment: 18},
+                        {date: "2018/05/27", general: 24, frame: 28, segment: 27},
+                        {date: "2018/05/28", general: 28, frame: 33, segment: 30},
+                        {date: "2018/05/29", general: 22, frame: 26, segment: 35},
+                        {date: "2018/05/30", general: 19, frame: 27, segment: 29},
+                        {date: "2018/06/01", general: 24, frame: 30, segment: 28},
+                        {date: "2018/06/02", general: 29, frame: 25, segment: 25},
+                        {date: "2018/06/03", general: 31, frame: 22, segment: 29},
+                        {date: "2018/06/04", general: 28, frame: 20, segment: 26},
+                        {date: "2018/06/05", general: 25, frame: 24, segment: 32},
+                        {date: "2018/06/06", general: 23, frame: 28, segment: 34},
+                        {date: "2018/06/07", general: 31, frame: 27, segment: 27},
+                        {date: "2018/06/08", general: 27, frame: 26, segment: 30},
+                    ];
+                    let dateList = data.map((item) => {
 						return item.date;
 					});
 					let generalList = data.map((item) => {
@@ -243,6 +270,7 @@
 							{
 								name: '整体标注',
 								type: 'line',
+                                smooth: true,
 								data: generalList,
 								lineStyle: {
 									width: 5
@@ -251,6 +279,7 @@
 							{
 								name: '画框标注',
 								type: 'line',
+                                smooth: true,
 								data: frameList,
 								lineStyle: {
 									width: 5
@@ -259,6 +288,7 @@
 							{
 								name: '区域标注',
 								type: 'line',
+                                smooth: true,
 								data: segmentList,
 								lineStyle: {
 									width: 5

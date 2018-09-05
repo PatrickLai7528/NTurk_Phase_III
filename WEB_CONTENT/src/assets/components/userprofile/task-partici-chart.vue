@@ -32,7 +32,8 @@
                     method: "GET",
                     headers: {Authorization: this.$store.getters.getToken},
                 }).then((response)=>{
-                    let data = response.data;
+                    // let data = response.data;
+                    let data = this.getVirtualData();
                     let drawMax = 0;
                     let qualityMax = 0;
                     let coverageMax = 0;
@@ -104,7 +105,7 @@
                                 fontSize: 16
                             }
                         },
-                        max: max*1.5
+                        max: 50
                     }],
                     grid: [{
                         bottom: '10%'
@@ -118,7 +119,6 @@
                         },
                         symbol:'none',  //这句就是去掉点的
                         smooth: true,  //这句就是让曲线变平滑的
-                        smoothMonotone: 'none',
                         areaStyle: {
                             color: {
                                 type: 'linear',
@@ -138,6 +138,25 @@
                 };
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
+            },
+            getVirtualData(){
+                let data = [
+                    {date: "2018/05/25", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/05/26", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/05/27", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/05/28", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/05/29", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/05/30", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/01", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/02", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/03", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/04", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/05", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/06", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/07", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 1, coverage: Math.floor(Math.random() * 30) + 1},
+                    {date: "2018/06/08", draw: Math.floor(Math.random() * 40) + 1, quality: Math.floor(Math.random() * 30) + 2, coverage: Math.floor(Math.random() * 30) + 1},
+                ];
+                return data;
             }
         }
     }

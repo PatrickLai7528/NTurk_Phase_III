@@ -28,7 +28,27 @@
 
                 let route = 'http://localhost:8086/admin/worker/workerGrowth';
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = response.data;
+                    // let data = response.data;
+
+                    let data = [
+                        {date: "2018-06-01", value: 42},
+                        {date: "2018-06-02", value: 37},
+                        {date: "2018-06-03", value: 65},
+                        {date: "2018-06-04", value: 29},
+                        {date: "2018-06-05", value: 52},
+                        {date: "2018-06-06", value: 41},
+                        {date: "2018-06-07", value: 38},
+                        {date: "2018-06-08", value: 32},
+                        {date: "2018-06-09", value: 40},
+                        {date: "2018-06-10", value: 39},
+                        {date: "2018-06-11", value: 47},
+                        {date: "2018-06-12", value: 44},
+                        {date: "2018-06-13", value: 35},
+                        {date: "2018-06-14", value: 45},
+                        {date: "2018-06-15", value: 50},
+                        {date: "2018-06-16", value: 46},
+                        {date: "2018-06-17", value: 39},
+                    ];
                     let dateList = data.map((item)=> {
                         return item.date;
                     });
@@ -82,6 +102,7 @@
                             type: 'line',
                             showSymbol: false,
                             center: ['40%', '50%'],
+                            smooth: true,  //这句就是让曲线变平滑的
                             data: valueList,
                             lineStyle: {
                                 width: 5
@@ -100,7 +121,14 @@
 
                 let route = 'http://localhost:8086/admin/worker/workerActive';
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
-                    let data = response.data;
+                    // let data = response.data;
+                    let data = [
+                        {name: 0, value: 2878},
+                        {name: 1, value: 3256},
+                        {name: 2, value: 4987},
+                        {name: 3, value: 3792}
+                    ];
+
                     for(let i=0;i<data.length;i++){
                         data[i].name = '参与'+data[i].name+'种任务';
                     }
@@ -109,7 +137,7 @@
                     });
                     let numberList = data.map((item)=> {
                         return item.value;
-                    });;
+                    });
 
                     let option = {
                         textStyle: {

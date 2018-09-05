@@ -29,19 +29,8 @@
                     method: "GET",
                     headers: {Authorization: this.$store.getters.getToken}
                 }).then((response)=>{
-                    let data = response.data;
-                    // let data = [
-                    //     {date: "2018/05/13", ongoing: 10, finished: 3, underReview: 7},
-                    //     {date: "2018/05/14", ongoing: 9, finished: 5, underReview: 6},
-                    //     {date: "2018/05/16", ongoing: 8, finished: 6, underReview: 6},
-                    //     {date: "2018/05/17", ongoing: 7, finished: 7, underReview: 6},
-                    //     {date: "2018/05/20", ongoing: 6, finished: 9, underReview: 5},
-                    //     {date: "2018/05/23", ongoing: 5, finished: 11, underReview: 4},
-                    //     {date: "2018/05/25", ongoing: 3, finished: 14, underReview: 3},
-                    //     {date: "2018/05/26", ongoing: 2, finished: 17, underReview: 1},
-                    //     {date: "2018/05/30", ongoing: 0, finished: 20, underReview: 0},
-                    //
-                    // ];
+                    // let data = response.data;
+                    let data = this.getVirtualData();
                     let dateList = data.map((item)=> {
                         return item.date;
                     });
@@ -122,7 +111,26 @@
                     myChart.setOption(option);
                 }).catch((error)=> {
                     console.log(error);
-                })
+                });
+            },
+            getVirtualData(){
+                let data = [
+                    {date: "2018/05/25", ongoing: 30, finished: 0, underReview: 0},
+                    {date: "2018/05/26", ongoing: 26, finished: 3, underReview: 1},
+                    {date: "2018/05/27", ongoing: 24, finished: 4, underReview: 2},
+                    {date: "2018/05/28", ongoing: 23, finished: 5, underReview: 2},
+                    {date: "2018/05/29", ongoing: 19, finished: 6, underReview: 5},
+                    {date: "2018/05/30", ongoing: 16, finished: 7, underReview: 7},
+                    {date: "2018/06/01", ongoing: 14, finished: 7, underReview: 9},
+                    {date: "2018/06/02", ongoing: 13, finished: 10, underReview: 7},
+                    {date: "2018/06/03", ongoing: 10, finished: 15, underReview: 5},
+                    {date: "2018/06/04", ongoing: 8, finished: 16, underReview: 6},
+                    {date: "2018/06/05", ongoing: 5, finished: 20, underReview: 5},
+                    {date: "2018/06/06", ongoing: 3, finished: 24, underReview: 3},
+                    {date: "2018/06/07", ongoing: 1, finished: 27, underReview: 2},
+                    {date: "2018/06/08", ongoing: 0, finished: 30, underReview: 0},
+                ];
+                return data;
             }
         }
     }

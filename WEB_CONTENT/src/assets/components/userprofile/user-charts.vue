@@ -47,13 +47,14 @@
                 let route = "http://localhost:8086/userProfile/worker/charts/active";
 
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response) => {
-                    let data = [];
-                    response.data.forEach((item) => {
-                        data.push([
-                            echarts.format.formatTime('yyyy-MM-dd', item.date),
-                            item.activity
-                        ])
-                    })
+                    // let data = [];
+                    // response.data.forEach((item) => {
+                    //     data.push([
+                    //         echarts.format.formatTime('yyyy-MM-dd', item.date),
+                    //         item.activity
+                    //     ])
+                    // })
+                    let data = this.getVirtualHeatData();
                     let option = {
                         title: [{
                             left: '30%',
@@ -155,14 +156,15 @@
                 let route = 'http://localhost:8086/userProfile/worker/charts/point';
                 this.$http.get(route, {headers: {Authorization: this.$store.getters.getToken}}).then((response)=> {
 
-                    let data = response.data;
+                    // let data = response.data;
+                    let data = this.getVirtualLineData();
                     let average = [];
                     let dateList = data.items.map((item)=> {
                         average.push(data.average);
                         return item.date;
                     });
                     let userPointList = data.items.map((item)=> {
-                        return item.point;
+                        return item.userPoint;
                     });
 
                     // 指定图表的配置项和数据
@@ -225,6 +227,69 @@
                 }).catch(function (error) {
                     console.log(error);
                 });
+            },
+            getVirtualHeatData() {
+                let echarts = require('echarts');
+                let now = new Date();
+                let year = now.getFullYear();
+                let month = now.getMonth()+1;
+
+                let date = new Date(DateUtils.monthFirstDay(year, month, -11)).getTime();
+                let end = new Date(DateUtils.monthLastDay(year, month, 0)).getTime();
+                let dayTime = 3600 * 24 * 1000;
+                let data = [];
+                for (let time = date; time <= end; time += dayTime) {
+                    let v = Math.floor(Math.random() * 1000);
+                    if(v < 800){
+                        v = 0;
+                    }
+                    else if(v < 870){
+                        v = 1;
+                    }
+                    else if(v < 930){
+                        v = 2;
+                    }
+                    else if(v < 980){
+                        v = 3;
+                    }
+                    else{
+                        v = 4;
+                    }
+
+                    if(time>=now.getTime()){
+                        v = 0;
+                    }
+                    data.push([
+                        echarts.format.formatTime('yyyy-MM-dd', time),
+                        v
+                    ]);
+                }
+                return data;
+            },
+            getVirtualLineData(){
+                let data = {
+                    average: 0.6,
+                    items: [
+                        {date: "2018-05-13", userPoint: 0.7},
+                        {date: "2018-05-14", userPoint: 0.59},
+                        {date: "2018-05-16", userPoint: 0.4},
+                        {date: "2018-05-17", userPoint: 0.62},
+                        {date: "2018-05-18", userPoint: 0.55},
+                        {date: "2018-05-20", userPoint: 0.65},
+                        {date: "2018-05-23", userPoint: 0.72},
+                        {date: "2018-05-25", userPoint: 0.70},
+                        {date: "2018-05-26", userPoint: 0.73},
+                        {date: "2018-05-27", userPoint: 0.8},
+                        {date: "2018-05-28", userPoint: 0.75},
+                        {date: "2018-05-31", userPoint: 0.83},
+                        {date: "2018-06-01", userPoint: 0.83},
+                        {date: "2018-06-04", userPoint: 0.83},
+                        {date: "2018-06-07", userPoint: 0.81},
+                        {date: "2018-06-09", userPoint: 0.85},
+                        {date: "2018-06-10", userPoint: 0.84}
+                    ]
+                };
+                return data;
             }
         }
     }
